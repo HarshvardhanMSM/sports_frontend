@@ -162,12 +162,12 @@ export const Sidebar = () => {
             href="/shipments"
             open={open}
           />
-          <Option
+          {/* <Option
             Icon={FiNavigation}
             title="Order Tracking"
             href="/order-tracking"
             open={open}
-          />
+          /> */}
 
           {/* ── CUSTOMERS ─────────────────────────────── */}
           <SectionLabel label="CUSTOMERS" open={open} />
