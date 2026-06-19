@@ -1,78 +1,86 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   FiBell,
   FiAlertOctagon,
   FiAlertTriangle,
   FiSearch,
+  FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
   FiRefreshCw,
-  FiBellOff,
+  FiCheck,
+  FiCheckCircle,
 } from "react-icons/fi";
-import Pagination from "@/components/ui/pagination/Pagination";
-
-interface InventoryAlert {
-  id: string;
-  product: string;
-  sku: string;
-  alertType: string;
-  currentStock: number;
-  threshold: number;
-  priority: string;
-  date: string;
-}
-
-const ALERTS: InventoryAlert[] = [
-  { id: "alt-1", product: "Nike Elite Basketball Socks", sku: "NK-ELITE-SOCK-BK", alertType: "Out of Stock", currentStock: 0, threshold: 5, priority: "Critical", date: "2026-06-11" },
-  { id: "alt-2", product: "Under Armour Running Cap", sku: "UA-CAP-RUN-02", alertType: "Out of Stock", currentStock: 0, threshold: 8, priority: "Critical", date: "2026-06-07" },
-  { id: "alt-3", product: "Puma Future Ultimate FG", sku: "PM-FUT-ULT-02", alertType: "Low Stock", currentStock: 8, threshold: 10, priority: "Warning", date: "2026-06-13" },
-  { id: "alt-4", product: "Adidas Ultraboost 22", sku: "AD-UB22-007", alertType: "Low Stock", currentStock: 6, threshold: 10, priority: "Warning", date: "2026-06-10" },
-  { id: "alt-5", product: "Puma Gym Bag Pro", sku: "PM-GYMBAG-001", alertType: "Low Stock", currentStock: 3, threshold: 5, priority: "Warning", date: "2026-06-08" },
-  { id: "alt-6", product: "Nike React Infinity Run 3", sku: "NK-RIR3-005", alertType: "Out of Stock", currentStock: 0, threshold: 10, priority: "Critical", date: "2026-06-06" },
-  { id: "alt-7", product: "Adidas Response Run Shoes", sku: "AD-RSP-RUN-04", alertType: "Low Stock", currentStock: 4, threshold: 10, priority: "Warning", date: "2026-06-05" },
-  { id: "alt-8", product: "Under Armour HOVR Sonic 5", sku: "UA-HOVR-S5-03", alertType: "Low Stock", currentStock: 7, threshold: 10, priority: "Warning", date: "2026-06-04" },
-  { id: "alt-9", product: "Puma Softride Premier Slip-On", sku: "PM-SRPO-002", alertType: "Out of Stock", currentStock: 0, threshold: 5, priority: "Critical", date: "2026-06-03" },
-  { id: "alt-10", product: "Nike Flex Runner 2", sku: "NK-FLX2-009", alertType: "Low Stock", currentStock: 2, threshold: 5, priority: "Warning", date: "2026-06-02" },
-];
-
-const PAGE_SIZE = 5;
-
-function PriorityBadge({ priority }: { priority: string }) {
-  if (priority === "Critical") {
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700">{priority}</span>;
-  }
-  return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">{priority}</span>;
-}
+import { useStockAlerts, useCheckAlerts, useResolveAllAlerts, useResolveAlert } from "@/hooks/useInventory";
+import type { InventoryListParams } from "@/types/inventory.types";
+import InventoryAlertTable from "@/features/inventory/components/InventoryAlertTable";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 export default function InventoryAlertsPage() {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [page, setPage] = useState(1);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const filtered = ALERTS.filter((a) => {
-    const matchSearch =
-      a.product.toLowerCase().includes(search.toLowerCase()) ||
-      a.sku.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "All" || a.priority === filter;
-    return matchSearch && matchFilter;
-  });
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 10;
+  const search = searchParams.get("search") || "";
+  const status = searchParams.get("status") || "unresolved";
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const start = (safePage - 1) * PAGE_SIZE;
-  const paginated = filtered.slice(start, start + PAGE_SIZE);
+  const params: InventoryListParams = { page, limit };
+  if (search) params.search = search;
+  if (status) params.status = status;
+
+  const { data, isLoading, error, refetch } = useStockAlerts(params);
+  const { mutate: checkAlerts, isPending: isChecking } = useCheckAlerts();
+  const { mutate: resolveAll, isPending: isResolvingAll } = useResolveAllAlerts();
+  const { mutate: resolveAlert, isPending: isResolving } = useResolveAlert();
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+
+  const allItems = data?.data?.items ?? [];
+  const total = data?.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  const criticalCount = allItems.filter((a) => a.alertType === "OUT_OF_STOCK").length;
+  const warningCount = allItems.filter((a) => a.alertType === "LOW_STOCK").length;
+
+  const updateParams = useCallback((updates: Record<string, string>) => {
+    const next = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([k, v]) => {
+      if (v) next.set(k, v);
+      else next.delete(k);
+    });
+    router.push(`${pathname}?${next.toString()}`);
+  }, [searchParams, router, pathname]);
+
+  const goToPage = (p: number) => updateParams({ page: String(p) });
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Inventory Alerts</h1>
           <p className="text-sm text-slate-500">Stay ahead of stock issues with real-time low stock and out-of-stock alerts.</p>
         </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => checkAlerts()}
+            disabled={isChecking}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors disabled:opacity-50"
+          >
+            <FiRefreshCw className={`size-4 ${isChecking ? "animate-spin" : ""}`} /> Check Alerts
+          </button>
+          <button
+            onClick={() => resolveAll()}
+            disabled={isResolvingAll}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            <FiCheckCircle className="size-4" /> Resolve All
+          </button>
+        </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
@@ -80,7 +88,7 @@ export default function InventoryAlertsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Alerts</p>
-            <p className="text-2xl font-bold text-slate-800">13</p>
+            <p className="text-2xl font-bold text-slate-800">{total}</p>
             <p className="text-xs text-slate-500 mt-0.5">requiring action</p>
           </div>
         </div>
@@ -90,7 +98,7 @@ export default function InventoryAlertsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Critical (Out of Stock)</p>
-            <p className="text-2xl font-bold text-slate-800">5</p>
+            <p className="text-2xl font-bold text-slate-800">{criticalCount}</p>
             <p className="text-xs text-slate-500 mt-0.5">zero stock items</p>
           </div>
         </div>
@@ -100,88 +108,93 @@ export default function InventoryAlertsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Warning (Low Stock)</p>
-            <p className="text-2xl font-bold text-slate-800">8</p>
+            <p className="text-2xl font-bold text-slate-800">{warningCount}</p>
             <p className="text-xs text-slate-500 mt-0.5">below threshold</p>
           </div>
         </div>
       </div>
 
-      {/* Filter Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <div className="relative flex-1 max-w-sm">
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
           <input
             type="text"
-            placeholder="Search by product or SKU..."
+            placeholder="Search by variant SKU..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => updateParams({ search: e.target.value, page: "1" })}
             className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
         </div>
         <select
-          value={filter}
-          onChange={(e) => { setFilter(e.target.value); setPage(1); }}
+          value={status}
+          onChange={(e) => updateParams({ status: e.target.value, page: "1" })}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
         >
-          <option value="All">All Priorities</option>
-          <option value="Critical">Critical</option>
-          <option value="Warning">Warning</option>
+          <option value="unresolved">Unresolved</option>
+          <option value="resolved">Resolved</option>
         </select>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Product / SKU</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Alert Type</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Current Stock</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Threshold</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Priority</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Alert Date</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {paginated.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-400">No alerts found.</td>
-              </tr>
-            ) : (
-              paginated.map((alert) => (
-                <tr key={alert.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="px-4 py-4">
-                    <p className="text-sm font-medium text-slate-800">{alert.product}</p>
-                    <p className="text-xs text-slate-400 font-mono mt-0.5">{alert.sku}</p>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700">{alert.alertType}</td>
-                  <td className="px-4 py-4">
-                    <span className={`text-sm font-bold ${alert.currentStock === 0 ? "text-red-600" : "text-slate-800"}`}>
-                      {alert.currentStock}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700">{alert.threshold}</td>
-                  <td className="px-4 py-4"><PriorityBadge priority={alert.priority} /></td>
-                  <td className="px-4 py-4 text-sm text-slate-700">{alert.date}</td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-1">
-                      <button className="rounded-lg p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="Restock">
-                        <FiRefreshCw className="size-4" />
-                      </button>
-                      <button className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Dismiss">
-                        <FiBellOff className="size-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <Pagination page={safePage} totalPages={totalPages} total={filtered.length} limit={PAGE_SIZE} onPageChange={setPage} />
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
+          <p className="mt-3 text-sm font-medium text-slate-500">Loading alerts...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+            <FiAlertCircle className="size-6 text-rose-500" />
+          </div>
+          <p className="text-sm font-semibold text-slate-800">Failed to load alerts</p>
+          <p className="text-xs text-slate-500 mt-1">Please try again later.</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm"
+            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <>
+          <InventoryAlertTable
+            items={allItems}
+            onResolve={(id) => { setResolvingId(id); resolveAlert(id, { onSettled: () => setResolvingId(null) }); }}
+            resolvingId={resolvingId}
+          />
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pb-4">
+              <button
+                onClick={() => goToPage(page - 1)}
+                disabled={page <= 1}
+                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+              >
+                <FiChevronLeft className="size-4" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => goToPage(p)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
+                    p === page
+                      ? "border-indigo-600 bg-indigo-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => goToPage(page + 1)}
+                disabled={page >= totalPages}
+                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+              >
+                <FiChevronRight className="size-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
