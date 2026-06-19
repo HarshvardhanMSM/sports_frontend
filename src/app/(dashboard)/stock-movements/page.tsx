@@ -1,59 +1,63 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback } from "react";
 import {
   FiActivity,
   FiArrowUp,
   FiArrowDown,
   FiTrendingUp,
   FiDownload,
+  FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
-
-interface StockMovement {
-  id: string;
-  date: string;
-  product: string;
-  sku: string;
-  type: string;
-  quantity: number;
-  reference: string;
-  user: string;
-}
-
-const MOVEMENTS: StockMovement[] = [
-  { id: "mv-1", date: "2026-06-15 09:23", product: "Nike Air Zoom Pegasus 40", sku: "NK-PEG40-001", type: "Stock In", quantity: 50, reference: "PO-2026-0045", user: "Admin" },
-  { id: "mv-2", date: "2026-06-15 10:45", product: "Adidas Tiro Training Pants", sku: "AD-TR-PANTS-09", type: "Sale", quantity: -3, reference: "ORD-0892", user: "System" },
-  { id: "mv-3", date: "2026-06-14 14:12", product: "Puma Future Ultimate FG", sku: "PM-FUT-ULT-02", type: "Return", quantity: 1, reference: "RET-0234", user: "System" },
-  { id: "mv-4", date: "2026-06-14 11:30", product: "Under Armour Compression Tee", sku: "UA-COMP-01", type: "Stock In", quantity: 100, reference: "PO-2026-0044", user: "Admin" },
-  { id: "mv-5", date: "2026-06-13 16:00", product: "Nike Elite Basketball Socks", sku: "NK-ELITE-SOCK-BK", type: "Adjustment", quantity: -5, reference: "ADJ-0021", user: "Warehouse Manager" },
-  { id: "mv-6", date: "2026-06-13 09:15", product: "Adidas Ultraboost 22", sku: "AD-UB22-007", type: "Sale", quantity: -2, reference: "ORD-0891", user: "System" },
-  { id: "mv-7", date: "2026-06-12 13:45", product: "Nike Dri-FIT Training Shorts", sku: "NK-DRFT-SH-03", type: "Stock In", quantity: 30, reference: "PO-2026-0043", user: "Admin" },
-  { id: "mv-8", date: "2026-06-12 10:00", product: "Puma Gym Bag Pro", sku: "PM-GYMBAG-001", type: "Damage Write-off", quantity: -2, reference: "WO-0012", user: "Warehouse Manager" },
-  { id: "mv-9", date: "2026-06-11 15:20", product: "Under Armour Running Cap", sku: "UA-CAP-RUN-02", type: "Sale", quantity: -4, reference: "ORD-0888", user: "System" },
-  { id: "mv-10", date: "2026-06-10 11:00", product: "Nike Zoom Fly 5", sku: "NK-ZF5-010", type: "Stock In", quantity: 40, reference: "PO-2026-0042", user: "Admin" },
-];
-
-const TYPE_BADGE: Record<string, string> = {
-  "Stock In": "bg-emerald-50 text-emerald-700",
-  "Sale": "bg-blue-50 text-blue-700",
-  "Return": "bg-purple-50 text-purple-700",
-  "Adjustment": "bg-amber-50 text-amber-700",
-  "Damage Write-off": "bg-red-50 text-red-700",
-};
-
-function TypeBadge({ type }: { type: string }) {
-  const cls = TYPE_BADGE[type] ?? "bg-slate-100 text-slate-600";
-  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cls}`}>{type}</span>;
-}
+import { useInventoryMovements } from "@/hooks/useInventory";
+import type { InventoryListParams } from "@/types/inventory.types";
+import StockMovementTable from "@/features/inventory/components/StockMovementTable";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 export default function StockMovementsPage() {
-  const [filter, setFilter] = useState("All");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const filtered = MOVEMENTS.filter((m) => filter === "All" || m.type === filter);
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 10;
+  const status = searchParams.get("status") || "";
+
+  const params: InventoryListParams = { page, limit };
+  if (status) params.actionType = status;
+
+  const { data, isLoading, error, refetch } = useInventoryMovements(params);
+
+  const allItems = data?.data?.items ?? [];
+  const total = data?.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
+  const updateParams = useCallback((updates: Record<string, string>) => {
+    const next = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([k, v]) => {
+      if (v) next.set(k, v);
+      else next.delete(k);
+    });
+    router.push(`${pathname}?${next.toString()}`);
+  }, [searchParams, router, pathname]);
+
+  const goToPage = (p: number) => updateParams({ page: String(p) });
+  const changeFilter = (v: string) => updateParams(v ? { status: v, page: "1" } : { status: "", page: "1" });
+
+  const todayMovements = allItems.filter((m) => {
+    const today = new Date();
+    const mDate = new Date(m.createdAt);
+    return mDate.toDateString() === today.toDateString();
+  }).length;
+
+  const stockIn = allItems.filter((m) => (m.afterQuantity - m.beforeQuantity) > 0).reduce((s, m) => s + (m.afterQuantity - m.beforeQuantity), 0);
+  const stockOut = allItems.filter((m) => (m.afterQuantity - m.beforeQuantity) < 0).reduce((s, m) => s + Math.abs(m.afterQuantity - m.beforeQuantity), 0);
+  const netChange = stockIn - stockOut;
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Stock Movements</h1>
@@ -64,7 +68,6 @@ export default function StockMovementsPage() {
         </button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
@@ -72,7 +75,7 @@ export default function StockMovementsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Today&apos;s Movements</p>
-            <p className="text-2xl font-bold text-slate-800">23</p>
+            <p className="text-2xl font-bold text-slate-800">{todayMovements}</p>
             <p className="text-xs text-slate-500 mt-0.5">as of today</p>
           </div>
         </div>
@@ -82,8 +85,8 @@ export default function StockMovementsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Stock In</p>
-            <p className="text-2xl font-bold text-slate-800">+145</p>
-            <p className="text-xs text-slate-500 mt-0.5">units received</p>
+            <p className="text-2xl font-bold text-slate-800">+{stockIn}</p>
+            <p className="text-xs text-slate-500 mt-0.5">units received (current page)</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
@@ -92,8 +95,8 @@ export default function StockMovementsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Stock Out</p>
-            <p className="text-2xl font-bold text-slate-800">-88</p>
-            <p className="text-xs text-slate-500 mt-0.5">units dispatched</p>
+            <p className="text-2xl font-bold text-slate-800">-{stockOut}</p>
+            <p className="text-xs text-slate-500 mt-0.5">units dispatched (current page)</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
@@ -102,70 +105,89 @@ export default function StockMovementsPage() {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Net Change</p>
-            <p className="text-2xl font-bold text-slate-800">+57</p>
-            <p className="text-xs text-slate-500 mt-0.5">net unit change</p>
+            <p className={`text-2xl font-bold ${netChange >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+              {netChange >= 0 ? "+" : ""}{netChange}
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">net unit change (current page)</p>
           </div>
         </div>
       </div>
 
-      {/* Filter Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <p className="text-sm font-semibold text-slate-600 shrink-0">Filter by Type:</p>
         <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          value={status}
+          onChange={(e) => changeFilter(e.target.value)}
           className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
         >
-          <option value="All">All Types</option>
-          <option value="Stock In">Stock In</option>
-          <option value="Sale">Sale</option>
-          <option value="Return">Return</option>
-          <option value="Adjustment">Adjustment</option>
-          <option value="Damage Write-off">Damage Write-off</option>
+          <option value="">All Types</option>
+          <option value="STOCK_IN">Stock In</option>
+          <option value="STOCK_OUT">Stock Out</option>
+          <option value="ADJUSTMENT">Adjustment</option>
+          <option value="RESERVATION">Reservation</option>
+          <option value="RELEASE">Release</option>
+          <option value="GOODS_RECEIPT">Goods Receipt</option>
+          <option value="MANUAL_ADJUST">Manual Adjust</option>
         </select>
-        <span className="text-xs text-slate-400 ml-auto">{filtered.length} record{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs text-slate-400 ml-auto">{total} record{total !== 1 ? "s" : ""}</span>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date / Time</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Product / SKU</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Quantity</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Reference</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">No movements found.</td>
-              </tr>
-            ) : (
-              filtered.map((mv) => (
-                <tr key={mv.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap font-mono">{mv.date}</td>
-                  <td className="px-4 py-4">
-                    <p className="text-sm font-medium text-slate-800">{mv.product}</p>
-                    <p className="text-xs text-slate-400 font-mono mt-0.5">{mv.sku}</p>
-                  </td>
-                  <td className="px-4 py-4"><TypeBadge type={mv.type} /></td>
-                  <td className="px-4 py-4">
-                    <span className={`text-sm font-bold ${mv.quantity > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                      {mv.quantity > 0 ? `+${mv.quantity}` : mv.quantity}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-sm text-slate-700 font-mono">{mv.reference}</td>
-                  <td className="px-4 py-4 text-sm text-slate-700">{mv.user}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
+          <p className="mt-3 text-sm font-medium text-slate-500">Loading movements...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+            <FiAlertCircle className="size-6 text-rose-500" />
+          </div>
+          <p className="text-sm font-semibold text-slate-800">Failed to load stock movements</p>
+          <p className="text-xs text-slate-500 mt-1">Please try again later.</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm"
+            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <>
+          <StockMovementTable items={allItems} />
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pb-4">
+              <button
+                onClick={() => goToPage(page - 1)}
+                disabled={page <= 1}
+                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+              >
+                <FiChevronLeft className="size-4" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => goToPage(p)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
+                    p === page
+                      ? "border-indigo-600 bg-indigo-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => goToPage(page + 1)}
+                disabled={page >= totalPages}
+                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+              >
+                <FiChevronRight className="size-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
