@@ -196,7 +196,7 @@ export const Sidebar = () => {
           />
 
           {/* ── MARKETING ─────────────────────────────── */}
-          <SectionLabel label="MARKETING" open={open} />
+          {/* <SectionLabel label="MARKETING" open={open} />
           <Option Icon={FiImage} title="Banners" href="/banners" open={open} />
           <Option Icon={FiTag} title="Coupons" href="/coupons" open={open} />
           <Option
@@ -210,19 +210,19 @@ export const Sidebar = () => {
             title="Newsletter Subscribers"
             href="/newsletter"
             open={open}
-          />
+          /> */}
         
 
           {/* ── CONTENT MANAGEMENT ────────────────────── */}
           <SectionLabel label="CONTENT MANAGEMENT" open={open} />
           <Option Icon={FiFile} title="Pages" href="/pages" open={open} />
           <Option Icon={FiHelpCircle} title="FAQ" href="/faq" open={open} />
-          <Option
+          {/* <Option
             Icon={FiVolume2}
             title="Announcements"
             href="/announcements"
             open={open}
-          />
+          /> */}
           <Option
             Icon={FiFileText}
             title="Terms & Conditions"
@@ -318,12 +318,12 @@ export const Sidebar = () => {
             open={open}
           />
          
-          <Option
+          {/* <Option
             Icon={FiBell}
             title="Notification Settings"
             href="/settings/notifications"
             open={open}
-          />
+          /> */}
          
         </div>
       </div>

@@ -46,7 +46,7 @@ export default function InventoryTable({ items, onDelete, deletingId }: Inventor
             <th className="px-5 py-4">Threshold</th>
             <th className="px-5 py-4">Status</th>
             <th className="px-5 py-4">Last Updated</th>
-            <th className="px-5 py-4 text-right">Actions</th>
+            {/* <th className="px-5 py-4 text-right">Actions</th> */}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -98,7 +98,7 @@ export default function InventoryTable({ items, onDelete, deletingId }: Inventor
                   <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">
                     {new Date(item.updatedAt).toLocaleDateString()}
                   </td>
-                  <td className="px-5 py-4 text-right">
+                  {/* <td className="px-5 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Link
                         href={`/inventory/${item.id}/edit`}
@@ -114,7 +114,7 @@ export default function InventoryTable({ items, onDelete, deletingId }: Inventor
                         <FiTrash2 className="size-4" />
                       </button>
                     </div>
-                  </td>
+                  </td> */}
                 </tr>
               );
             })
