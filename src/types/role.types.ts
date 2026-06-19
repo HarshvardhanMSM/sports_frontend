@@ -28,6 +28,7 @@ export interface Permission {
 // ── Slug-based permissions (new backend format) ──────────────────
 
 export interface PermissionSlug {
+  id: string;             // numeric ID from API
   slug: string;           // e.g. "product.create"
   name: string;           // e.g. "Create Product"
   module: string;         // e.g. "product"

@@ -18,12 +18,15 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 interface PermissionFormModalProps {
+  permission?: { name: string; slug: string; module: string } | null;
   onClose: () => void;
   onSubmit: (data: FormValues) => void;
   isPending: boolean;
 }
 
-export default function PermissionFormModal({ onClose, onSubmit, isPending }: PermissionFormModalProps) {
+export default function PermissionFormModal({ permission, onClose, onSubmit, isPending }: PermissionFormModalProps) {
+  const isEdit = !!permission;
+
   const {
     register,
     handleSubmit,
@@ -32,7 +35,11 @@ export default function PermissionFormModal({ onClose, onSubmit, isPending }: Pe
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", slug: "", module: "" },
+    defaultValues: {
+      name: permission?.name ?? "",
+      slug: permission?.slug ?? "",
+      module: permission?.module ?? "",
+    },
   });
 
   const nameVal = watch("name");
@@ -42,7 +49,7 @@ export default function PermissionFormModal({ onClose, onSubmit, isPending }: Pe
       <div className="fixed inset-0 bg-black/40" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-800">Create Permission</h2>
+          <h2 className="text-lg font-bold text-slate-800">{isEdit ? "Edit Permission" : "Create Permission"}</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
             <FiX className="size-5" />
           </button>
@@ -86,7 +93,7 @@ export default function PermissionFormModal({ onClose, onSubmit, isPending }: Pe
               Cancel
             </button>
             <button type="submit" disabled={isPending} className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50">
-              {isPending ? "Creating..." : "Create Permission"}
+              {isPending ? "Saving..." : isEdit ? "Update Permission" : "Create Permission"}
             </button>
           </div>
         </form>

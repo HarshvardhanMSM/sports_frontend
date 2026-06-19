@@ -47,6 +47,11 @@ export const PermissionService = {
     return api.post<PermissionSlug>("/admin/permissions", data);
   },
 
+  /** PUT /admin/permissions/:id */
+  updatePermission(id: string, data: CreatePermissionPayload) {
+    return api.put<PermissionSlug>(`/admin/permissions/${id}`, data);
+  },
+
   /** DELETE /admin/permissions/:id */
   deletePermission(id: string) {
     return api.delete<void>(`/admin/permissions/${id}`);

@@ -125,6 +125,30 @@ export function useResetAdminPassword(id: string) {
   });
 }
 
+// ── Role Permission Hooks ─────────────────────────────────────────
+
+export function useAssignRolePermissions(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (permissionSlugs: string[]) => RoleService.assignRolePermissions(id, permissionSlugs),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: roleKeys.list() });
+      qc.invalidateQueries({ queryKey: roleKeys.detail(id) });
+    },
+  });
+}
+
+export function useRemoveRolePermissions(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (permissionSlugs: string[]) => RoleService.removeRolePermissions(id, permissionSlugs),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: roleKeys.list() });
+      qc.invalidateQueries({ queryKey: roleKeys.detail(id) });
+    },
+  });
+}
+
 // ── Audit Log Hook ────────────────────────────────────────────────
 
 export function useAuditLogs(params?: ListParams & { module?: string; severity?: AuditSeverity }) {

@@ -45,6 +45,18 @@ export function useCreatePermission() {
   });
 }
 
+export function useUpdatePermission() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreatePermissionPayload }) =>
+      PermissionService.updatePermission(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: permissionKeys.list() });
+      qc.invalidateQueries({ queryKey: permissionKeys.code() });
+    },
+  });
+}
+
 export function useDeletePermission() {
   const qc = useQueryClient();
   return useMutation({

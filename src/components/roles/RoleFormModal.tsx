@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { FiX, FiCopy } from "react-icons/fi";
-import type { ModuleGroup, Role } from "@/types/role.types";
+import type { ModuleGroup, Role, PermissionSlug } from "@/types/role.types";
 import { groupPermissionsByModule, permissionsToSlugs } from "@/types/role.types";
 import PermissionModuleCard from "./PermissionModuleCard";
 
@@ -24,7 +24,7 @@ interface RoleFormModalProps {
   /** If provided, the modal is in "edit" mode. */
   role?: Role | null;
   /** All available permission slugs (from the API). */
-  permissionSlugs: { slug: string; name: string; module: string }[];
+  permissionSlugs: PermissionSlug[];
   /** All roles for "clone from" dropdown. */
   allRoles: Role[];
   /** Called with the final name, slug, description, and selected permission slugs. */

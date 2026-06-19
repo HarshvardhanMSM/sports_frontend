@@ -24,6 +24,7 @@ import {
   FiTruck,
   FiNavigation,
   FiUsers,
+  FiDollarSign,
   FiUserCheck,
   FiMessageCircle,
   FiHeart,
@@ -157,8 +158,8 @@ export const Sidebar = () => {
           />
           <Option
             Icon={FiTruck}
-            title="Shipping Management"
-            href="/shipping"
+            title="Shipments"
+            href="/shipments"
             open={open}
           />
           <Option
@@ -242,6 +243,10 @@ export const Sidebar = () => {
             open={open}
           />
 
+          {/* ── FINANCE ──────────────────────────────── */}
+          {/* <SectionLabel label="FINANCE" open={open} /> */}
+      
+
           {/* ── ANALYTICS & REPORTS ───────────────────── */}
           <SectionLabel label="ANALYTICS & REPORTS" open={open} />
           <Option
@@ -250,10 +255,16 @@ export const Sidebar = () => {
             href="/reports/sales"
             open={open}
           />
-          <Option
+          {/* <Option
             Icon={FiTrendingUp}
             title="Revenue Analytics"
             href="/reports/revenue"
+            open={open}
+          /> */}
+              <Option
+            Icon={FiDollarSign}
+            title="Financial Reports"
+            href="/financial-reports"
             open={open}
           />
           <Option
@@ -266,6 +277,12 @@ export const Sidebar = () => {
             Icon={FiActivity}
             title="Customer Analytics"
             href="/reports/customers"
+            open={open}
+          />
+          <Option
+            Icon={FiRotateCcw}
+            title="Returns Analytics"
+            href="/analytics/returns"
             open={open}
           />
       
@@ -468,24 +485,12 @@ const TitleSection = ({ open }: TitleSectionProps) => (
 // Logo
 // ---------------------------------------------------------------------------
 const Logo = () => (
-  <div className="grid size-10 shrink-0 place-content-center rounded-md bg-indigo-600">
-    <svg
-      width="24"
-      height="auto"
-      viewBox="0 0 50 39"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="fill-slate-50"
-    >
-      <path
-        d="M16.4992 2H37.5808L22.0816 24.9729H1L16.4992 2Z"
-        stopColor="#000000"
-      />
-      <path
-        d="M17.4224 27.102L11.4192 36H33.5008L49 13.0271H32.7024L23.2064 27.102H17.4224Z"
-        stopColor="#000000"
-      />
-    </svg>
+  <div className="grid size-10 shrink-0 place-content-center rounded-md">
+    <img
+          src="/assets/logos/Final file_Logo + wordmark.png"
+          alt="MSM Logo"
+          className=""
+        />
   </div>
 );
 

@@ -1,214 +1,222 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  FiStar,
-  FiThumbsUp,
-  FiClock,
-  FiAlertTriangle,
-  FiSearch,
-  FiCheck,
-  FiTrash2,
-} from "react-icons/fi";
+import React, { useState, useMemo } from "react";
+import { FiAlertCircle, FiStar } from "react-icons/fi";
+import { useReviews, useDeleteReview, useApproveReview, useRejectReview, useHideReview, useReviewAnalytics } from "@/hooks/useReviews";
+import type { ReviewListParams } from "@/types/review.types";
+import ReviewTable from "@/features/reviews/components/ReviewTable";
+import ReviewFilters from "@/features/reviews/components/ReviewFilters";
+import ReviewAnalyticsCards from "@/features/reviews/components/ReviewAnalyticsCards";
+import DeleteReviewModal from "@/features/reviews/components/DeleteReviewModal";
 import Pagination from "@/components/ui/pagination/Pagination";
+import type { Review } from "@/types/review.types";
 
-interface Review {
-  id: string;
-  product: string;
-  customer: string;
-  rating: number;
-  comment: string;
-  date: string;
-  status: string;
-}
-
-const REVIEWS: Review[] = [
-  { id: "rev-1", product: "Nike Air Zoom Pegasus 40", customer: "James Wilson", rating: 5, comment: "Absolutely love these shoes! Great cushioning for long runs.", date: "2026-06-10", status: "Approved" },
-  { id: "rev-2", product: "Adidas Tiro Training Pants", customer: "Sarah Chen", rating: 4, comment: "Good quality fabric, fits true to size. Fast delivery too.", date: "2026-06-09", status: "Approved" },
-  { id: "rev-3", product: "Puma Future Ultimate FG", customer: "Marco Rossi", rating: 5, comment: "Best cleats I've owned. Excellent grip and lightweight.", date: "2026-06-08", status: "Approved" },
-  { id: "rev-4", product: "Under Armour Compression Tee", customer: "Emily Davis", rating: 3, comment: "Decent shirt but runs a bit small. Order a size up.", date: "2026-06-07", status: "Pending" },
-  { id: "rev-5", product: "Nike Elite Basketball Socks", customer: "Tom Johnson", rating: 2, comment: "They wore out after 2 months. Expected more from Nike.", date: "2026-06-06", status: "Pending" },
-  { id: "rev-6", product: "Nike Air Zoom Pegasus 40", customer: "Aisha Patel", rating: 5, comment: "Perfect for my marathon training. Super responsive!", date: "2026-06-05", status: "Approved" },
-  { id: "rev-7", product: "Puma Future Ultimate FG", customer: "Carlos Mendez", rating: 1, comment: "Wrong size sent, very disappointed with the order process.", date: "2026-06-04", status: "Flagged" },
-  { id: "rev-8", product: "Adidas Tiro Training Pants", customer: "Rachel Kim", rating: 4, comment: "Great pants for training. Love the ankle zip feature.", date: "2026-06-03", status: "Approved" },
-  { id: "rev-9", product: "Under Armour Compression Tee", customer: "David Brown", rating: 5, comment: "Best compression shirt for intense workouts. Stays cool.", date: "2026-06-02", status: "Approved" },
-  { id: "rev-10", product: "Nike Elite Basketball Socks", customer: "Lisa Zhang", rating: 3, comment: "Decent socks but nothing special. Just average quality.", date: "2026-06-01", status: "Pending" },
-];
-
-const PAGE_SIZE = 5;
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <FiStar
-          key={i}
-          className={`size-3.5 ${i < rating ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"}`}
-        />
-      ))}
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  if (status === "Approved") {
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">{status}</span>;
-  }
-  if (status === "Pending") {
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">{status}</span>;
-  }
-  if (status === "Flagged") {
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700">{status}</span>;
-  }
-  return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">{status}</span>;
-}
-
-function truncate(str: string, n: number) {
-  return str.length > n ? str.slice(0, n) + "..." : str;
-}
+const PAGE_SIZE = 10;
 
 export default function ProductReviewsPage() {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [ratingFilter, setRatingFilter] = useState<number | undefined>(undefined);
   const [page, setPage] = useState(1);
+  const [deleteTarget, setDeleteTarget] = useState<Review | null>(null);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  const filtered = REVIEWS.filter((r) => {
-    const matchSearch =
-      r.product.toLowerCase().includes(search.toLowerCase()) ||
-      r.customer.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "All" || r.status === filter;
-    return matchSearch && matchFilter;
-  });
+  const params: ReviewListParams = {
+    search: searchTerm || undefined,
+    ...(statusFilter !== "All" ? { status: statusFilter as ReviewListParams["status"] } : {}),
+    ...(ratingFilter !== undefined ? { rating: ratingFilter } : {}),
+  };
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const { data, isLoading, error, isRefetching, refetch } = useReviews(params);
+  const { data: analyticsData, isLoading: isAnalyticsLoading } = useReviewAnalytics();
+  const { mutateAsync: deleteReview, isPending: isDeleting } = useDeleteReview();
+  const { mutateAsync: approveReview } = useApproveReview();
+  const { mutateAsync: rejectReview } = useRejectReview();
+  const { mutateAsync: hideReview } = useHideReview();
+
+  const allReviews = useMemo(() => data?.data ?? [], [data]);
+
+  const filtered = useMemo(() => {
+    let result = allReviews;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      result = result.filter(
+        (r) =>
+          r.userName.toLowerCase().includes(q) ||
+          r.productName.toLowerCase().includes(q) ||
+          r.title.toLowerCase().includes(q) ||
+          r.comment.toLowerCase().includes(q),
+      );
+    }
+    if (statusFilter !== "All") {
+      result = result.filter((r) => r.status === statusFilter);
+    }
+    if (ratingFilter !== undefined) {
+      result = result.filter((r) => r.rating === ratingFilter);
+    }
+    return result;
+  }, [allReviews, searchTerm, statusFilter, ratingFilter]);
+
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * PAGE_SIZE;
-  const paginated = filtered.slice(start, start + PAGE_SIZE);
+  const items = filtered.slice(start, start + PAGE_SIZE);
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleDelete = (id: string) => {
+    const review = allReviews.find((r) => r.id === id);
+    if (review) setDeleteTarget(review);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteReview(deleteTarget.id);
+      showToast("success", "Review deleted successfully");
+      setDeleteTarget(null);
+    } catch {
+      showToast("error", "Failed to delete review");
+    }
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      await approveReview(id);
+      showToast("success", "Review approved successfully");
+    } catch {
+      showToast("error", "Failed to approve review");
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      await rejectReview(id);
+      showToast("success", "Review rejected successfully");
+    } catch {
+      showToast("error", "Failed to reject review");
+    }
+  };
+
+  const handleHide = async (id: string) => {
+    try {
+      await hideReview(id);
+      showToast("success", "Review hidden successfully");
+    } catch {
+      showToast("error", "Failed to hide review");
+    }
+  };
 
   return (
-    <div className="space-y-6 font-sans">
-      {/* Header */}
+    <div className="space-y-6">
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 rounded-xl px-4 py-3 text-sm font-semibold shadow-lg transition-all ${
+            toast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Product Reviews</h1>
-          <p className="text-sm text-slate-500">Moderate and manage customer reviews across your product catalog.</p>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-5 w-1 rounded-full bg-indigo-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Review Management</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Product Reviews</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Moderate and manage customer reviews across your product catalog.</p>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-            <FiStar className="size-6 text-indigo-600" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Reviews</p>
-            <p className="text-2xl font-bold text-slate-800">234</p>
-            <p className="text-xs text-slate-500 mt-0.5">all time</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-            <FiThumbsUp className="size-6 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Average Rating</p>
-            <p className="text-2xl font-bold text-slate-800">4.3★</p>
-            <p className="text-xs text-slate-500 mt-0.5">across all products</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-50">
-            <FiClock className="size-6 text-amber-600" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Pending Approval</p>
-            <p className="text-2xl font-bold text-slate-800">18</p>
-            <p className="text-xs text-slate-500 mt-0.5">awaiting review</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-50">
-            <FiAlertTriangle className="size-6 text-rose-600" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Flagged</p>
-            <p className="text-2xl font-bold text-slate-800">5</p>
-            <p className="text-xs text-slate-500 mt-0.5">need attention</p>
-          </div>
-        </div>
-      </div>
+      <ReviewAnalyticsCards analytics={analyticsData?.data} isLoading={isAnalyticsLoading} />
 
-      {/* Filter Bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div className="relative flex-1 max-w-sm">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
-          <input
-            type="text"
-            placeholder="Search by product or customer..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+      <ReviewFilters
+        search={searchTerm}
+        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
+        statusFilter={statusFilter}
+        onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
+        ratingFilter={ratingFilter}
+        onRatingFilterChange={(v) => { setRatingFilter(v); setPage(1); }}
+        onRefresh={() => refetch()}
+        isRefetching={isRefetching}
+      />
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
+          <p className="mt-3 text-sm font-medium text-slate-500">Loading reviews...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+            <FiAlertCircle className="size-6 text-rose-500" />
+          </div>
+          <p className="text-sm font-semibold text-slate-800">Failed to load reviews</p>
+          <p className="text-xs text-slate-500 mt-1">Please try again later.</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all"
+            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+          >
+            Retry
+          </button>
+        </div>
+      ) : items.length > 0 ? (
+        <div className="space-y-4">
+          <ReviewTable
+            reviews={items}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onHide={handleHide}
+            onDelete={handleDelete}
+            isPending={isDeleting}
+          />
+          <Pagination
+            page={safePage}
+            totalPages={totalPages}
+            total={total}
+            limit={PAGE_SIZE}
+            onPageChange={setPage}
           />
         </div>
-        <select
-          value={filter}
-          onChange={(e) => { setFilter(e.target.value); setPage(1); }}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="All">All Statuses</option>
-          <option value="Approved">Approved</option>
-          <option value="Pending">Pending</option>
-          <option value="Flagged">Flagged</option>
-        </select>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Product</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Rating</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Comment</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {paginated.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-400">No reviews found.</td>
-              </tr>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
+          <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+            {searchTerm || statusFilter !== "All" || ratingFilter !== undefined ? (
+              <FiAlertCircle className="size-6 text-slate-400" />
             ) : (
-              paginated.map((rev) => (
-                <tr key={rev.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="px-4 py-4 text-sm font-medium text-slate-800 max-w-[180px]">{rev.product}</td>
-                  <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">{rev.customer}</td>
-                  <td className="px-4 py-4"><StarRating rating={rev.rating} /></td>
-                  <td className="px-4 py-4 text-sm text-slate-500 max-w-[240px]">{truncate(rev.comment, 60)}</td>
-                  <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">{rev.date}</td>
-                  <td className="px-4 py-4"><StatusBadge status={rev.status} /></td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-1">
-                      <button className="rounded-lg p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="Approve">
-                        <FiCheck className="size-4" />
-                      </button>
-                      <button className="rounded-lg p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Delete">
-                        <FiTrash2 className="size-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+              <FiStar className="size-6 text-slate-400" />
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+          <h3 className="text-base font-bold text-slate-800">
+            {searchTerm || statusFilter !== "All" || ratingFilter !== undefined
+              ? "No matching reviews"
+              : "No reviews found"}
+          </h3>
+          <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
+            {searchTerm || statusFilter !== "All" || ratingFilter !== undefined
+              ? "No reviews match your current filters. Try refining your search query."
+              : "Customer reviews will appear here once they start submitting feedback on your products."}
+          </p>
+        </div>
+      )}
 
-      <Pagination page={safePage} totalPages={totalPages} total={filtered.length} limit={PAGE_SIZE} onPageChange={setPage} />
+      {deleteTarget && (
+        <DeleteReviewModal
+          reviewTitle={deleteTarget.title}
+          customerName={deleteTarget.userName}
+          rating={deleteTarget.rating}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteConfirm}
+          isPending={isDeleting}
+        />
+      )}
     </div>
   );
 }

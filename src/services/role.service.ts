@@ -97,6 +97,18 @@ export const RoleService = {
     return api.patch<void>(`/api/admin-users/${id}/reset-password`, { newPassword });
   },
 
+  // ── Role Permissions ───────────────────────────────────────────
+
+  /** POST /admin/roles/:id/permissions — assign permissions to a role */
+  assignRolePermissions(id: string, permissionSlugs: string[]) {
+    return api.post<void>(`/admin/roles/${id}/permissions`, { permissionSlugs });
+  },
+
+  /** DELETE /admin/roles/:id/permissions — remove permissions from a role */
+  removeRolePermissions(id: string, permissionSlugs: string[]) {
+    return api.delete<void>(`/admin/roles/${id}/permissions`, { data: { permissionSlugs } });
+  },
+
   // ── Audit Logs ─────────────────────────────────────────────────
 
   /** GET /api/audit-logs */
