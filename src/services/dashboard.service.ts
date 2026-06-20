@@ -1,12 +1,3 @@
-/**
- * ─────────────────────────────────────────────────────────────────
- * DASHBOARD SERVICE + QUERY KEYS
- *
- * Query keys follow the factory pattern — always arrays, always
- * include all params so TanStack Query caches correctly.
- * ─────────────────────────────────────────────────────────────────
- */
-
 import { api } from "./api";
 import type {
   GlobalPeriod,
@@ -15,8 +6,8 @@ import type {
   SignupsGranularity,
   DashboardSummaryResponse,
   SalesOverviewResponse,
-  SalesByCategoryResponse,
-  SalesByPaymentResponse,
+  SalesCategoryItem,
+  SalesPaymentItem,
   UsersOverviewResponse,
   UsersBySourceResponse,
   SignupsResponse,
@@ -24,78 +15,69 @@ import type {
   RecentOrdersResponse,
 } from "@/types/dashboard.types";
 
-// ── Query Key Factory ─────────────────────────────────────────────
-// Use these as `queryKey` in every useQuery / useMutation call.
-// Nested structure enables bulk invalidation:
-//   queryClient.invalidateQueries({ queryKey: dashboardKeys.all() })
+interface ApiResponse<T> {
+  statusCode: number;
+  message: string;
+  data: T;
+  timestamp: string;
+}
 
 export const dashboardKeys = {
-  all: ()                              => ["dashboard"]                              as const,
-  summary:        (period: GlobalPeriod)       => ["dashboard", "summary",          period]       as const,
-  salesOverview:  (g: ChartGranularity)        => ["dashboard", "sales-overview",   g]            as const,
-  byCategory:     (period: ChartPeriod)        => ["dashboard", "sales-by-category",period]       as const,
-  byPayment:      (period: ChartPeriod)        => ["dashboard", "sales-by-payment", period]       as const,
-  usersOverview:  (g: ChartGranularity)        => ["dashboard", "users-overview",   g]            as const,
-  bySource:       (period: ChartPeriod)        => ["dashboard", "users-by-source",  period]       as const,
-  signups:        (g: SignupsGranularity)       => ["dashboard", "signups",          g]            as const,
-  topProducts:    ()                           => ["dashboard", "top-products"]                   as const,
-  recentOrders:   ()                           => ["dashboard", "recent-orders"]                  as const,
+  all:              ()                                  => ["dashboard"]                                  as const,
+  summary:          (period: GlobalPeriod)              => ["dashboard", "summary",          period]       as const,
+  salesOverview:    (g: ChartGranularity)               => ["dashboard", "sales-overview",   g]            as const,
+  byCategory:       (period: ChartPeriod)               => ["dashboard", "sales-by-category",period]       as const,
+  byPayment:        (period: ChartPeriod)               => ["dashboard", "sales-by-payment", period]       as const,
+  usersOverview:    (g: ChartGranularity)               => ["dashboard", "users-overview",   g]            as const,
+  bySource:         (period: ChartPeriod)               => ["dashboard", "users-by-source",  period]       as const,
+  signups:          (g: SignupsGranularity)              => ["dashboard", "signups",          g]            as const,
+  topProducts:      ()                                  => ["dashboard", "top-products"]                   as const,
+  recentOrders:     ()                                  => ["dashboard", "recent-orders"]                  as const,
 };
 
-// ── API Functions ─────────────────────────────────────────────────
-
 export const DashboardService = {
-  /** API 1 — KPI summary cards.  GET /api/dashboard/summary?period=... */
-  getSummary(period: GlobalPeriod) {
-    return api.get<DashboardSummaryResponse>("/api/dashboard/summary", { period });
+  async getSummary(period: GlobalPeriod): Promise<DashboardSummaryResponse> {
+    const res = await api.get<ApiResponse<DashboardSummaryResponse>>("/dashboard/summary", { period });
+    return res.data;
   },
 
-  /**
-   * API 2 — Sales overview line chart.
-   * GET /api/dashboard/sales-overview?granularity=...
-   *
-   * granularity | points | x-axis
-   * ----------- | ------ | ------
-   * daily       | 7      | "15 May", …
-   * weekly      | 4      | "Week 1", …
-   * monthly     | 12     | "Jan", …
-   */
-  getSalesOverview(granularity: ChartGranularity) {
-    return api.get<SalesOverviewResponse>("/api/dashboard/sales-overview", { granularity });
+  async getSalesOverview(granularity: ChartGranularity): Promise<SalesOverviewResponse> {
+    const res = await api.get<ApiResponse<SalesOverviewResponse>>("/dashboard/sales-overview", { granularity });
+    return res.data;
   },
 
-  /** API 3 — Sales by category donut.  GET /api/dashboard/sales-by-category?period=... */
-  getSalesByCategory(period: ChartPeriod) {
-    return api.get<SalesByCategoryResponse>("/api/dashboard/sales-by-category", { period });
+  async getSalesByCategory(period: ChartPeriod): Promise<SalesCategoryItem[]> {
+    const res = await api.get<ApiResponse<SalesCategoryItem[]>>("/dashboard/sales-by-category", { period });
+    return res.data;
   },
 
-  /** API 4 — Sales by payment method donut.  GET /api/dashboard/sales-by-payment?period=... */
-  getSalesByPayment(period: ChartPeriod) {
-    return api.get<SalesByPaymentResponse>("/api/dashboard/sales-by-payment", { period });
+  async getSalesByPayment(period: ChartPeriod): Promise<SalesPaymentItem[]> {
+    const res = await api.get<ApiResponse<SalesPaymentItem[]>>("/dashboard/sales-by-payment", { period });
+    return res.data;
   },
 
-  /** API 5 — Users area chart.  GET /api/dashboard/users-overview?granularity=... */
-  getUsersOverview(granularity: ChartGranularity) {
-    return api.get<UsersOverviewResponse>("/api/dashboard/users-overview", { granularity });
+  async getUsersOverview(granularity: ChartGranularity): Promise<UsersOverviewResponse> {
+    const res = await api.get<ApiResponse<UsersOverviewResponse>>("/dashboard/users-overview", { granularity });
+    return res.data;
   },
 
-  /** API 6 — Users by source donut.  GET /api/dashboard/users-by-source?period=... */
-  getUsersBySource(period: ChartPeriod) {
-    return api.get<UsersBySourceResponse>("/api/dashboard/users-by-source", { period });
+  async getUsersBySource(period: ChartPeriod): Promise<UsersBySourceResponse> {
+    const res = await api.get<ApiResponse<UsersBySourceResponse>>("/dashboard/users-by-source", { period });
+    return res.data;
   },
 
-  /** API 7 — New signups bar chart.  GET /api/dashboard/signups?granularity=... */
-  getSignups(granularity: SignupsGranularity) {
-    return api.get<SignupsResponse>("/api/dashboard/signups", { granularity });
+  async getSignups(granularity: SignupsGranularity): Promise<SignupsResponse> {
+    const res = await api.get<ApiResponse<SignupsResponse>>("/dashboard/signups", { granularity });
+    return res.data;
   },
 
-  /** API 8 — Top products table (no filter).  GET /api/dashboard/top-products */
-  getTopProducts() {
-    return api.get<TopProductsResponse>("/api/dashboard/top-products");
+  async getTopProducts(): Promise<TopProductsResponse> {
+    const res = await api.get<ApiResponse<TopProductsResponse>>("/dashboard/top-products");
+    return res.data;
   },
 
-  /** API 9 — Recent orders table (no filter).  GET /api/dashboard/recent-orders */
-  getRecentOrders() {
-    return api.get<RecentOrdersResponse>("/api/dashboard/recent-orders");
+  async getRecentOrders(): Promise<RecentOrdersResponse> {
+    const res = await api.get<ApiResponse<RecentOrdersResponse>>("/dashboard/recent-orders");
+    return res.data;
   },
 };

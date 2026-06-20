@@ -86,7 +86,7 @@ export default function ShippingSettingsPage() {
       </div>
 
       {/* Shipping Zones Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="border-b border-slate-100 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600">
@@ -147,7 +147,7 @@ export default function ShippingSettingsPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </div> */}
 
       {/* Shipping Rates */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -194,7 +194,7 @@ export default function ShippingSettingsPage() {
       </div>
 
       {/* Default Carrier Settings */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="border-b border-slate-100 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600">
@@ -230,7 +230,7 @@ export default function ShippingSettingsPage() {
           </div>
         </div>
         <SectionFooter />
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -49,6 +49,7 @@ import {
   FiCreditCard,
   FiTool,
   FiKey,
+  FiLink,
 } from "react-icons/fi";
 
 export const Sidebar = () => {
@@ -322,26 +323,24 @@ export const Sidebar = () => {
             href="/settings/general"
             open={open}
           />
-          <Option
+          {/* <Option
             Icon={FiCreditCard}
             title="Payment Methods"
             href="/settings/payments"
             open={open}
-          />
-          <Option
+          /> */}
+          {/* <Option
             Icon={FiTruck}
             title="Shipping Settings"
             href="/settings/shipping"
             open={open}
-          />
-         
-          {/* <Option
-            Icon={FiBell}
-            title="Notification Settings"
-            href="/settings/notifications"
-            open={open}
           /> */}
-         
+          <Option
+            Icon={FiTruck}
+            title="Delivery Charges"
+            href="/settings/delivery-charges"
+            open={open}
+          />
         </div>
       </div>
 
