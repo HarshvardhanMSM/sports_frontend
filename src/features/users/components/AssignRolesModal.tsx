@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { FiUsers } from "react-icons/fi";
 import type { User } from "@/types/user.types";
+import { SUPER_ADMIN_ROLE } from "@/types/role.types";
 
 interface Props {
   user: User;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default function AssignRolesModal({ user, allRoles, onClose, onAssign, onRemove, isPending }: Props) {
+  const visibleRoles = allRoles.filter((r) => r.name !== SUPER_ADMIN_ROLE);
   const userRoleIds = user.roles.map((r) => r.id);
   const [selectedIds, setSelectedIds] = useState<string[]>(userRoleIds);
 
@@ -35,8 +37,8 @@ export default function AssignRolesModal({ user, allRoles, onClose, onAssign, on
         </div>
 
         <div className="space-y-1.5 max-h-60 overflow-y-auto border border-slate-200 rounded-xl p-3">
-          {allRoles.length === 0 && <p className="text-xs text-slate-400">No roles available.</p>}
-          {allRoles.map((r) => {
+          {visibleRoles.length === 0 && <p className="text-xs text-slate-400">No roles available.</p>}
+          {visibleRoles.map((r) => {
             const isAssigned = userRoleIds.includes(r.id);
             return (
               <label key={r.id} className="flex items-center gap-2.5 cursor-pointer py-1">

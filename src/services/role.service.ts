@@ -65,11 +65,11 @@ export const RoleService = {
     return api.delete<void>(`/admin/roles/${id}`);
   },
 
-  // ── Admin Users ────────────────────────────────────────────────
+  // ── Roles (used in assign modals) ──────────────────────────────
 
-  /** GET /api/admin-users */
-  getAdminUsers(params?: ListParams) {
-    return api.get<PaginatedResponse<AdminUser>>("/api/admin-users", params);
+  /** GET /admin/roles */
+  getAdminRoles() {
+    return api.get<ApiListResponse<Role[]>>("/admin/roles").then((r) => r.data);
   },
 
   /** GET /api/admin-users/:id */

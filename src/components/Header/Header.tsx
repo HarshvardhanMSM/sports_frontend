@@ -145,26 +145,14 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
               </div>
               <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-white bg-green-500" />
             </div>
-            <div className="hidden lg:block">
-              <span className="block text-xs font-semibold text-slate-800 leading-tight">
-                TomIsLoading
-              </span>
-              <span className="block text-[10px] text-slate-400 font-medium">
-                Administrator
-              </span>
-            </div>
+           
             <FiChevronDown className="hidden lg:block size-4 text-slate-400" />
           </button>
 
           {showProfileMenu && (
             <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-100 animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="px-3 py-2 border-b border-slate-100">
-                <span className="block text-xs font-semibold text-slate-800">
-                  TomIsLoading
-                </span>
-                <span className="block text-[10px] text-slate-400 font-medium">
-                  tom@sportswear.com
-                </span>
+               
               </div>
               <div className="py-1">
                 <ProfileMenuItem Icon={FiUser} label="Profile" />

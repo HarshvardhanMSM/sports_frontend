@@ -26,6 +26,7 @@ import {
   groupPermissionsByModule,
   permissionsToSlugs,
   slugsToPermissions,
+  SUPER_ADMIN_ROLE,
 } from "@/types/role.types";
 import RoleSidebar from "@/components/roles/RoleSidebar";
 import PermissionModuleCard from "@/components/roles/PermissionModuleCard";
@@ -106,7 +107,9 @@ export default function RolesPage() {
   // ── Derived Data ──────────────────────────────────────────────────
   const rolesRaw: Role[] = rolesData ?? [];
   const roles = useMemo(
-    () => rolesRaw.map((r) => ({ ...r, permissions: normalizePermissions(r.permissions) })),
+    () => rolesRaw
+      .filter((r) => r.name !== SUPER_ADMIN_ROLE)
+      .map((r) => ({ ...r, permissions: normalizePermissions(r.permissions) })),
     [rolesRaw],
   );
   const permissionSlugs: PermissionSlug[] = permissionSlugsRaw ?? [];

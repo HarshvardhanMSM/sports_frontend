@@ -208,3 +208,6 @@ export function slugsToPermissions(slugs: string[]): Permission[] {
 export function permissionsToSlugs(permissions: Permission[]): string[] {
   return permissions.flatMap((p) => p.actions.map((a) => `${p.module}.${a}`));
 }
+
+/** Name of the super-admin role that should be hidden from assign modals and protected from edit/delete. */
+export const SUPER_ADMIN_ROLE = "Super Admin";

@@ -19,19 +19,25 @@ const inventorySchema = z.object({
 export type InventoryFormValues = z.infer<typeof inventorySchema>;
 
 interface InventoryFormProps {
+  defaultValues?: Partial<InventoryFormValues>;
+  initialVariant?: { variantId: string; variantSku: string };
   onSubmit: (data: InventoryFormValues & { variantId?: string; variantSku?: string }) => void;
   onCancel: () => void;
   isPending?: boolean;
 }
 
 export default function InventoryForm({
+  defaultValues: externalDefaults,
+  initialVariant,
   onSubmit,
   onCancel,
   isPending,
 }: InventoryFormProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(externalDefaults?.variantSku ?? "");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<VariantSearchResult | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<VariantSearchResult | null>(
+    initialVariant ? { productId: initialVariant.variantId, sku: initialVariant.variantSku } : null
+  );
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { data: variantsRes } = useInventoryVariants(searchTerm);
@@ -52,6 +58,7 @@ export default function InventoryForm({
       reorderPoint: 10,
       lowStockThreshold: 5,
       reorderQuantity: 50,
+      ...externalDefaults,
     },
   });
 
@@ -90,10 +97,10 @@ export default function InventoryForm({
   const handleFormSubmit = useCallback((data: InventoryFormValues) => {
     onSubmit({
       ...data,
-      variantId: selectedVariant?.productId,
-      variantSku: selectedVariant?.sku ?? data.variantSku,
+      variantId: selectedVariant?.productId ?? initialVariant?.variantId,
+      variantSku: selectedVariant?.sku ?? initialVariant?.variantSku ?? data.variantSku,
     });
-  }, [onSubmit, selectedVariant]);
+  }, [onSubmit, selectedVariant, initialVariant]);
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 max-w-2xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm font-sans">
