@@ -36,6 +36,7 @@ export interface SupportAttachment {
 export interface SupportTag {
   id: string;
   name: string;
+  tag:string
 }
 
 export interface AuditLogEntry {
@@ -78,12 +79,9 @@ export interface ReopenTicketRequest {
 
 export interface AddNoteRequest {
   note: string;
-  isInternal: boolean;
 }
 
-export interface AddTagRequest {
-  name: string;
-}
+export type AddTagRequest = string;
 
 // ── Response types ────────────────────────────────────────────────
 

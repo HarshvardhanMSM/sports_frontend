@@ -3,6 +3,8 @@
 import React from "react";
 import { FiX, FiHeart } from "react-icons/fi";
 import { useCustomerWishlist } from "@/hooks/useCustomers";
+import { resolveImageUrl } from "@/lib/image";
+import type { WishlistItem } from "@/types/customer.types";
 
 interface CustomerWishlistDrawerProps {
   customerId: string;
@@ -17,8 +19,15 @@ export default function CustomerWishlistDrawer({
 }: CustomerWishlistDrawerProps) {
   const { data, isLoading } = useCustomerWishlist(customerId);
 
-  const raw = data?.data;
-  const items = Array.isArray(raw) ? raw : (raw?.items ?? []);
+  const items: WishlistItem[] = (() => {
+    if (!data) return [];
+    const d = data as unknown as Record<string, unknown>;
+    const nested = d.data as WishlistItem[] | { items: WishlistItem[] } | undefined;
+    if (Array.isArray(nested)) return nested;
+    if (nested && "items" in nested && Array.isArray(nested.items)) return nested.items;
+    if ("items" in d && Array.isArray(d.items)) return d.items as WishlistItem[];
+    return [];
+  })();
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -59,19 +68,18 @@ export default function CustomerWishlistDrawer({
                   className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-400">
-                    {item.image ? (
-                      <img src={item.image} alt={item.productName} className="h-full w-full object-cover rounded-lg" />
+                    {resolveImageUrl(item.product.imageUrl) ? (
+                      <img src={resolveImageUrl(item.product.imageUrl)} alt={item.product.name} className="h-full w-full object-cover rounded-lg" />
                     ) : (
                       <FiHeart className="size-5 text-slate-300" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{item.productName}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">SKU: {item.sku}</p>
-                    <p className="text-xs text-slate-500">{item.variant}</p>
+                    <p className="text-sm font-semibold text-slate-800 truncate">{item.product.name}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">SKU: {item.variant.sku}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-slate-800">${item.price.toFixed(2)}</p>
+                    <p className="text-sm font-bold text-slate-800">${(Number(item.variant.price) || 0).toFixed(2)}</p>
                     <p className="text-xs text-slate-400 mt-0.5">{new Date(item.addedAt).toLocaleDateString()}</p>
                   </div>
                 </div>

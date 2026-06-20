@@ -2,6 +2,7 @@ import { api } from "./api";
 import type {
   CustomerListResponse,
   CustomerSingleResponse,
+  CustomerActionResponse,
   CustomerStatsResponse,
   WishlistResponse,
   CustomerListParams,
@@ -22,5 +23,13 @@ export const CustomerService = {
 
   getWishlist(userId: string) {
     return api.get<WishlistResponse>(`/admin/wishlist/${userId}`);
+  },
+
+  toggleActive(id: string) {
+    return api.patch<CustomerActionResponse>(`/admin/customers/${id}/toggle-active`);
+  },
+
+  delete(id: string) {
+    return api.delete<CustomerActionResponse>(`/admin/customers/${id}`);
   },
 };

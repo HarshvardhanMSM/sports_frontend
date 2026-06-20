@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CustomerService } from "@/services/customer.service";
 import type { CustomerListParams } from "@/types/customer.types";
 
@@ -44,5 +44,25 @@ export function useCustomerWishlist(userId: string | null) {
     queryKey: customerKeys.wishlist(userId ?? ""),
     queryFn: () => CustomerService.getWishlist(userId!),
     enabled: !!userId,
+  });
+}
+
+export function useToggleCustomerActive() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => CustomerService.toggleActive(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: customerKeys.all() });
+    },
+  });
+}
+
+export function useDeleteCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => CustomerService.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: customerKeys.all() });
+    },
   });
 }

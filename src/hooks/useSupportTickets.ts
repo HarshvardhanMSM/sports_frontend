@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SupportTicketService } from "@/services/support-ticket.service";
-import { RoleService } from "@/services/role.service";
+import { UserService } from "@/services/user.service";
 import type {
   SupportTicketListParams,
   AssignTicketRequest,
@@ -10,8 +10,6 @@ import type {
   AddNoteRequest,
   AddTagRequest,
 } from "@/types/support-ticket.types";
-import type { ListParams } from "@/types/common.types";
-
 export const supportTicketKeys = {
   all:          ()                          => ["support"]                     as const,
   lists:        ()                          => ["support", "list"]             as const,
@@ -126,8 +124,8 @@ export function useAddSupportNote() {
 export function useAddSupportTag() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: AddTagRequest }) =>
-      SupportTicketService.addTag(id, body),
+    mutationFn: ({ id, tag }: { id: string; tag: string }) =>
+      SupportTicketService.addTag(id, tag),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: supportTicketKeys.all() });
     },
@@ -145,9 +143,20 @@ export function useRemoveSupportTag() {
   });
 }
 
-export function useAdminUsers(params?: ListParams) {
+export function useUploadSupportAttachments() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+      SupportTicketService.uploadAttachments(id, formData),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: supportTicketKeys.all() });
+    },
+  });
+}
+
+export function useAdminUsers() {
   return useQuery({
-    queryKey: ["admin-users", "list", params],
-    queryFn: () => RoleService.getAdminUsers(params),
+    queryKey: ["admin", "users"],
+    queryFn: () => UserService.getUsers(),
   });
 }

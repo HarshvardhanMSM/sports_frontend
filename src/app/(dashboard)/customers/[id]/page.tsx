@@ -13,7 +13,8 @@ import {
   FiCalendar,
   FiAlertCircle,
 } from "react-icons/fi";
-import { useCustomer, useCustomerWishlist } from "@/hooks/useCustomers";
+import { useCustomer, useCustomerWishlist, useToggleCustomerActive, useDeleteCustomer } from "@/hooks/useCustomers";
+import { resolveImageUrl } from "@/lib/image";
 
 export default function CustomerDetailPage() {
   const params = useParams();
@@ -24,10 +25,31 @@ export default function CustomerDetailPage() {
   const { data: wishlistRes } = useCustomerWishlist(id ?? null);
 
   const customer = res?.data;
-  const raw = wishlistRes?.data;
-  const wishlistItems = Array.isArray(raw) ? raw : (raw?.items ?? []);
+  const wishlistItems = (() => {
+    if (!wishlistRes) return [];
+    const d = wishlistRes as unknown as Record<string, unknown>;
+    const nested = d.data as Array<unknown> | { items: Array<unknown> } | undefined;
+    if (Array.isArray(nested)) return nested;
+    if (nested && "items" in nested && Array.isArray(nested.items)) return nested.items;
+    if ("items" in d && Array.isArray(d.items)) return d.items;
+    return [];
+  })();
 
   const [showWishlist, setShowWishlist] = useState(false);
+
+  const toggleMutation = useToggleCustomerActive();
+  const deleteMutation = useDeleteCustomer();
+
+  const handleToggleActive = async () => {
+    await toggleMutation.mutateAsync(id!);
+    refetch();
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this customer?")) return;
+    await deleteMutation.mutateAsync(id!);
+    router.push("/customers");
+  };
 
   if (isLoading) {
     return (
@@ -151,6 +173,22 @@ export default function CustomerDetailPage() {
               <FiHeart className="size-4" />
               View Wishlist ({wishlistItems.length})
             </button>
+            <button
+              onClick={handleToggleActive}
+              disabled={toggleMutation.isPending}
+              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <FiUser className="size-4" />
+              {toggleMutation.isPending ? "Toggling..." : customer.isActive ? "Deactivate" : "Activate"}
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="w-full rounded-lg border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <FiXCircle className="size-4" />
+              {deleteMutation.isPending ? "Deleting..." : "Delete Customer"}
+            </button>
           </div>
         </div>
       </div>
@@ -180,19 +218,18 @@ export default function CustomerDetailPage() {
                   {wishlistItems.map((item) => (
                     <div key={item.id} className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
                       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-400">
-                        {item.image ? (
-                          <img src={item.image} alt={item.productName} className="h-full w-full object-cover rounded-lg" />
+                        {resolveImageUrl(item.product.imageUrl) ? (
+                          <img src={resolveImageUrl(item.product.imageUrl)} alt={item.product.name} className="h-full w-full object-cover rounded-lg" />
                         ) : (
                           <FiHeart className="size-5 text-slate-300" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 truncate">{item.productName}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">SKU: {item.sku}</p>
-                        <p className="text-xs text-slate-500">{item.variant}</p>
+                        <p className="text-sm font-semibold text-slate-800 truncate">{item.product.name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">SKU: {item.variant.sku}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold text-slate-800">${item.price.toFixed(2)}</p>
+                        <p className="text-sm font-bold text-slate-800">${(Number(item.variant.price) || 0).toFixed(2)}</p>
                         <p className="text-xs text-slate-400 mt-0.5">{new Date(item.addedAt).toLocaleDateString()}</p>
                       </div>
                     </div>

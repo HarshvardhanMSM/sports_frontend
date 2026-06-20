@@ -5,6 +5,7 @@ import { FiUserPlus, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useAssignRoles, useRemoveRoles } from "@/hooks/useUsers";
 import { useRoles } from "@/hooks/useRoles";
 import type { User, CreateUserRequest, UpdateUserRequest } from "@/types/user.types";
+import { SUPER_ADMIN_ROLE } from "@/types/role.types";
 import UserStatsCards from "@/features/users/components/UserStatsCards";
 import UserFilters from "@/features/users/components/UserFilters";
 import UserTable from "@/features/users/components/UserTable";
@@ -31,7 +32,7 @@ export default function AdminUsersPage() {
 
   const raw = (data as unknown as Record<string, unknown>)?.data ?? data;
   const allUsers: User[] = Array.isArray(raw) ? raw : [];
-  const allRoles = rolesData ?? [];
+  const allRoles = (rolesData ?? []).filter((r) => r.name !== SUPER_ADMIN_ROLE);
 
   const filtered = useMemo(() => {
     return allUsers.filter((u) => {

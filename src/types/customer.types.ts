@@ -20,11 +20,9 @@ export interface CustomerStats {
 export interface WishlistItem {
   id: string;
   productId: string;
-  productName: string;
-  sku: string;
-  variant: string;
-  price: number;
-  image?: string;
+  variantId: string;
+  product: { id: string; name: string; imageUrl?: string }; 
+  variant: { id: string; sku: string; price: string };
   addedAt: string;
 }
 
@@ -53,6 +51,12 @@ export interface CustomerSingleResponse {
   statusCode: number;
   message: string;
   data: Customer;
+}
+
+export interface CustomerActionResponse {
+  statusCode?: number;
+  message: string;
+  data?: Customer;
 }
 
 export interface CustomerStatsResponse {

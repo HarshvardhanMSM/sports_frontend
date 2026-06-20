@@ -72,10 +72,10 @@ export function useDeleteRole() {
 
 // ── Admin User Hooks ──────────────────────────────────────────────
 
-export function useAdminUsers(params?: ListParams) {
+export function useAdminRoles() {
   return useQuery({
-    queryKey: roleKeys.adminsList(),
-    queryFn:  () => RoleService.getAdminUsers(params),
+    queryKey: ["admin", "roles"],
+    queryFn:  () => RoleService.getAdminRoles(),
     staleTime: STALE,
   });
 }

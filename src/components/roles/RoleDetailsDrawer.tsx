@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { FiX, FiEdit2, FiCopy, FiTrash2, FiCalendar, FiClock, FiUsers } from "react-icons/fi";
 import type { Role } from "@/types/role.types";
+import { SUPER_ADMIN_ROLE } from "@/types/role.types";
 
 interface RoleDetailsDrawerProps {
   role: Role;
@@ -122,30 +123,37 @@ export default function RoleDetailsDrawer({
           </div>
 
           {/* Actions */}
-          <div className="space-y-2">
-            <button
-              onClick={() => onEdit(role)}
-              className="w-full flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              <FiEdit2 className="size-4 text-indigo-500" />
-              Edit Role
-            </button>
-            <button
-              onClick={() => onDuplicate(role)}
-              className="w-full flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              <FiCopy className="size-4 text-amber-500" />
-              Duplicate Role
-            </button>
-            <button
-              onClick={() => onDelete(role)}
-              disabled={role.isSystemRole}
-              className="w-full flex items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <FiTrash2 className="size-4" />
-              {role.isSystemRole ? "Cannot Delete System Role" : "Delete Role"}
-            </button>
-          </div>
+          {role.name !== SUPER_ADMIN_ROLE && (
+            <div className="space-y-2">
+              <button
+                onClick={() => onEdit(role)}
+                className="w-full flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <FiEdit2 className="size-4 text-indigo-500" />
+                Edit Role
+              </button>
+              <button
+                onClick={() => onDuplicate(role)}
+                className="w-full flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <FiCopy className="size-4 text-amber-500" />
+                Duplicate Role
+              </button>
+              <button
+                onClick={() => onDelete(role)}
+                disabled={role.isSystemRole}
+                className="w-full flex items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <FiTrash2 className="size-4" />
+                {role.isSystemRole ? "Cannot Delete System Role" : "Delete Role"}
+              </button>
+            </div>
+          )}
+          {role.name === SUPER_ADMIN_ROLE && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 text-center">
+              This role is pre-configured and cannot be modified.
+            </div>
+          )}
         </div>
       </div>
 

@@ -68,8 +68,14 @@ export const SupportTicketService = {
     });
   },
 
-  addTag(id: string, body: AddTagRequest) {
-    return api.post<SupportTicketActionResponse>(`/admin/support/${id}/tags`, body, {
+  uploadAttachments(id: string, formData: FormData) {
+    return api.post<SupportTicketActionResponse>(`/admin/support/${id}/attachments`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  addTag(id: string, tag: string) {
+    return api.post<SupportTicketActionResponse>(`/admin/support/${id}/tags`, { tag }, {
       headers: { "Content-Type": "application/json" },
     });
   },
