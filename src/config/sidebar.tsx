@@ -25,7 +25,6 @@ import {
   FiNavigation,
   FiUsers,
   FiDollarSign,
-  FiUserCheck,
   FiMessageCircle,
   FiHeart,
   FiImage,
@@ -175,12 +174,6 @@ export const Sidebar = () => {
             Icon={FiUsers}
             title="Customers"
             href="/customers"
-            open={open}
-          />
-          <Option
-            Icon={FiUserCheck}
-            title="Customer Groups"
-            href="/customer-groups"
             open={open}
           />
           <Option

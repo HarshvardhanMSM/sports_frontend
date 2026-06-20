@@ -1,48 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   FiUsers,
   FiUserCheck,
   FiUserPlus,
-  FiDollarSign,
   FiSearch,
   FiEye,
-  FiEdit2,
-  FiTrash2,
-  FiFilter,
+  FiHeart,
+  FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
-import Pagination from "@/components/ui/pagination/Pagination";
+import { useCustomers, useCustomerStats } from "@/hooks/useCustomers";
+import type { CustomerListParams } from "@/types/customer.types";
+import CustomerWishlistDrawer from "@/features/customers/components/CustomerWishlistDrawer";
 
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  orders: number;
-  totalSpent: number;
-  status: string;
-  joined: string;
-}
-
-const CUSTOMERS: Customer[] = [
-  { id: "cust-1", name: "James Wilson", email: "james.wilson@email.com", phone: "+1 (555) 234-5678", location: "New York, US", orders: 12, totalSpent: 1380.0, status: "Active", joined: "2025-03-15" },
-  { id: "cust-2", name: "Sarah Chen", email: "sarah.chen@email.com", phone: "+1 (555) 345-6789", location: "Los Angeles, US", orders: 8, totalSpent: 620.0, status: "Active", joined: "2025-04-22" },
-  { id: "cust-3", name: "Marco Rossi", email: "marco.rossi@email.com", phone: "+39 02 1234567", location: "Milan, IT", orders: 5, totalSpent: 890.0, status: "Active", joined: "2025-06-10" },
-  { id: "cust-4", name: "Emily Davis", email: "emily.davis@email.com", phone: "+1 (555) 456-7890", location: "Chicago, US", orders: 15, totalSpent: 2240.0, status: "Active", joined: "2024-11-08" },
-  { id: "cust-5", name: "Tom Johnson", email: "tom.j@email.com", phone: "+1 (555) 567-8901", location: "Houston, US", orders: 3, totalSpent: 198.0, status: "Inactive", joined: "2025-09-30" },
-  { id: "cust-6", name: "Aisha Patel", email: "aisha.patel@email.com", phone: "+44 20 7946 0958", location: "London, UK", orders: 20, totalSpent: 3450.0, status: "Active", joined: "2024-08-14" },
-  { id: "cust-7", name: "Carlos Mendez", email: "c.mendez@email.com", phone: "+34 91 234 5678", location: "Madrid, ES", orders: 7, totalSpent: 530.0, status: "Active", joined: "2025-07-02" },
-  { id: "cust-8", name: "Rachel Kim", email: "r.kim@email.com", phone: "+82 2 1234 5678", location: "Seoul, KR", orders: 11, totalSpent: 1560.0, status: "Active", joined: "2025-01-19" },
-  { id: "cust-9", name: "David Brown", email: "d.brown@email.com", phone: "+1 (555) 678-9012", location: "Toronto, CA", orders: 4, totalSpent: 280.0, status: "Active", joined: "2025-10-05" },
-  { id: "cust-10", name: "Lisa Zhang", email: "l.zhang@email.com", phone: "+86 10 1234 5678", location: "Beijing, CN", orders: 9, totalSpent: 945.0, status: "Inactive", joined: "2025-05-27" },
-];
-
-const PAGE_SIZE = 5;
-
-function getInitials(name: string) {
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+function getInitials(first: string, last: string) {
+  return (first[0] ?? "").toUpperCase() + (last[0] ?? "").toUpperCase();
 }
 
 const AVATAR_COLORS = [
@@ -54,34 +30,48 @@ const AVATAR_COLORS = [
   "from-violet-500 to-purple-600",
 ];
 
-const STAT_CARDS = [
-  { label: "Total Customers", value: "3,842", sub: "Registered accounts", icon: FiUsers, bg: "from-indigo-500 to-indigo-600" },
-  { label: "Active", value: "2,956", sub: "Active in last 90 days", icon: FiUserCheck, bg: "from-emerald-500 to-emerald-600" },
-  { label: "New This Month", value: "156", sub: "June 2026", icon: FiUserPlus, bg: "from-blue-500 to-blue-600" },
-  { label: "Avg Order Value", value: "$116.54", sub: "Per order average", icon: FiDollarSign, bg: "from-violet-500 to-violet-600" },
-];
-
 export default function CustomersPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [isActive, setIsActive] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState("");
   const [page, setPage] = useState(1);
+  const [wishlistTarget, setWishlistTarget] = useState<{ id: string; name: string } | null>(null);
 
-  const filtered = CUSTOMERS.filter((c) => {
-    const matchesSearch =
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = filter === "All" || c.status === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const params: CustomerListParams = { page, limit: 10 };
+  if (search) params.search = search;
+  if (isActive) params.isActive = isActive === "true";
+  if (isEmailVerified) params.isEmailVerified = isEmailVerified === "true";
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const start = (safePage - 1) * PAGE_SIZE;
-  const paginated = filtered.slice(start, start + PAGE_SIZE);
+  const { data, isLoading, error, refetch } = useCustomers(params);
+  const { data: statsData } = useCustomerStats();
+
+  const stats = statsData?.data;
+  const raw = data?.data;
+  const isPaginated = raw != null && !Array.isArray(raw);
+  const allItems = Array.isArray(raw) ? raw : (raw?.items ?? []);
+  const total = isPaginated ? (raw?.total ?? 0) : allItems.length;
+  const totalPages = Math.max(1, Math.ceil(total / 10));
+
+  const handleSearch = useCallback((val: string) => {
+    setSearch(val);
+    setPage(1);
+  }, []);
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <FiAlertCircle className="size-10 text-rose-500 mb-4" />
+          <p className="text-sm font-semibold text-slate-800">Failed to load customers</p>
+          <button onClick={() => refetch()} className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -91,28 +81,61 @@ export default function CustomersPage() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Customers</h1>
           <p className="text-sm text-slate-500 mt-0.5">View and manage your customer base, accounts, and purchase history.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]" style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}>
-          <FiUserPlus className="size-4" />
-          Add Customer
-        </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {STAT_CARDS.map(({ label, value, sub, icon: Icon, bg }) => (
-          <div key={label} className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-            <div className={`absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br ${bg} opacity-5`} />
-            <div className={`inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bg} shadow-sm mb-3`}>
-              <Icon className="size-5 text-white" />
-            </div>
-            <p className="text-2xl font-bold text-slate-900 leading-none">{value}</p>
-            <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">{label}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
+        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-indigo-500 to-indigo-600 opacity-5" />
+          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-sm mb-3">
+            <FiUsers className="size-5 text-white" />
           </div>
-        ))}
+          <p className="text-2xl font-bold text-slate-900">
+            {stats?.totalCustomers ?? "-"}
+          </p>
+          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Total Customers</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-emerald-500 to-emerald-600 opacity-5" />
+          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm mb-3">
+            <FiUserCheck className="size-5 text-white" />
+          </div>
+          <p className="text-2xl font-bold text-slate-900">
+            {stats?.activeCustomers ?? "-"}
+          </p>
+          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Active Customers</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-blue-500 to-blue-600 opacity-5" />
+          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm mb-3">
+            <FiUsers className="size-5 text-white" />
+          </div>
+          <p className="text-2xl font-bold text-slate-900">
+            {stats?.verifiedCustomers ?? "-"}
+          </p>
+          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Verified Customers</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-violet-500 to-violet-600 opacity-5" />
+          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm mb-3">
+            <FiUserPlus className="size-5 text-white" />
+          </div>
+          <p className="text-2xl font-bold text-slate-900">
+            {stats?.newThisMonth ?? "-"}
+          </p>
+          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">New This Month</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
+          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-amber-500 to-amber-600 opacity-5" />
+          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-sm mb-3">
+            <FiUserPlus className="size-5 text-white" />
+          </div>
+          <p className="text-2xl font-bold text-slate-900">
+            {stats?.newToday ?? "-"}
+          </p>
+          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">New Today</p>
+        </div>
       </div>
 
-      {/* Filter Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
         <div className="relative flex-1 max-w-sm">
           <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
@@ -120,109 +143,163 @@ export default function CustomersPage() {
             type="text"
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => handleSearch(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-400"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <FiFilter className="size-4 text-slate-400 shrink-0" />
-          <select
-            value={filter}
-            onChange={(e) => { setFilter(e.target.value); setPage(1); }}
-            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 hover:bg-white transition-all"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
+        <select
+          value={isActive}
+          onChange={(e) => { setIsActive(e.target.value); setPage(1); }}
+          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 hover:bg-white transition-all"
+        >
+          <option value="">All Statuses</option>
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
+        <select
+          value={isEmailVerified}
+          onChange={(e) => { setIsEmailVerified(e.target.value); setPage(1); }}
+          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 hover:bg-white transition-all"
+        >
+          <option value="">All Verified</option>
+          <option value="true">Verified</option>
+          <option value="false">Unverified</option>
+        </select>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/80">
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Phone</th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Location</th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Orders</th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Total Spent</th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Joined</th>
-                <th className="px-5 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {paginated.map((c, i) => (
-                <tr key={c.id} className="group hover:bg-slate-50/60 transition-colors">
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${AVATAR_COLORS[i % AVATAR_COLORS.length]} text-xs font-bold text-white shadow-sm`}>
-                        {getInitials(c.name)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{c.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{c.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">{c.phone}</td>
-                  <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">{c.location}</td>
-                  <td className="px-5 py-4">
-                    <span className="inline-flex items-center justify-center size-7 rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
-                      {c.orders}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-sm font-bold text-slate-900">${c.totalSpent.toFixed(2)}</td>
-                  <td className="px-5 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${
-                      c.status === "Active"
-                        ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                        : "bg-slate-100 text-slate-600 ring-slate-200"
-                    }`}>
-                      <span className={`size-1.5 rounded-full ${c.status === "Active" ? "bg-emerald-500" : "bg-slate-400"}`} />
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">{c.joined}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex gap-1 justify-end">
-                      <button className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all">
-                        <FiEye className="size-4" />
-                      </button>
-                      <button className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all">
-                        <FiEdit2 className="size-4" />
-                      </button>
-                      <button className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all">
-                        <FiTrash2 className="size-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
+          <p className="mt-3 text-sm font-medium text-slate-500">Loading customers...</p>
+        </div>
+      ) : allItems.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center">
+            <FiUsers className="size-6 text-slate-400" />
+          </div>
+          <p className="mt-3 text-sm font-semibold text-slate-700">No customers found</p>
+          <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filter criteria.</p>
+        </div>
+      ) : (
+        <>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/80">
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Customer ID</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">First Name</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mobile</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email Verified</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Created Date</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {allItems.map((c) => (
+                    <tr key={c.id} className="group hover:bg-slate-50/60 transition-colors">
+                      <td className="px-5 py-4 text-xs font-mono text-slate-500">{c.id.slice(0, 8)}...</td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${AVATAR_COLORS[0]} text-xs font-bold text-white shadow-sm`}>
+                            {getInitials(c.firstName, c.lastName)}
+                          </div>
+                          <span className="text-sm font-semibold text-slate-800">{c.firstName}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-slate-700">{c.lastName}</td>
+                      <td className="px-5 py-4 text-sm text-slate-600">{c.email}</td>
+                      <td className="px-5 py-4 text-sm text-slate-600">{c.mobile ?? "-"}</td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          c.isEmailVerified
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-500"
+                        }`}>
+                          {c.isEmailVerified ? "Yes" : "No"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${
+                          c.isActive
+                            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                            : "bg-slate-100 text-slate-600 ring-slate-200"
+                        }`}>
+                          <span className={`size-1.5 rounded-full ${c.isActive ? "bg-emerald-500" : "bg-slate-400"}`} />
+                          {c.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">
+                        {new Date(c.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex gap-1 justify-end">
+                          <button
+                            onClick={() => router.push(`/customers/${c.id}`)}
+                            className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                          >
+                            <FiEye className="size-4" />
+                          </button>
+                          <button
+ onClick={() => setWishlistTarget({ id: c.id, name: `${c.firstName} ${c.lastName}` })}
+ className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+ title="View Wishlist"
+                          >
+                            <FiHeart className="size-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page <= 1}
+                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+              >
+                <FiChevronLeft className="size-4" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm font-semibold ${
+                    p === page
+                      ? "border-indigo-600 bg-indigo-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {p}
+                </button>
               ))}
-              {paginated.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-5 py-16 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-                        <FiUsers className="size-6 text-slate-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-700">No customers found</p>
-                        <p className="text-xs text-slate-400 mt-0.5">Try adjusting your search or filter criteria.</p>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages}
+                className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-40 hover:bg-slate-50"
+              >
+                <FiChevronRight className="size-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
 
-      <Pagination page={safePage} totalPages={totalPages} total={filtered.length} limit={PAGE_SIZE} onPageChange={setPage} />
+      {wishlistTarget && (
+        <CustomerWishlistDrawer
+          customerId={wishlistTarget.id}
+          customerName={wishlistTarget.name}
+          onClose={() => setWishlistTarget(null)}
+        />
+      )}
     </div>
   );
 }

@@ -105,6 +105,7 @@ export interface CreateInventoryRequest {
 
 export interface UpdateInventoryRequest {
   variantId?: string;
+  variantSku?: string;
   quantity?: number;
   reservedQuantity?: number;
   reorderPoint?: number;
