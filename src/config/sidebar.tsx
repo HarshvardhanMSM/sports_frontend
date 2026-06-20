@@ -452,31 +452,13 @@ interface TitleSectionProps {
 
 const TitleSection = ({ open }: TitleSectionProps) => (
   <div className="mb-3 border-b border-slate-200 pb-2">
-    <div className="flex cursor-pointer items-center justify-between rounded-lg p-1 transition-colors duration-150 hover:bg-slate-50">
-      <div className="flex items-center gap-2 overflow-hidden">
+    <div className="flex cursor-pointer items-center justify-center rounded-lg p-1 transition-colors duration-150 hover:bg-slate-50">
+      <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden">
         <Logo />
-        <div
-          style={{
-            opacity: open ? 1 : 0,
-            transition: "opacity 0.2s ease-in-out",
-          }}
-        >
-          <span className="block text-xs font-semibold whitespace-nowrap">
-            TomIsLoading
-          </span>
-          <span className="block text-xs text-slate-500 whitespace-nowrap">
-            Pro Plan
-          </span>
-        </div>
-      </div>
+        
+      </Link>
 
-      <FiChevronDown
-        className="mr-2 shrink-0"
-        style={{
-          opacity: open ? 1 : 0,
-          transition: "opacity 0.2s ease-in-out",
-        }}
-      />
+   
     </div>
   </div>
 );
