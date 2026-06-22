@@ -71,13 +71,20 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="space-y-6 font-sans">
-      <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/customers")} className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => router.push("/customers")}
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+        >
           <FiArrowLeft className="size-4" />
+          Back
         </button>
-        <h1 className="text-xl font-bold text-slate-800">
-          {customer.firstName} {customer.lastName}
-        </h1>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            {customer.firstName} {customer.lastName}
+          </h1>
+          <p className="text-sm text-slate-500">{customer.email}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

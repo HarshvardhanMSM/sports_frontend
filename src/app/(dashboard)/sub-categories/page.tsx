@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { FiPlus, FiGrid, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useSubCategories, useDeleteSubCategory } from "@/hooks/useSubCategories";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import SubCategoryTable from "@/features/sub-categories/components/SubCategoryTable";
 import SubCategoryFilters from "@/features/sub-categories/components/SubCategoryFilters";
 import DeleteSubCategoryModal from "@/features/sub-categories/components/DeleteSubCategoryModal";
@@ -11,7 +12,10 @@ import Pagination from "@/components/ui/pagination/Pagination";
 
 export default function SubCategoriesPage() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const { query: search, setQuery: setSearch, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [categoryId, setCategoryId] = useState("");
   const [isActive, setIsActive] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -21,14 +25,18 @@ export default function SubCategoriesPage() {
   const { data, isPending, isError, error, refetch, isRefetching } = useSubCategories({
     page,
     limit,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     categoryId: categoryId || undefined,
     isActive: isActive !== "" ? isActive === "true" : undefined,
   });
 
   const { mutateAsync: deleteSubCat, isPending: isDeleting } = useDeleteSubCategory();
 
-  const handleSearch = useCallback((v: string) => { setSearch(v); setPage(1); }, []);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const handleSearch = useCallback((v: string) => { setSearch(v); }, [setSearch]);
   const handleCategory = useCallback((v: string) => { setCategoryId(v); setPage(1); }, []);
   const handleIsActive = useCallback((v: string) => { setIsActive(v); setPage(1); }, []);
 

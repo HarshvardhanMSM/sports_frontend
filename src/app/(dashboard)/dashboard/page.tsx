@@ -746,9 +746,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 2: Sales Overview, Sales by Category, Sales by Payment Method */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-12">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-12">
         {/* Sales Overview Line Chart */}
-        <div className="md:col-span-2 xl:col-span-6 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-5 shadow-sm">
+        <div className="md:col-span-2 xl:col-span-6 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-3 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold text-slate-800">Sales Overview</h3>
@@ -796,7 +796,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Sales by Category Donut Chart */}
-        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Sales by Category</h3>
             <select
@@ -843,7 +843,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Sales by Payment Method Donut Chart */}
-        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Sales by Payment Method</h3>
             <select
@@ -891,9 +891,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 3: Users Overview, Users by Source, New Users Signups */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-12">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-12">
         {/* Users Overview Area Chart */}
-        <div className="md:col-span-2 xl:col-span-6 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-5 shadow-sm">
+        <div className="md:col-span-2 xl:col-span-6 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-3 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold text-slate-800">Users Overview</h3>
@@ -941,7 +941,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Return Reasons Donut Chart */}
-        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Return Reasons</h3>
           </div>
@@ -980,7 +980,7 @@ export default function DashboardPage() {
         </div>
 
         {/* New Users Signups Bar Chart */}
-        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-5 shadow-sm">
+        <div className="md:col-span-1 xl:col-span-3 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-3 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">New Users Signups</h3>
             <select
@@ -1010,9 +1010,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 4: Sales Overview (This Month), Top Selling Products, Recent Orders */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
         {/* Sales Overview (This Month) */}
-        <div className="md:col-span-1 xl:col-span-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+        <div className="md:col-span-1 xl:col-span-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
           <h3 className="mb-4 font-semibold text-slate-800">
             Sales Overview{" "}
             <span className="text-xs font-normal text-slate-400">
@@ -1108,7 +1108,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Selling Products */}
-        <div className="md:col-span-1 xl:col-span-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div className="md:col-span-1 xl:col-span-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Top Selling Products</h3>
           </div>
@@ -1117,7 +1117,7 @@ export default function DashboardPage() {
               <thead>
                 <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   <th className="pb-2">Product</th>
-                  <th className="pb-2 text-right">Sold</th>
+                  <th className="pb-2 pr-1 text-right">Sold</th>
                   <th className="pb-2 text-right">Revenue</th>
                 </tr>
               </thead>
@@ -1163,7 +1163,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Orders */}
-        <div className="md:col-span-2 xl:col-span-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div className="md:col-span-2 xl:col-span-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
             <h3 className="font-semibold text-slate-800">Recent Orders</h3>
             <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
@@ -1291,7 +1291,7 @@ const ProductRow = ({ name, type, sold, revenue, imageUrl }: ProductRowProps) =>
     <tr className="group hover:bg-slate-50/50 transition-colors">
       <td className="py-2.5 pr-2">
         <div className="flex items-center gap-2.5">
-          <div className="size-8 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+          <div className="size-15 rounded-lg overflow-hidden bg-slate-100 shrink-0">
             <img src={getImageUrl(imageUrl)} alt={name} className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
@@ -1300,7 +1300,7 @@ const ProductRow = ({ name, type, sold, revenue, imageUrl }: ProductRowProps) =>
           </div>
         </div>
       </td>
-      <td className="py-2.5 text-right font-semibold text-slate-800">{sold}</td>
+      <td className="py-2.5 text-center font-semibold text-slate-800">{sold}</td>
       <td className="py-2.5 text-right font-semibold text-slate-800">{revenue}</td>
     </tr>
   );

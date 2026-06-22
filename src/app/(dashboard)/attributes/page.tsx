@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { FiPlus, FiSliders, FiCheckCircle, FiAlertCircle, FiXCircle } from "react-icons/fi";
 import { useAttributes, useDeleteAttribute } from "@/hooks/useAttributes";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import AttributeTable from "@/features/attributes/components/AttributeTable";
 import AttributeFilters from "@/features/attributes/components/AttributeFilters";
 import DeleteAttributeModal from "@/features/attributes/components/DeleteAttributeModal";
@@ -11,7 +12,10 @@ import Pagination from "@/components/ui/pagination/Pagination";
 
 export default function AttributesPage() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const { query: search, setQuery: setSearch, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [isFilterable, setIsFilterable] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -20,13 +24,17 @@ export default function AttributesPage() {
   const { data, isPending, isError, error, refetch, isRefetching } = useAttributes({
     page,
     limit,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     isFilterable: isFilterable !== "" ? isFilterable === "true" : undefined,
   });
 
   const { mutateAsync: deleteAttribute, isPending: isDeleting } = useDeleteAttribute();
 
-  const handleSearch = useCallback((v: string) => { setSearch(v); setPage(1); }, []);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const handleSearch = useCallback((v: string) => { setSearch(v); }, [setSearch]);
   const handleFilterable = useCallback((v: string) => { setIsFilterable(v); setPage(1); }, []);
 
   const handleDelete = useCallback(async () => {

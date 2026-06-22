@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { CustomerService } from "@/services/customer.service";
 import type { CustomerListParams } from "@/types/customer.types";
 
@@ -20,6 +20,7 @@ export function useCustomers(params?: CustomerListParams) {
     queryFn: () => CustomerService.getAll(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

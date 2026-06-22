@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { BrandService, brandKeys } from "@/services/brand.service";
 import type { BrandListParams } from "@/types/brand.types";
@@ -13,6 +13,7 @@ export function useBrands(params?: BrandListParams) {
     queryFn: () => BrandService.getBrands(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

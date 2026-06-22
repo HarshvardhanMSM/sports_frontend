@@ -1,7 +1,9 @@
 "use client";
 
 import React, { use } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FiArrowLeft } from "react-icons/fi";
 import { useBrand, useUpdateBrand, useUpdateBrandJson } from "@/hooks/useBrands";
 import BrandForm from "@/features/brands/components/BrandForm";
 import type { BrandFormValues } from "@/features/brands/components/BrandForm";
@@ -71,12 +73,21 @@ export default function EditBrandPage({ params }: EditBrandPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Edit Brand</h1>
-        <p className="text-sm text-slate-500">Modify details for {brand.name}.</p>
+      <div className="flex items-center gap-4">
+        <Link
+          href="/brands"
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+        >
+          <FiArrowLeft className="size-4" />
+          Back
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Edit Brand</h1>
+          <p className="text-sm text-slate-500">Modify details for {brand.name}.</p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm max-w-3xl">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm max-w-full">
         <BrandForm initialData={brand} onSubmit={handleSubmit} onCancel={handleCancel} isPending={isPending || isJsonPending} />
       </div>
     </div>

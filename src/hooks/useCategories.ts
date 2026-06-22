@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { CategoryService, categoryKeys } from "@/services/category.service";
 import type { CategoryListParams } from "@/types/category.types";
@@ -12,6 +12,7 @@ export function useCategories(params?: CategoryListParams) {
     queryKey: categoryKeys.list(params ?? {}),
     queryFn: () => CategoryService.getCategories(params),
     staleTime: 0,
+    placeholderData: keepPreviousData,
   });
 }
 

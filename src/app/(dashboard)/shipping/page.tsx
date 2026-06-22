@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   FiTruck,
   FiNavigation,
@@ -11,6 +11,7 @@ import {
   FiEdit2,
 } from "react-icons/fi";
 import Pagination from "@/components/ui/pagination/Pagination";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 
 interface Shipment {
   id: string;
@@ -56,21 +57,26 @@ function statusBadge(status: string) {
 }
 
 export default function ShippingPage() {
-  const [search, setSearch] = useState("");
   const [carrierFilter, setCarrierFilter] = useState("All Carriers");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
 
-  const filtered = SHIPMENTS.filter((s) => {
-    const matchesSearch =
-      s.id.toLowerCase().includes(search.toLowerCase()) ||
-      s.customer.toLowerCase().includes(search.toLowerCase()) ||
-      s.trackingNo.toLowerCase().includes(search.toLowerCase()) ||
-      s.destination.toLowerCase().includes(search.toLowerCase());
-    const matchesCarrier = carrierFilter === "All Carriers" || s.carrier === carrierFilter;
-    const matchesStatus = statusFilter === "All" || s.status === statusFilter;
-    return matchesSearch && matchesCarrier && matchesStatus;
+  const preFiltered = useMemo(() => {
+    return SHIPMENTS.filter((s) => {
+      const matchesCarrier = carrierFilter === "All Carriers" || s.carrier === carrierFilter;
+      const matchesStatus = statusFilter === "All" || s.status === statusFilter;
+      return matchesCarrier && matchesStatus;
+    });
+  }, [carrierFilter, statusFilter]);
+
+  const { query: search, setQuery: setSearch, results: filtered } = useFuzzySearch(preFiltered, {
+    keys: ["id", "customer", "trackingNo", "destination"],
+    isServerSide: false,
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -139,7 +145,7 @@ export default function ShippingPage() {
             type="text"
             placeholder="Search by shipment ID, customer, tracking #..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => { setSearch(e.target.value); }}
             className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
         </div>

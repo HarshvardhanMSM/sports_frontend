@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { SubCategoryService, subCategoryKeys } from "@/services/sub-category.service";
 import type { SubCategoryListParams } from "@/types/sub-category.types";
@@ -14,6 +14,7 @@ export function useSubCategories(params?: SubCategoryListParams, opts?: { enable
     staleTime: 0,
     refetchOnMount: "always",
     enabled: opts?.enabled ?? true,
+    placeholderData: keepPreviousData,
   });
 }
 

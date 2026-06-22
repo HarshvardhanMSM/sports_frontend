@@ -73,7 +73,7 @@ export default function BrandForm({
   };
 
   return (
-    <form onSubmit={handleSubmit((data) => onSubmit(data, logoFile, selectedCategoryIds))} className="space-y-6 max-w-2xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm font-sans">
+    <form onSubmit={handleSubmit((data) => onSubmit(data, logoFile, selectedCategoryIds))} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-slate-800">
           {initialData ? "Edit Brand" : "Create New Brand"}
@@ -83,7 +83,7 @@ export default function BrandForm({
         </p>
       </div>
 
-      <div className="grid gap-5">
+      <div className="grid gap-5 md:grid-cols-2">
         {/* Brand Name */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -109,7 +109,7 @@ export default function BrandForm({
             type="text"
             placeholder="e.g. nike"
             {...register("slug")}
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
           {errors.slug && (
             <p className="text-xs font-semibold text-rose-600 mt-1">{errors.slug.message}</p>
@@ -117,13 +117,15 @@ export default function BrandForm({
         </div>
 
         {/* Logo Upload */}
-        <BrandImageUpload
-          currentLogo={initialData?.logo}
-          onFileChange={setLogoFile}
-        />
+        <div className="md:col-span-2">
+          <BrandImageUpload
+            currentLogo={initialData?.logo}
+            onFileChange={setLogoFile}
+          />
+        </div>
 
         {/* Description */}
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Description
           </label>
@@ -139,7 +141,7 @@ export default function BrandForm({
         </div>
 
         {/* Linked Categories */}
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Linked Categories
           </label>
@@ -168,7 +170,7 @@ export default function BrandForm({
         </div>
 
         {/* Status Toggle */}
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Status
           </label>
@@ -197,7 +199,7 @@ export default function BrandForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
         <button
           type="button"
           onClick={onCancel}

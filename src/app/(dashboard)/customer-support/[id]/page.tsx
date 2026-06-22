@@ -375,9 +375,9 @@ export default function CustomerSupportDetailPage() {
               <div>
                 <p className="text-xs font-semibold text-slate-400">Customer</p>
                 <p className="text-slate-800 font-medium">
-                  {ticket.customerName}
+                  {ticket.customer ? `${ticket.customer.firstName} ${ticket.customer.lastName}` : ticket.customerName}
                 </p>
-                <p className="text-slate-500 text-xs">{ticket.customerEmail}</p>
+                <p className="text-slate-500 text-xs">{ticket.customer?.email ?? ticket.customerEmail}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400">

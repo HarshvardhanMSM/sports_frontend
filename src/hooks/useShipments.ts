@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { ShipmentService, shipmentKeys } from "@/services/shipment.service";
 import type { ShipmentListParams } from "@/types/shipment.types";
 
@@ -10,6 +10,7 @@ export function useShipments(params?: ShipmentListParams) {
     queryFn: () => ShipmentService.getShipments(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

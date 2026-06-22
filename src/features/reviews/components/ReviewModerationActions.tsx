@@ -32,7 +32,7 @@ export default function ReviewModerationActions({
         <h2 className="text-lg font-bold text-slate-800">Moderation Actions</h2>
       </div>
       <div className="p-6 space-y-3">
-        {status !== "APPROVED" && (
+        {/* {status !== "APPROVED" && (
           <button
             onClick={onApprove}
             disabled={isApproving}
@@ -81,7 +81,7 @@ export default function ReviewModerationActions({
             </div>
             {isHiding && <span className="ml-auto text-xs">Processing...</span>}
           </button>
-        )}
+        )} */}
 
         <div className="border-t border-slate-100 pt-3">
           <button

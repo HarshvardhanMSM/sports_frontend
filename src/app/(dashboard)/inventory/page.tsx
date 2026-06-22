@@ -1,29 +1,48 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiPlus, FiPackage, FiAlertTriangle, FiXCircle, FiDollarSign, FiAlertCircle } from "react-icons/fi";
-import { useInventoryItems, useDeleteInventory } from "@/hooks/useInventory";
-import type { InventoryListParams } from "@/types/inventory.types";
+import { useInventoryItems, useDeleteInventory, useAdjustInventory, useReserveInventory, useReleaseInventory } from "@/hooks/useInventory";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
+import type { InventoryItem, InventoryListParams } from "@/types/inventory.types";
 import InventoryTable from "@/features/inventory/components/InventoryTable";
 import InventoryFilters from "@/features/inventory/components/InventoryFilters";
+import AdjustStockModal from "@/features/inventory/components/AdjustStockModal";
+import ReserveStockModal from "@/features/inventory/components/ReserveStockModal";
+import ReleaseStockModal from "@/features/inventory/components/ReleaseStockModal";
 import Pagination from "@/components/ui/pagination/Pagination";
 
 export default function InventoryPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { query: searchTerm, setQuery: setSearchTerm, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
 
   const params: InventoryListParams = {
     page,
     limit: 10,
-    search: searchTerm || undefined,
+    search: debouncedSearch || undefined,
     status: statusFilter === "all" ? undefined : (statusFilter as "in_stock" | "low_stock" | "out_of_stock"),
   };
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   const { data, isLoading, error, isRefetching, refetch } = useInventoryItems(params);
-  const { mutate: deleteItem, isPending: isDeleting } = useDeleteInventory();
+  const { mutate: deleteItem } = useDeleteInventory();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [adjustingItem, setAdjustingItem] = useState<InventoryItem | null>(null);
+  const [reservingItem, setReservingItem] = useState<InventoryItem | null>(null);
+  const [releasingItem, setReleasingItem] = useState<InventoryItem | null>(null);
+
+  const { mutate: adjustStock, isPending: isAdjusting } = useAdjustInventory(adjustingItem?.id ?? "");
+  const { mutate: reserveStock, isPending: isReserving } = useReserveInventory(reservingItem?.id ?? "");
+  const { mutate: releaseStock, isPending: isReleasing } = useReleaseInventory(releasingItem?.id ?? "");
 
   const raw = data?.data;
   const isPaginated = !Array.isArray(raw) && raw != null;
@@ -80,7 +99,7 @@ export default function InventoryPage() {
 
       <InventoryFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
+        onSearchChange={(v) => { setSearchTerm(v); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         onRefresh={() => refetch()}
@@ -113,6 +132,9 @@ export default function InventoryPage() {
             items={pageItems}
             onDelete={(id) => { setDeletingId(id); deleteItem(id, { onSettled: () => setDeletingId(null) }); }}
             deletingId={deletingId}
+            onAdjust={(item) => setAdjustingItem(item)}
+            onReserve={(item) => setReservingItem(item)}
+            onRelease={(item) => setReleasingItem(item)}
           />
           <Pagination
             page={page}
@@ -145,6 +167,31 @@ export default function InventoryPage() {
             </Link>
           )}
         </div>
+      )}
+
+      {adjustingItem && (
+        <AdjustStockModal
+          item={adjustingItem}
+          onClose={() => setAdjustingItem(null)}
+          onSubmit={(qty) => adjustStock({ quantity: qty }, { onSuccess: () => setAdjustingItem(null) })}
+          isPending={isAdjusting}
+        />
+      )}
+      {reservingItem && (
+        <ReserveStockModal
+          item={reservingItem}
+          onClose={() => setReservingItem(null)}
+          onSubmit={(qty) => reserveStock({ quantity: qty }, { onSuccess: () => setReservingItem(null) })}
+          isPending={isReserving}
+        />
+      )}
+      {releasingItem && (
+        <ReleaseStockModal
+          item={releasingItem}
+          onClose={() => setReleasingItem(null)}
+          onSubmit={(qty) => releaseStock({ quantity: qty }, { onSuccess: () => setReleasingItem(null) })}
+          isPending={isReleasing}
+        />
       )}
     </div>
   );

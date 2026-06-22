@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { OrderService, orderKeys } from "@/services/order.service";
 import type { OrderListParams } from "@/types/order.types";
 
@@ -12,6 +12,7 @@ export function useOrders(params?: OrderListParams) {
     queryFn: () => OrderService.getOrders(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

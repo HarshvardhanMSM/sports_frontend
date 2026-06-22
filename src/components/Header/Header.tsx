@@ -156,7 +156,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
               </div>
               <div className="py-1">
                 <ProfileMenuItem Icon={FiUser} label="Profile" />
-                <ProfileMenuItem Icon={FiSettings} label="Settings" />
+                <ProfileMenuItem Icon={FiSettings} label="Settings" onClick={() => { router.push("/settings/general")}}/>
               </div>
               <div className="border-t border-slate-100 pt-1.5 mt-1">
                 <ProfileMenuItem

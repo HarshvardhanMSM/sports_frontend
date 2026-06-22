@@ -76,7 +76,7 @@ export default function CategoryForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 max-w-2xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm font-sans">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-slate-800">
           {initialData ? "Edit Category" : "Create New Category"}
@@ -86,11 +86,13 @@ export default function CategoryForm({
         </p>
       </div>
 
-      <div className="grid gap-5">
-        <CategoryImageUpload
-          currentImage={initialData?.image}
-          onFileSelect={setImageFile}
-        />
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="md:col-span-2">
+          <CategoryImageUpload
+            currentImage={initialData?.image}
+            onFileSelect={setImageFile}
+          />
+        </div>
 
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -122,7 +124,7 @@ export default function CategoryForm({
           )}
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Description
           </label>
@@ -138,7 +140,7 @@ export default function CategoryForm({
         </div>
 
         {/* Linked Brands */}
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Linked Brands
           </label>
@@ -167,7 +169,7 @@ export default function CategoryForm({
         </div>
 
         {initialData && (
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Status
             </label>
@@ -193,7 +195,7 @@ export default function CategoryForm({
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
         <button
           type="button"
           onClick={onCancel}

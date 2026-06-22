@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiShoppingCart,
   FiClock,
@@ -12,6 +12,7 @@ import {
   FiTruck,
 } from "react-icons/fi";
 import { useOrders, useUpdateOrderStatus, useCancelOrder } from "@/hooks/useOrders";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { OrderListParams, OrderListItem, OrderStatus } from "@/types/order.types";
 import OrdersTable from "@/features/orders/components/OrdersTable";
 import OrderFilters from "@/features/orders/components/OrderFilters";
@@ -20,7 +21,10 @@ import CancelOrderModal from "@/features/orders/components/CancelOrderModal";
 import Pagination from "@/components/ui/pagination/Pagination";
 
 export default function OrdersPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { query: searchTerm, setQuery: setSearchTerm, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
   const [statusTarget, setStatusTarget] = useState<OrderListItem | null>(null);
@@ -30,9 +34,13 @@ export default function OrdersPage() {
   const params: OrderListParams = {
     page,
     limit: 10,
-    search: searchTerm || undefined,
+    search: debouncedSearch || undefined,
     ...(statusFilter !== "All" ? { status: statusFilter as OrderStatus } : {}),
   };
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const { data, isLoading, error, isRefetching, refetch } = useOrders(params);
   const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateOrderStatus();
@@ -124,7 +132,7 @@ export default function OrdersPage() {
 
       <OrderFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
+        onSearchChange={(v) => { setSearchTerm(v); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         onRefresh={() => refetch()}

@@ -58,7 +58,7 @@ export default function ReviewRowActions({
             <FiEye className="size-3.5" />
             View
           </Link>
-          {status !== "APPROVED" && (
+          {/* {status !== "APPROVED" && (
             <button
               type="button"
               onClick={() => { onApprove(id); close(); }}
@@ -87,7 +87,7 @@ export default function ReviewRowActions({
               <FiEyeOff className="size-3.5" />
               Hide
             </button>
-          )}
+          )} */}
           <div className="border-t border-slate-100 my-1" />
           <button
             type="button"

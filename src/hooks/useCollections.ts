@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { CollectionService, collectionKeys } from "@/services/collection.service";
 import type { CollectionListParams } from "@/types/collection.types";
@@ -13,6 +13,7 @@ export function useCollections(params?: CollectionListParams) {
     queryFn: () => CollectionService.getCollections(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

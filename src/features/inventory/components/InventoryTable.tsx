@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiEye, FiEdit2, FiTrash2, FiMinusCircle, FiLock, FiUnlock, FiMoreVertical } from "react-icons/fi";
 import type { InventoryItem } from "@/types/inventory.types";
 import Badge from "@/components/ui/badge/Badge";
 
@@ -10,6 +10,9 @@ interface InventoryTableProps {
   items: InventoryItem[];
   onDelete?: (id: string) => void;
   deletingId?: string | null;
+  onAdjust?: (item: InventoryItem) => void;
+  onReserve?: (item: InventoryItem) => void;
+  onRelease?: (item: InventoryItem) => void;
 }
 
 function StockBar({ stock, threshold }: { stock: number; threshold: number }) {
@@ -32,9 +35,101 @@ function getStatus(item: InventoryItem): { label: string; color: "success" | "wa
   return { label: "In Stock", color: "success" };
 }
 
-export default function InventoryTable({ items, onDelete, deletingId }: InventoryTableProps) {
+function ActionDropdown({ item, onDelete, deletingId, onAdjust, onReserve, onRelease }: {
+  item: InventoryItem;
+  onDelete?: (id: string) => void;
+  deletingId?: string | null;
+  onAdjust?: (item: InventoryItem) => void;
+  onReserve?: (item: InventoryItem) => void;
+  onRelease?: (item: InventoryItem) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-w-full overflow-x-auto">
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+      >
+        <FiMoreVertical className="size-4" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-40 w-44 rounded-xl border border-slate-200 bg-white shadow-lg py-1">
+          <Link
+            href={`/inventory/${item.id}`}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <FiEye className="size-4 text-slate-400" />
+            View Details
+          </Link>
+          <Link
+            href={`/inventory/${item.id}/edit`}
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <FiEdit2 className="size-4 text-slate-400" />
+            Edit
+          </Link>
+          <div className="border-t border-slate-100 my-1" />
+          <button
+            onClick={() => { setOpen(false); onAdjust?.(item); }}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+          >
+            <FiMinusCircle className="size-4 text-slate-400" />
+            Adjust Stock
+          </button>
+          <button
+            onClick={() => { setOpen(false); onReserve?.(item); }}
+            disabled={item.availableQuantity <= 0}
+            className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition-colors text-left ${
+              item.availableQuantity <= 0
+                ? "text-slate-300 cursor-not-allowed"
+                : "text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <FiLock className="size-4 text-slate-400" />
+            Reserve Stock
+          </button>
+          <button
+            onClick={() => { setOpen(false); onRelease?.(item); }}
+            disabled={item.reservedQuantity <= 0}
+            className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition-colors text-left ${
+              item.reservedQuantity <= 0
+                ? "text-slate-300 cursor-not-allowed"
+                : "text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            <FiUnlock className="size-4 text-slate-400" />
+            Release Stock
+          </button>
+          <div className="border-t border-slate-100 my-1" />
+          <button
+            onClick={() => { setOpen(false); onDelete?.(item.id); }}
+            disabled={deletingId === item.id}
+            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors text-left disabled:opacity-40"
+          >
+            <FiTrash2 className="size-4" />
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function InventoryTable({ items, onDelete, deletingId, onAdjust, onReserve, onRelease }: InventoryTableProps) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm max-w-full overflow-x-auto">
       <table className="w-full border-collapse text-left text-sm text-slate-600">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -42,11 +137,11 @@ export default function InventoryTable({ items, onDelete, deletingId }: Inventor
             <th className="px-5 py-4">Stock Level</th>
             <th className="px-5 py-4">Reserved</th>
             <th className="px-5 py-4">Available</th>
-            <th className="px-5 py-4">Reorder</th>
+            {/* <th className="px-5 py-4">Reorder</th> */}
             <th className="px-5 py-4">Threshold</th>
             <th className="px-5 py-4">Status</th>
             <th className="px-5 py-4">Last Updated</th>
-            {/* <th className="px-5 py-4 text-right">Actions</th> */}
+            <th className="px-5 py-4 text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -84,9 +179,9 @@ export default function InventoryTable({ items, onDelete, deletingId }: Inventor
                   <td className="px-5 py-4">
                     <span className="text-sm font-bold text-slate-800">{item.availableQuantity}</span>
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-700">
+                  {/* <td className="px-5 py-4 text-sm text-slate-700">
                     {item.reorderPoint != null ? `${item.reorderPoint} / ${item.reorderQuantity ?? "-"}` : "-"}
-                  </td>
+                  </td> */}
                   <td className="px-5 py-4">
                     <span className="inline-flex items-center justify-center size-7 rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
                       {item.lowStockThreshold}
@@ -98,23 +193,16 @@ export default function InventoryTable({ items, onDelete, deletingId }: Inventor
                   <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">
                     {new Date(item.updatedAt).toLocaleDateString()}
                   </td>
-                  {/* <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Link
-                        href={`/inventory/${item.id}/edit`}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-indigo-600 transition-colors"
-                      >
-                        <FiEdit2 className="size-4" />
-                      </Link>
-                      <button
-                        onClick={() => onDelete?.(item.id)}
-                        disabled={deletingId === item.id}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-40"
-                      >
-                        <FiTrash2 className="size-4" />
-                      </button>
-                    </div>
-                  </td> */}
+                  <td className="px-5 py-4 text-right">
+                    <ActionDropdown
+                      item={item}
+                      onDelete={onDelete}
+                      deletingId={deletingId}
+                      onAdjust={onAdjust}
+                      onReserve={onReserve}
+                      onRelease={onRelease}
+                    />
+                  </td>
                 </tr>
               );
             })

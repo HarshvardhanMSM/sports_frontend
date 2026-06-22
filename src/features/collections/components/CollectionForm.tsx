@@ -56,13 +56,13 @@ export default function CollectionForm({
   }, [nameVal, setValue, initialData]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm font-sans">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-slate-800">{initialData ? "Edit Collection" : "Create New Collection"}</h2>
         <p className="text-xs text-slate-500 mt-1">{initialData ? "Modify your collection details below." : "Add a new product collection."}</p>
       </div>
 
-      <div className="grid gap-5">
+      <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Collection Name *</label>
           <input type="text" placeholder="e.g. Summer Collection" {...register("name")} className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
@@ -75,7 +75,7 @@ export default function CollectionForm({
           {errors.slug && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.slug.message}</p>}
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Banner Image URL</label>
           <input type="url" placeholder="https://cdn.sport.com/collections/summer-banner.jpg" {...register("bannerImage")} className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
           {watch("bannerImage") && (
@@ -85,12 +85,12 @@ export default function CollectionForm({
           )}
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Description</label>
           <textarea rows={3} placeholder="Hot styles for the summer season..." {...register("description")} className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Status</label>
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -105,7 +105,7 @@ export default function CollectionForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
         <button type="button" onClick={onCancel} className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
         <button type="submit" disabled={isPending} className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50">{isPending ? "Saving..." : initialData ? "Save Changes" : "Create Collection"}</button>
       </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { FiPlus, FiLayers, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useCategories, useDeleteCategory } from "@/hooks/useCategories";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import CategoryTable from "@/features/categories/components/CategoryTable";
 import CategoryFilters from "@/features/categories/components/CategoryFilters";
 import DeleteCategoryModal from "@/features/categories/components/DeleteCategoryModal";
@@ -11,7 +12,10 @@ import Pagination from "@/components/ui/pagination/Pagination";
 
 export default function CategoriesPage() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const { query: search, setQuery: setSearch, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [isActive, setIsActive] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -20,16 +24,19 @@ export default function CategoriesPage() {
   const { data, isPending, isError, error, refetch, isRefetching } = useCategories({
     page,
     limit,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     isActive: isActive !== "" ? isActive === "true" : undefined,
   });
 
   const { mutateAsync: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   const handleSearch = useCallback((v: string) => {
     setSearch(v);
-    setPage(1);
-  }, []);
+  }, [setSearch]);
 
   const handleIsActive = useCallback((v: string) => {
     setIsActive(v);

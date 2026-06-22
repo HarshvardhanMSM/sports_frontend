@@ -8,9 +8,15 @@ export interface SupportTicket {
   category: string;
   priority: SupportTicketPriority;
   status: SupportTicketStatus;
-  customerId: string;
-  customerName: string;
-  customerEmail: string;
+  customerId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customer?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   assignedAdminId?: string;
   assignedAdminName?: string;
   createdAt: string;

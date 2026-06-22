@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiPlus, FiGrid, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useCollections, useDeleteCollection } from "@/hooks/useCollections";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import CollectionTable from "@/features/collections/components/CollectionTable";
 import CollectionFilters from "@/features/collections/components/CollectionFilters";
 import DeleteCollectionModal from "@/features/collections/components/DeleteCollectionModal";
@@ -13,7 +14,10 @@ import Pagination from "@/components/ui/pagination/Pagination";
 export default function CollectionsPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const { query: search, setQuery: setSearch, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [isActive, setIsActive] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -22,13 +26,17 @@ export default function CollectionsPage() {
   const { data, isPending, isError, error, refetch, isRefetching } = useCollections({
     page,
     limit,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     isActive: isActive !== "" ? isActive === "true" : undefined,
   });
 
   const { mutateAsync: deleteCollection, isPending: isDeleting } = useDeleteCollection();
 
-  const handleSearch = useCallback((v: string) => { setSearch(v); setPage(1); }, []);
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
+  const handleSearch = useCallback((v: string) => { setSearch(v); }, [setSearch]);
   const handleIsActive = useCallback((v: string) => { setIsActive(v); setPage(1); }, []);
 
   const handleDelete = useCallback(async () => {

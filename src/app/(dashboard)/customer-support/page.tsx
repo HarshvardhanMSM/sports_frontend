@@ -202,8 +202,10 @@ export default function CustomerSupportPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="text-sm font-semibold text-slate-800">{t.customerName}</p>
-                      <p className="text-xs text-slate-400">{t.customerEmail}</p>
+                      <p className="text-sm font-semibold text-slate-800">
+                        {t.customer ? `${t.customer.firstName} ${t.customer.lastName}` : t.customerName}
+                      </p>
+                      <p className="text-xs text-slate-400">{t.customer?.email ?? t.customerEmail}</p>
                     </td>
                     <td className="px-4 py-4 text-sm text-slate-700">{t.assignedAdminName ?? "Unassigned"}</td>
                     <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { AttributeService, attributeKeys } from "@/services/attribute.service";
 import type { AttributeListParams } from "@/types/attribute.types";
@@ -13,6 +13,7 @@ export function useAttributes(params?: AttributeListParams) {
     queryFn: () => AttributeService.getAttributes(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiNavigation,
   FiClock,
@@ -8,6 +8,7 @@ import {
   FiSearch,
   FiTruck,
 } from "react-icons/fi";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 
 interface Shipment {
   id: string;
@@ -50,16 +51,9 @@ function statusBadge(status: string) {
 }
 
 export default function OrderTrackingPage() {
-  const [trackSearch, setTrackSearch] = useState("");
-
-  const filtered = SHIPMENTS.filter((s) => {
-    if (!trackSearch.trim()) return true;
-    const q = trackSearch.toLowerCase();
-    return (
-      s.orderId.toLowerCase().includes(q) ||
-      s.trackingNo.toLowerCase().includes(q) ||
-      s.customer.toLowerCase().includes(q)
-    );
+  const { query: trackSearch, setQuery: setTrackSearch, results: filtered } = useFuzzySearch(SHIPMENTS, {
+    keys: ["orderId", "trackingNo", "customer"],
+    isServerSide: false,
   });
 
   return (

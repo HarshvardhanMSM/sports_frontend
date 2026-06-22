@@ -77,8 +77,17 @@ export default function SubCategoryForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-slate-800">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <div className="sm:col-span-2">
+      <div className="border-b border-slate-100 pb-4">
+        <h2 className="text-xl font-bold text-slate-800">
+          {initialData ? "Edit Sub Category" : "Create New Sub Category"}
+        </h2>
+        <p className="text-xs text-slate-500 mt-1">
+          {initialData ? "Modify your sub category details below." : "Add a new sub category for product classification."}
+        </p>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Parent Category *</label>
           <select
             {...register("categoryId")}
@@ -136,17 +145,7 @@ export default function SubCategoryForm({
           {errors.sortOrder && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.sortOrder.message}</p>}
         </div>
 
-        <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Description</label>
-          <textarea
-            rows={3}
-            placeholder="High-performance running footwear"
-            {...register("description")}
-            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
-          />
-        </div>
-
-        <div className="sm:col-span-2">
+        <div className="flex items-center pt-6">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -155,6 +154,16 @@ export default function SubCategoryForm({
             />
             <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Active</span>
           </label>
+        </div>
+
+        <div className="md:col-span-2">
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Description</label>
+          <textarea
+            rows={3}
+            placeholder="High-performance running footwear"
+            {...register("description")}
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+          />
         </div>
       </div>
 
@@ -183,7 +192,7 @@ export default function SubCategoryForm({
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
         <button
           type="button"
           onClick={onCancel}

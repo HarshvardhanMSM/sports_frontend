@@ -103,14 +103,18 @@ export default function InventoryForm({
   }, [onSubmit, selectedVariant, initialVariant]);
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 max-w-2xl bg-white p-6 rounded-2xl border border-slate-200 shadow-sm font-sans">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
-        <h2 className="text-xl font-bold text-slate-800">Create Inventory Item</h2>
-        <p className="text-xs text-slate-500 mt-1">Search for a variant by SKU and set stock levels.</p>
+        <h2 className="text-xl font-bold text-slate-800">
+          {externalDefaults?.variantSku ? "Edit Inventory Item" : "Create Inventory Item"}
+        </h2>
+        <p className="text-xs text-slate-500 mt-1">
+          {externalDefaults?.variantSku ? "Modify inventory details below." : "Search for a variant by SKU and set stock levels."}
+        </p>
       </div>
 
-      <div className="grid gap-5">
-        <div ref={dropdownRef} className="relative">
+      <div className="grid gap-5 md:grid-cols-2">
+        <div ref={dropdownRef} className="relative md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Variant SKU <span className="text-red-500">*</span>
           </label>
@@ -219,7 +223,7 @@ export default function InventoryForm({
           )}
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Reorder Quantity
           </label>
@@ -236,7 +240,7 @@ export default function InventoryForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
         <button
           type="button"
           onClick={onCancel}
@@ -249,7 +253,7 @@ export default function InventoryForm({
           disabled={isPending}
           className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
         >
-          {isPending ? "Saving..." : "Create Inventory"}
+          {isPending ? "Saving..." : externalDefaults?.variantSku ? "Save Changes" : "Create Inventory"}
         </button>
       </div>
     </form>

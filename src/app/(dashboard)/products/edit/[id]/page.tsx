@@ -1,7 +1,9 @@
 "use client";
 
 import React, { use } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FiArrowLeft } from "react-icons/fi";
 import { useProduct, useUpdateProduct } from "@/hooks/useProducts";
 import ProductForm from "@/features/products/components/ProductForm";
 import type { UpdateProductRequest } from "@/types/product.types";
@@ -50,13 +52,18 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-          Edit Product
-        </h1>
-        <p className="text-sm text-slate-500">
-          Update product details and settings.
-        </p>
+      <div className="flex items-center gap-4">
+        <Link
+          href="/products"
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+        >
+          <FiArrowLeft className="size-4" />
+          Back
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Edit Product</h1>
+          <p className="text-sm text-slate-500">Update product details and settings.</p>
+        </div>
       </div>
 
       <ProductForm

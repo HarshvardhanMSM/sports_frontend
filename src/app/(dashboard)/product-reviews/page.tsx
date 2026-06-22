@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { FiAlertCircle, FiStar } from "react-icons/fi";
 import { useReviews, useDeleteReview, useApproveReview, useRejectReview, useHideReview, useReviewAnalytics } from "@/hooks/useReviews";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { ReviewListParams } from "@/types/review.types";
 import ReviewTable from "@/features/reviews/components/ReviewTable";
 import ReviewFilters from "@/features/reviews/components/ReviewFilters";
@@ -14,7 +15,10 @@ import type { Review } from "@/types/review.types";
 const PAGE_SIZE = 10;
 
 export default function ProductReviewsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { query: searchTerm, setQuery: setSearchTerm, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [statusFilter, setStatusFilter] = useState("All");
   const [ratingFilter, setRatingFilter] = useState<number | undefined>(undefined);
   const [page, setPage] = useState(1);
@@ -22,10 +26,14 @@ export default function ProductReviewsPage() {
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const params: ReviewListParams = {
-    search: searchTerm || undefined,
+    search: debouncedSearch || undefined,
     ...(statusFilter !== "All" ? { status: statusFilter as ReviewListParams["status"] } : {}),
     ...(ratingFilter !== undefined ? { rating: ratingFilter } : {}),
   };
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const { data, isLoading, error, isRefetching, refetch } = useReviews(params);
   const { data: analyticsData, isLoading: isAnalyticsLoading } = useReviewAnalytics();
@@ -138,7 +146,7 @@ export default function ProductReviewsPage() {
 
       <ReviewFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
+        onSearchChange={(v) => { setSearchTerm(v); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         ratingFilter={ratingFilter}

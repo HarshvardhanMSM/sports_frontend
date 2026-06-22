@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { ReviewService, reviewKeys } from "@/services/review.service";
 import type { ReviewListParams } from "@/types/review.types";
 
@@ -12,6 +12,7 @@ export function useReviews(params?: ReviewListParams) {
     queryFn: () => ReviewService.getReviews(params),
     staleTime: 0,
     refetchOnMount: "always",
+    placeholderData: keepPreviousData,
   });
 }
 

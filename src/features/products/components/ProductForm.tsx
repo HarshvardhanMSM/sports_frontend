@@ -108,7 +108,7 @@ export default function ProductForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8 max-w-4xl font-sans text-slate-800"
+      className="space-y-8 max-w-6xl font-sans text-slate-800"
     >
       {/* 1. General Information */}
       <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">

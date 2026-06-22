@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useRoles, useCreateRole, useDeleteRole } from "@/hooks/useRoles";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import { RoleService, roleKeys } from "@/services/role.service";
 import type {
   Permission,
@@ -113,20 +114,26 @@ export default function RolesPage() {
     [rolesRaw],
   );
   const permissionSlugs: PermissionSlug[] = permissionSlugsRaw ?? [];
-  const groupedModules = useMemo(
-    () => groupPermissionsByModule(permissionSlugs),
-    [permissionSlugs],
-  );
 
   // ── Local State ───────────────────────────────────────────────────
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [selectedSlugs, setSelectedSlugs] = useState<Set<string>>(new Set());
   const [originalSlugs, setOriginalSlugs] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [drawerRole, setDrawerRole] = useState<Role | null>(null);
   const [deletingRole, setDeletingRole] = useState<Role | null>(null);
+
+  // ── Fuzzy Searches ────────────────────────────────────────────────
+  const { query: roleSearchQuery, setQuery: setRoleSearchQuery, results: filteredRoles } = useFuzzySearch(roles, {
+    keys: ["name", "description"],
+    isServerSide: false,
+  });
+
+  const { query: permissionSearchQuery, setQuery: setPermissionSearchQuery, results: filteredPermissionSlugs } = useFuzzySearch(permissionSlugs, {
+    keys: ["name", "slug", "module"],
+    isServerSide: false,
+  });
 
   // ── Computed ──────────────────────────────────────────────────────
   const selectedRole = roles.find((r) => r.id === selectedRoleId) ?? null;
@@ -137,22 +144,10 @@ export default function RolesPage() {
   const totalSystemRoles = roles.filter((r) => r.isSystemRole).length;
   const totalCustomRoles = roles.filter((r) => !r.isSystemRole).length;
 
-  // Filtered modules (search)
-  const filteredModules = useMemo(() => {
-    if (!searchQuery.trim()) return groupedModules;
-    const q = searchQuery.toLowerCase();
-    return groupedModules
-      .map((mod) => ({
-        ...mod,
-        permissions: mod.permissions.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.slug.toLowerCase().includes(q) ||
-            mod.displayName.toLowerCase().includes(q),
-        ),
-      }))
-      .filter((mod) => mod.permissions.length > 0);
-  }, [groupedModules, searchQuery]);
+  const filteredModules = useMemo(
+    () => groupPermissionsByModule(filteredPermissionSlugs),
+    [filteredPermissionSlugs],
+  );
 
   // ── Handlers ──────────────────────────────────────────────────────
 
@@ -299,7 +294,7 @@ export default function RolesPage() {
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-bold text-slate-700">All Roles</h2>
                 <span className="text-xs font-medium text-slate-400">
-                  {roles.length} total
+                  {filteredRoles.length} / {roles.length} total
                 </span>
               </div>
               <div className="relative">
@@ -307,20 +302,20 @@ export default function RolesPage() {
                 <input
                   type="text"
                   placeholder="Search roles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={roleSearchQuery}
+                  onChange={(e) => setRoleSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 py-2 text-xs outline-none focus:border-indigo-400 focus:bg-white focus:ring-1 focus:ring-indigo-400 placeholder:text-slate-400 transition-colors"
                 />
               </div>
             </div>
             <div className="p-2 max-h-[580px] overflow-y-auto">
-              {roles.length === 0 ? (
+              {filteredRoles.length === 0 ? (
                 <p className="text-xs text-slate-400 text-center py-8">
-                  No roles defined yet
+                  No matching roles found
                 </p>
               ) : (
                 <RoleSidebar
-                  roles={roles}
+                  roles={filteredRoles}
                   selectedId={selectedRoleId}
                   onSelect={handleSelectRole}
                 />
@@ -400,8 +395,8 @@ export default function RolesPage() {
                   <input
                     type="text"
                     placeholder="Search permissions..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={permissionSearchQuery}
+                    onChange={(e) => setPermissionSearchQuery(e.target.value)}
                     className="w-56 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-xs outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 placeholder:text-slate-400 transition-colors"
                   />
                 </div>
@@ -430,7 +425,7 @@ export default function RolesPage() {
                 {filteredModules.length === 0 && (
                   <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-12">
                     <p className="text-sm text-slate-400">
-                      {searchQuery
+                      {permissionSearchQuery
                         ? "No permissions match your search"
                         : "No permissions available"}
                     </p>

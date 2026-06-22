@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { FiTruck, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { useShipments, useUpdateShipmentStatus } from "@/hooks/useShipments";
-import type { ShipmentListItem } from "@/types/shipment.types";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
+import type { ShipmentListItem, ShipmentListParams, ShipmentStatus } from "@/types/shipment.types";
 import ShipmentStatsCards from "@/features/shipments/components/ShipmentStatsCards";
 import ShipmentFilters from "@/features/shipments/components/ShipmentFilters";
 import ShipmentsTable from "@/features/shipments/components/ShipmentsTable";
@@ -11,38 +12,39 @@ import UpdateShipmentStatusModal from "@/features/shipments/components/UpdateShi
 import Pagination from "@/components/ui/pagination/Pagination";
 
 export default function ShipmentsPage() {
-  const [search, setSearch] = useState("");
+  const { query: search, setQuery: setSearch, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [updateTarget, setUpdateTarget] = useState<ShipmentListItem | null>(null);
 
-  const { data, isLoading, error, isRefetching, refetch } = useShipments();
+  const params: ShipmentListParams = {
+    page,
+    limit: 10,
+    search: debouncedSearch || undefined,
+    status: statusFilter === "All" ? undefined : (statusFilter as ShipmentStatus),
+  };
+
+  const { data, isLoading, error, isRefetching, refetch } = useShipments(params);
   const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateShipmentStatus();
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   const listData = data?.data;
-  const allShipments = listData?.items ?? [];
+  const items = listData?.items ?? [];
   const metrics = listData?.metrics;
   const meta = listData?.meta;
 
   const PAGE_SIZE = meta?.limit ?? 10;
-
-  const filtered = useMemo(() => {
-    return allShipments.filter((s) => {
-      const q = search.toLowerCase();
-      const matchesSearch = !search
-        || s.trackingId.toLowerCase().includes(q)
-        || s.orderId.toLowerCase().includes(q)
-        || s.customer.toLowerCase().includes(q);
-      const matchesFilter = statusFilter === "All" || s.status === statusFilter;
-      return matchesSearch && matchesFilter;
-    });
-  }, [allShipments, search, statusFilter]);
-
-  const total = meta?.total ?? filtered.length;
-  const totalPages = meta ? Math.max(1, Math.ceil(total / PAGE_SIZE)) : Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginated = meta ? allShipments : filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const total = meta?.total ?? 0;
+  const totalPages = meta?.totalPages ?? 1;
+  const safePage = page;
+  const paginated = items;
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -109,7 +111,7 @@ export default function ShipmentsPage() {
 
           <ShipmentFilters
             search={search}
-            onSearchChange={(v) => { setSearch(v); setPage(1); }}
+            onSearchChange={(v) => { setSearch(v); }}
             statusFilter={statusFilter}
             onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
             onRefresh={() => refetch()}

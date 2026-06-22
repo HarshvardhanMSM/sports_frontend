@@ -66,18 +66,20 @@ export default function OrderDetailPage() {
       )}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Link
-              href="/orders"
-              className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
-            >
-              <FiArrowLeft className="size-3.5" />
-              Back to Orders
-            </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/orders"
+            className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+          >
+            <FiArrowLeft className="size-4" />
+            Back
+          </Link>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Order Details</h1>
+            <p className="text-sm text-slate-500">
+              {isLoading ? "Loading..." : order ? order.orderNumber : "Not found"}
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Order Details</h1>
-          <p className="text-sm text-slate-500 mt-0.5">View order information, items, pricing, and manage status.</p>
         </div>
         {order && (
           <div className="flex gap-2">

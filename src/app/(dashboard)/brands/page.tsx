@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiPlus, FiBriefcase, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useBrands, useDeleteBrand } from "@/hooks/useBrands";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { BrandListParams } from "@/types/brand.types";
 import BrandTable from "@/features/brands/components/BrandTable";
 import BrandFilters from "@/features/brands/components/BrandFilters";
@@ -12,7 +13,10 @@ import Pagination from "@/components/ui/pagination/Pagination";
 import type { Brand } from "@/types/brand.types";
 
 export default function BrandsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { query: searchTerm, setQuery: setSearchTerm, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+  });
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<Brand | null>(null);
@@ -20,13 +24,17 @@ export default function BrandsPage() {
   const params: BrandListParams = {
     page,
     limit: 10,
-    search: searchTerm || undefined,
+    search: debouncedSearch || undefined,
     ...(statusFilter === "active" ? { isActive: true } : {}),
     ...(statusFilter === "inactive" ? { isActive: false } : {}),
   };
 
   const { data, isLoading, error, isRefetching, refetch } = useBrands(params);
   const { mutateAsync: deleteBrand, isPending: isDeleting } = useDeleteBrand();
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const items = data?.data?.items ?? [];
   const total = data?.data?.meta?.total ?? 0;
@@ -91,7 +99,7 @@ export default function BrandsPage() {
 
       <BrandFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
+        onSearchChange={(v) => { setSearchTerm(v); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         onRefresh={() => refetch()}

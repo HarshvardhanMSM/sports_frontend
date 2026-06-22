@@ -67,10 +67,10 @@ export default function ReviewTable({
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="font-semibold text-slate-800">{review.userName}</span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800 max-w-[180px]">
-                {review.productName}
+              <td className="px-6 py-4 text-sm font-medium text-slate-800 max-w-[160px] truncate overflow-hidden">
+                <span className="block truncate" title={review.productName}>{review.productName}</span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-6 py-4 whitespace-nowrap w-[110px] min-w-[110px]">
                 <StarRating rating={review.rating} />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 max-w-[160px]">

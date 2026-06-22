@@ -57,7 +57,16 @@ export default function AttributeForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-slate-800">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="border-b border-slate-100 pb-4">
+        <h2 className="text-xl font-bold text-slate-800">
+          {initialData ? "Edit Attribute" : "Create New Attribute"}
+        </h2>
+        <p className="text-xs text-slate-500 mt-1">
+          {initialData ? "Modify your attribute details below." : "Add a new product attribute."}
+        </p>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Attribute Name *</label>
           <input
@@ -92,7 +101,7 @@ export default function AttributeForm({
           {errors.sortOrder && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.sortOrder.message}</p>}
         </div>
 
-        <div className="sm:col-span-2 flex items-center gap-6">
+        <div className="flex items-center gap-6 pt-6">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -113,7 +122,7 @@ export default function AttributeForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
         <button
           type="button"
           onClick={onCancel}

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, Suspense, useCallback } from "react";
+import React, { useState, Suspense, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiPlus, FiAlertCircle } from "react-icons/fi";
 import { useProducts, useDeleteProduct } from "@/hooks/useProducts";
+import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import ProductFilters from "@/features/products/components/ProductFilters";
 import ProductTable from "@/features/products/components/ProductTable";
 import Pagination from "@/components/ui/pagination/Pagination";
@@ -22,21 +23,21 @@ function ProductsContent() {
   const status = searchParams.get("status") ?? "All";
   const isFeatured = searchParams.get("isFeatured") ?? "All";
 
-  const [search, setSearch] = useState(searchFromUrl);
+  const { query, setQuery, debouncedQuery } = useFuzzySearch(null, {
+    keys: [],
+    isServerSide: true,
+    initialQuery: searchFromUrl,
+  });
 
   const params = {
     page: pageFromUrl,
     limit: limitFromUrl,
-    ...(search ? { search } : {}),
+    ...(debouncedQuery ? { search: debouncedQuery } : {}),
     ...(brandId !== "All" ? { brandId } : {}),
     ...(categoryId !== "All" ? { categoryId } : {}),
     ...(status !== "All" ? { status: status.toUpperCase() } : {}),
     ...(isFeatured !== "All" ? { isFeatured: isFeatured === "true" } : {}),
   };
-
-  const { data, isLoading, isError } = useProducts(params);
-  const deleteMutation = useDeleteProduct();
-
   const updateUrl = useCallback(
     (updates: Record<string, string>) => {
       const next = new URLSearchParams(searchParams);
@@ -49,6 +50,15 @@ function ProductsContent() {
     [router, searchParams],
   );
 
+  useEffect(() => {
+    if (debouncedQuery !== searchFromUrl) {
+      updateUrl({ search: debouncedQuery, page: "1" });
+    }
+  }, [debouncedQuery, searchFromUrl, updateUrl]);
+
+  const { data, isLoading, isError } = useProducts(params);
+  const deleteMutation = useDeleteProduct();
+
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       deleteMutation.mutate(id);
@@ -56,7 +66,7 @@ function ProductsContent() {
   };
 
   const handleReset = () => {
-    setSearch("");
+    setQuery("");
     router.push("/products");
   };
 
@@ -84,8 +94,8 @@ function ProductsContent() {
       </div>
 
       <ProductFilters
-        search={search}
-        onSearchChange={(v) => { setSearch(v); updateUrl({ search: v, page: "1" }); }}
+        search={query}
+        onSearchChange={(v) => { setQuery(v); }}
         brandId={brandId}
         onBrandChange={(v) => updateUrl({ brandId: v, page: "1" })}
         categoryId={categoryId}
