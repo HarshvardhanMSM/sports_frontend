@@ -1,12 +1,13 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
 import { useProduct, useUpdateProduct } from "@/hooks/useProducts";
 import ProductForm from "@/features/products/components/ProductForm";
 import type { UpdateProductRequest } from "@/types/product.types";
+import { ProductService } from "@/services/product.service";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
@@ -16,10 +17,73 @@ export default function EditProductPage({ params }: EditProductPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { data, isLoading, isError } = useProduct(id);
-  const updateMutation = useUpdateProduct(id, () => router.push("/products"));
+  const updateMutation = useUpdateProduct(id);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = (data: Record<string, unknown>) => {
-    updateMutation.mutate(data as unknown as UpdateProductRequest);
+  const handleSubmit = async (
+    data: Record<string, unknown>,
+    newImages: File[],
+    deletedImageIds: string[],
+    primaryImageIndex: number,
+    primaryImageId: string | null
+  ) => {
+    setIsSaving(true);
+    const fd = new FormData();
+    fd.append("brandId", data.brandId as string);
+    fd.append("categoryId", data.categoryId as string);
+    fd.append("subCategoryId", (data.subCategoryId as string) || "");
+    fd.append("name", data.name as string);
+    fd.append("slug", data.slug as string);
+    fd.append("skuPrefix", (data.skuPrefix as string) || "");
+    fd.append("shortDescription", (data.shortDescription as string) || "");
+    fd.append("description", (data.description as string) || "");
+    fd.append("status", data.status as string);
+    fd.append("metaTitle", (data.metaTitle as string) || "");
+    fd.append("metaDescription", (data.metaDescription as string) || "");
+    fd.append("metaKeywords", (data.metaKeywords as string) || "");
+    // Omit boolean fields isFeatured and isActive from FormData because NestJS validator expects true booleans.
+    // We will update them via JSON Patch in the next step.
+
+    // Append multiple files under the key "images"
+    if (newImages.length > 0) {
+      newImages.forEach((file) => {
+        fd.append("images", file);
+      });
+      fd.append("primaryImageIndex", String(primaryImageIndex));
+    }
+
+    // Append deleted image IDs if any
+    if (deletedImageIds.length > 0) {
+      fd.append("deletedImageIds", JSON.stringify(deletedImageIds));
+    }
+
+    // Append primary image ID if an existing one was set as primary
+    if (primaryImageId) {
+      fd.append("primaryImageId", primaryImageId);
+    }
+
+    if (Array.isArray(data.collectionIds)) {
+      fd.append("collectionIds", JSON.stringify(data.collectionIds));
+    }
+    if (Array.isArray(data.tagIds)) {
+      fd.append("tagIds", JSON.stringify(data.tagIds));
+    }
+
+    try {
+      await updateMutation.mutateAsync(fd as unknown as UpdateProductRequest);
+
+      // Update boolean fields via JSON patch request
+      await ProductService.updateProduct(id, {
+        isFeatured: data.isFeatured as boolean,
+        isActive: data.isActive as boolean,
+      });
+
+      router.push("/products");
+    } catch (err) {
+      console.error("Failed to update product", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => router.push("/products");
@@ -70,6 +134,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         initialData={data.data}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
+        isPending={isSaving}
       />
     </div>
   );

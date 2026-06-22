@@ -3,6 +3,7 @@
 import React from "react";
 import { FiMail, FiCalendar, FiShield } from "react-icons/fi";
 import type { User } from "@/types/user.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface Props {
   user: User;
@@ -19,7 +20,7 @@ export default function UserDetailsCard({ user }: Props) {
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
           {user.avatar ? (
-            <img src={user.avatar} alt="" className="size-16 rounded-full object-cover border-2 border-slate-200" />
+            <img src={resolveImageUrl(user.avatar)} alt="" className="size-16 rounded-full object-cover border-2 border-slate-200" />
           ) : (
             <div className="size-16 rounded-full bg-indigo-100 flex items-center justify-center text-lg font-bold text-indigo-700 shrink-0">
               {initials}

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { FiEye } from "react-icons/fi";
 import type { ReturnListItem, ReturnStatus } from "@/types/return.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface Props {
   returns: ReturnListItem[];
@@ -76,7 +77,7 @@ export default function ReturnsTable({
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2.5">
                       {productImage ? (
-                        <img src={productImage} alt="" className="size-8 rounded-lg object-cover border border-slate-200" />
+                        <img src={resolveImageUrl(productImage)} alt="" className="size-8 rounded-lg object-cover border border-slate-200" />
                       ) : (
                         <div className="size-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-400">
                           {productName.charAt(0)}

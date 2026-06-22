@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { ToastProvider } from "@/components/common/Toast/ToastProvider";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -20,9 +22,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-800">
-        <QueryProvider>{children}</QueryProvider>
+      <body className="h-full overflow-hidden flex flex-col font-sans bg-slate-50 text-slate-800">
+        <ErrorBoundary>
+          <ToastProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </ToastProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
 }
+

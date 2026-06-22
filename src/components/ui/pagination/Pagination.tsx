@@ -14,13 +14,10 @@ interface PaginationProps {
   total: number;
   limit: number;
   onPageChange: (page: number) => void;
-  onLimitChange?: (limit: number) => void;
   isLoading?: boolean;
-  showLimitSelector?: boolean;
   showPageJump?: boolean;
 }
 
-const LIMIT_OPTIONS = [10, 20, 50, 100] as const;
 const SIBLING_COUNT = 1; // pages shown on each side of current
 
 /** Generate a compact page-number array with ellipsis markers. */
@@ -48,9 +45,7 @@ export default function Pagination({
   total,
   limit,
   onPageChange,
-  onLimitChange,
   isLoading,
-  showLimitSelector = false,
   showPageJump = false,
 }: PaginationProps) {
   const [jumpValue, setJumpValue] = useState("");
@@ -116,7 +111,7 @@ export default function Pagination({
         {btn("Previous page", () => go(page - 1), page === 1, <FiChevronLeft className="size-3.5" />)}
 
         {/* Page numbers */}
-        {hasMultiple &&
+        {totalPages >= 1 &&
           pages.map((p, i) =>
             p === "ellipsis" ? (
               <span key={`e${i}`} className="px-1 text-xs text-slate-400 select-none">
@@ -146,25 +141,6 @@ export default function Pagination({
 
         {/* Last */}
         {hasMultiple && btn("Last page", () => go(totalPages), page === totalPages, <FiChevronsRight className="size-3.5" />)}
-
-        {/* Per-page selector */}
-        {showLimitSelector && onLimitChange && (
-          <select
-            value={limit}
-            onChange={(e) => {
-              onLimitChange(Number(e.target.value));
-              onPageChange(1);
-            }}
-            className="ml-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-            aria-label="Items per page"
-          >
-            {LIMIT_OPTIONS.map((n) => (
-              <option key={n} value={n}>
-                {n}/page
-              </option>
-            ))}
-          </select>
-        )}
 
         {/* Page jump */}
         {showPageJump && hasMultiple && (

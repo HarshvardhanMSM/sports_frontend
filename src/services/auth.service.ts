@@ -38,7 +38,7 @@ export const AuthService = {
   },
 
   getProfile(): Promise<User> {
-    return api.get<User>("/auth/me");
+    return api.get<User>("/admin/profile");
   },
 
   forgotPassword(body: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {

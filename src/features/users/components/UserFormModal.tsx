@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { FiUserPlus, FiEdit2 } from "react-icons/fi";
+import React, { useState, useEffect, useRef } from "react";
+import { FiUserPlus, FiEdit2, FiUpload } from "react-icons/fi";
 import type { User, CreateUserRequest, UpdateUserRequest } from "@/types/user.types";
+import { UserService } from "@/services/user.service";
+import { resolveImageUrl } from "@/lib/image";
 
 interface Props {
   mode: "create" | "edit";
@@ -20,6 +22,39 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
   const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [isActive, setIsActive] = useState(true);
   const [avatar, setAvatar] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const showToast = (type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (avatar && avatar.startsWith("blob:")) {
+        URL.revokeObjectURL(avatar);
+      }
+    };
+  }, [avatar]);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("error", "Avatar size cannot exceed 2MB.");
+      return;
+    }
+
+    setAvatarFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    if (avatar && avatar.startsWith("blob:")) {
+      URL.revokeObjectURL(avatar);
+    }
+    setAvatar(previewUrl);
+  };
 
   useEffect(() => {
     if (mode === "edit" && user) {
@@ -35,7 +70,13 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
     if (mode === "create") {
       onConfirm({ name, email, password, roleIds: selectedRoleIds } as CreateUserRequest);
     } else {
-      onConfirm({ name, email, isActive, avatar: avatar || undefined } as UpdateUserRequest);
+      onConfirm({
+        name,
+        email,
+        isActive,
+        avatar: avatar && !avatar.startsWith("blob:") ? avatar : undefined,
+        avatarFile: avatarFile || undefined,
+      } as UpdateUserRequest);
     }
   };
 
@@ -43,6 +84,15 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {toast && (
+        <div
+          className={`fixed top-6 right-6 z-[60] rounded-xl px-5 py-3 shadow-xl text-sm font-semibold text-white transition-all animate-slideIn ${
+            toast.type === "success" ? "bg-emerald-600" : "bg-rose-600"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
       <div className="fixed inset-0 bg-black/40" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center gap-3 mb-6">
@@ -84,13 +134,38 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
           )}
           {mode === "edit" && (
             <>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Avatar URL</label>
-                <input
-                  type="text" value={avatar} onChange={(e) => setAvatar(e.target.value)}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                />
+              <div className="flex items-center gap-4">
+                <div className="shrink-0">
+                  {avatar ? (
+                    <img
+                      src={resolveImageUrl(avatar)}
+                      alt={name}
+                      className="size-16 rounded-xl object-cover border border-slate-200 shadow-sm"
+                    />
+                  ) : (
+                    <div className="size-16 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white shadow-sm">
+                      {name ? name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : "?"}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Avatar</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFileChange}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                  >
+                    <FiUpload className="size-4 text-slate-500" />
+                    Upload Image
+                  </button>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Status</label>
@@ -105,7 +180,7 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
               </div>
             </>
           )}
-          <div>
+          {/* <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Roles</label>
             <div className="max-h-40 overflow-y-auto space-y-1.5 border border-slate-200 rounded-xl p-3">
               {roles.length === 0 && <p className="text-xs text-slate-400">No roles available.</p>}
@@ -125,7 +200,7 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
                 </label>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex items-center justify-end gap-3 mt-6">

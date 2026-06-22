@@ -4,7 +4,7 @@ import React, { useState, Suspense, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiPlus, FiAlertCircle } from "react-icons/fi";
-import { useProducts, useDeleteProduct } from "@/hooks/useProducts";
+import { useProducts, useDeleteProduct, useBulkDeleteProducts } from "@/hooks/useProducts";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import ProductFilters from "@/features/products/components/ProductFilters";
 import ProductTable from "@/features/products/components/ProductTable";
@@ -58,11 +58,16 @@ function ProductsContent() {
 
   const { data, isLoading, isError } = useProducts(params);
   const deleteMutation = useDeleteProduct();
+  const bulkDeleteMutation = useBulkDeleteProducts();
 
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this product?")) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleBulkDelete = (ids: string[]) => {
+    bulkDeleteMutation.mutate(ids);
   };
 
   const handleReset = () => {
@@ -120,16 +125,14 @@ function ProductsContent() {
         </div>
       ) : products.length > 0 ? (
         <div className="space-y-4">
-          <ProductTable products={products} onDelete={handleDelete} />
+          <ProductTable products={products} onDelete={handleDelete} onBulkDelete={handleBulkDelete} isBulkDeleting={bulkDeleteMutation.isPending} />
           {meta && (
             <Pagination
               page={meta.page}
               totalPages={meta.totalPages}
               total={meta.total}
               limit={meta.limit}
-              showLimitSelector
               onPageChange={(p) => updateUrl({ page: String(p) })}
-              onLimitChange={(l) => updateUrl({ limit: String(l), page: "1" })}
             />
           )}
         </div>

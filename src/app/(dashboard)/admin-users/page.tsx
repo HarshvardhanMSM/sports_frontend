@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { FiUserPlus, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useAssignRoles, useRemoveRoles } from "@/hooks/useUsers";
 import { useRoles } from "@/hooks/useRoles";
+import { useToast } from "@/components/common/Toast/useToast";
 import type { User, CreateUserRequest, UpdateUserRequest } from "@/types/user.types";
 import { SUPER_ADMIN_ROLE } from "@/types/role.types";
 import UserStatsCards from "@/features/users/components/UserStatsCards";
@@ -16,11 +17,11 @@ import DeleteUserDialog from "@/features/users/components/DeleteUserDialog";
 export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [editTarget, setEditTarget] = useState<User | null>(null);
   const [assignTarget, setAssignTarget] = useState<User | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const toast = useToast();
 
   const { data, isLoading, error, isRefetching, refetch } = useUsers();
   const { data: rolesData } = useRoles();
@@ -53,20 +54,10 @@ export default function AdminUsersPage() {
     inactive: allUsers.filter((u) => !u.isActive).length,
   }), [allUsers]);
 
-  const showToast = (type: "success" | "error", message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
+
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div className={`fixed top-6 right-6 z-[60] rounded-xl px-5 py-3 shadow-xl text-sm font-semibold text-white ${
-          toast.type === "success" ? "bg-emerald-600" : "bg-rose-600"
-        }`}>
-          {toast.message}
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -138,7 +129,6 @@ export default function AdminUsersPage() {
         </>
       )}
 
-      {/* Create Modal */}
       {showCreate && (
         <UserFormModal
           mode="create"
@@ -147,9 +137,8 @@ export default function AdminUsersPage() {
           onConfirm={async (d) => {
             try {
               await createUser(d as CreateUserRequest);
-              showToast("success", "User created successfully.");
               setShowCreate(false);
-            } catch { showToast("error", "Failed to create user."); }
+            } catch { /* onError in useCreateUser handles toast */ }
           }}
           isPending={isCreating}
         />
@@ -165,9 +154,8 @@ export default function AdminUsersPage() {
           onConfirm={async (d) => {
             try {
               await updateUser({ id: editTarget.id, ...d as UpdateUserRequest });
-              showToast("success", "User updated successfully.");
               setEditTarget(null);
-            } catch { showToast("error", "Failed to update user."); }
+            } catch { /* onError in useUpdateUser handles toast */ }
           }}
           isPending={isUpdating}
         />
@@ -182,16 +170,14 @@ export default function AdminUsersPage() {
           onAssign={async (roleIds) => {
             try {
               await assignRoles({ id: assignTarget.id, roleIds });
-              showToast("success", "Roles assigned.");
               setAssignTarget(null);
-            } catch { showToast("error", "Failed to assign roles."); }
+            } catch { /* onError in useAssignRoles handles toast */ }
           }}
           onRemove={async (roleIds) => {
             try {
               await removeRoles({ id: assignTarget.id, roleIds });
-              showToast("success", "Roles removed.");
               setAssignTarget(null);
-            } catch { showToast("error", "Failed to remove roles."); }
+            } catch { /* onError in useRemoveRoles handles toast */ }
           }}
           isPending={isAssigning || isRemoving}
         />
@@ -205,9 +191,8 @@ export default function AdminUsersPage() {
           onConfirm={async () => {
             try {
               await deleteUser(deleteTarget.id);
-              showToast("success", "User deleted.");
               setDeleteTarget(null);
-            } catch { showToast("error", "Failed to delete user."); }
+            } catch { /* onError in useDeleteUser handles toast */ }
           }}
           isPending={isDeleting}
         />

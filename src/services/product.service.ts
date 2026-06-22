@@ -45,6 +45,11 @@ export const ProductService = {
     return api.delete<void>(`/admin/products/${id}`);
   },
 
+  /** DELETE /admin/products/bulk */
+  bulkDeleteProducts(ids: string[]) {
+    return api.delete<void>("/admin/products/bulk", { data: { ids } });
+  },
+
   /** PATCH /admin/products/:id/publish */
   publishProduct(id: string) {
     return api.patch<ProductSingleResponse>(`/admin/products/${id}/publish`);
@@ -63,8 +68,11 @@ export const ProductService = {
   },
 
   /** POST /admin/products/:id/images */
-  createProductImage(productId: string, data: CreateProductImageRequest) {
-    return api.post<ProductImage>(`/admin/products/${productId}/images`, data);
+  createProductImage(productId: string, data: CreateProductImageRequest | FormData) {
+    const isFormData = data instanceof FormData;
+    return api.post<ProductImage>(`/admin/products/${productId}/images`, data, {
+      headers: isFormData ? { "Content-Type": "multipart/form-data" } : undefined,
+    });
   },
 
   /** PATCH /admin/products/images/:imageId */

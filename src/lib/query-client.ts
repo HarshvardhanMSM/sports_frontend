@@ -3,12 +3,20 @@
  * TANSTACK QUERY — QueryClient singleton
  *
  * Created once and shared through QueryProvider.
+ * - queryCache.onError logs query errors in development only.
+ *   (Toasts are handled by the Axios interceptor — no double-toast.)
  * ─────────────────────────────────────────────────────────────────
  */
 
-import { QueryClient } from "@tanstack/react-query";
+import { QueryCache, QueryClient } from "@tanstack/react-query";
+import { logError } from "@/lib/errors/error-handler";
 
 export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      logError(`QueryCache [${String(query.queryKey)}]`, error);
+    },
+  }),
   defaultOptions: {
     queries: {
       // Data is considered fresh for 2 minutes — no re-fetch on window focus
@@ -26,3 +34,4 @@ export const queryClient = new QueryClient({
     },
   },
 });
+

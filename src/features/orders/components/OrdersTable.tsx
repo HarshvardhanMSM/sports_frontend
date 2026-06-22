@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { FiEye, FiRefreshCw, FiXCircle, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import type { OrderListItem } from "@/types/order.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface OrdersTableProps {
   orders: OrderListItem[];
@@ -123,7 +124,7 @@ function ImageLightbox({ items, startIndex, orderNumber, onClose }: LightboxProp
         <div className="relative w-full aspect-square max-h-[60vh] rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center shadow-2xl">
           {item.imageUrl ? (
             <img
-              src={item.imageUrl}
+              src={resolveImageUrl(item.imageUrl)}
               alt={item.productName}
               className="w-full h-full object-contain"
             />
@@ -167,7 +168,7 @@ function ImageLightbox({ items, startIndex, orderNumber, onClose }: LightboxProp
                 }`}
               >
                 {it.imageUrl ? (
-                  <img src={it.imageUrl} alt={it.productName} className="w-full h-full object-cover" />
+                  <img src={resolveImageUrl(it.imageUrl)} alt={it.productName} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white">
                     {it.productName.charAt(0)}
@@ -248,7 +249,7 @@ export default function OrdersTable({ orders, onStatusUpdate, onCancel }: Orders
                                 className="size-14 rounded-lg border-2 border-white overflow-hidden hover:scale-125 hover:z-10 hover:border-indigo-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-400"
                               >
                                 <img
-                                  src={item.imageUrl}
+                                  src={resolveImageUrl(item.imageUrl)}
                                   alt={item.productName}
                                   className="w-full h-full object-cover"
                                 />

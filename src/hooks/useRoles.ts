@@ -8,6 +8,8 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RoleService, roleKeys } from "@/services/role.service";
+import { useToast } from "@/components/common/Toast/useToast";
+import { normalizeApiError } from "@/lib/errors/error-handler";
 import type {
   CreateRoleRequest,
   UpdateRoleRequest,
@@ -42,30 +44,50 @@ export function useRole(id: string | undefined) {
 
 export function useCreateRole() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (data: CreateRoleRequest) => RoleService.createRole(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: roleKeys.list() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: roleKeys.list() });
+      toast.success("Role created successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
+    },
   });
 }
 
 export function useUpdateRole(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (data: UpdateRoleRequest) => RoleService.updateRole(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: roleKeys.list() });
       qc.invalidateQueries({ queryKey: roleKeys.detail(id) });
+      toast.success("Role updated successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useDeleteRole() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => RoleService.deleteRole(id),
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: roleKeys.list() });
       qc.removeQueries({ queryKey: roleKeys.detail(id) });
+      toast.success("Role deleted successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -91,37 +113,65 @@ export function useAdminUser(id: string | undefined) {
 
 export function useCreateAdminUser() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (data: CreateAdminUserRequest) => RoleService.createAdminUser(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: roleKeys.adminsList() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: roleKeys.adminsList() });
+      toast.success("Admin user created successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
+    },
   });
 }
 
 export function useUpdateAdminUser(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (data: UpdateAdminUserRequest) => RoleService.updateAdminUser(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: roleKeys.adminsList() });
       qc.invalidateQueries({ queryKey: roleKeys.admin(id) });
+      toast.success("Admin user updated successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useDeleteAdminUser() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => RoleService.deleteAdminUser(id),
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: roleKeys.adminsList() });
       qc.removeQueries({ queryKey: roleKeys.admin(id) });
+      toast.success("Admin user deleted successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useResetAdminPassword(id: string) {
+  const toast = useToast();
   return useMutation({
     mutationFn: (newPassword: string) => RoleService.resetAdminPassword(id, newPassword),
+    onSuccess: () => {
+      toast.success("Admin password reset successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
+    },
   });
 }
 
@@ -129,22 +179,34 @@ export function useResetAdminPassword(id: string) {
 
 export function useAssignRolePermissions(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (permissionSlugs: string[]) => RoleService.assignRolePermissions(id, permissionSlugs),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: roleKeys.list() });
       qc.invalidateQueries({ queryKey: roleKeys.detail(id) });
+      toast.success("Permissions assigned successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useRemoveRolePermissions(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (permissionSlugs: string[]) => RoleService.removeRolePermissions(id, permissionSlugs),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: roleKeys.list() });
       qc.invalidateQueries({ queryKey: roleKeys.detail(id) });
+      toast.success("Permissions removed successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }

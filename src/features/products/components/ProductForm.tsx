@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { FiUpload, FiX, FiImage, FiPlus, FiStar } from "react-icons/fi";
+import { resolveImageUrl } from "@/lib/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -31,15 +33,122 @@ type ProductFormValues = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
   initialData?: Product;
-  onSubmit: (data: ProductFormValues) => void;
+  onSubmit: (
+    data: ProductFormValues,
+    newImages: File[],
+    deletedImageIds: string[],
+    primaryImageIndex: number,
+    primaryImageId: string | null
+  ) => void;
   onCancel: () => void;
+  isPending?: boolean;
 }
 
 export default function ProductForm({
   initialData,
   onSubmit,
   onCancel,
+  isPending,
 }: ProductFormProps) {
+  const [imagesList, setImagesList] = useState<{
+    id: string;
+    file: File | null;
+    preview: string;
+    isPrimary: boolean;
+  }[]>([]);
+  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialData?.images && initialData.images.length > 0) {
+      setImagesList(
+        initialData.images.map((img) => ({
+          id: img.id,
+          file: null,
+          preview: resolveImageUrl(img.imageUrl) ?? "",
+          isPrimary: img.isPrimary,
+        }))
+      );
+    } else if (initialData?.image) {
+      setImagesList([
+        {
+          id: "fallback-primary",
+          file: null,
+          preview: resolveImageUrl(initialData.image) ?? "",
+          isPrimary: true,
+        },
+      ]);
+    } else {
+      setImagesList([]);
+    }
+  }, [initialData]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const newItems = files.map((file) => {
+      const id = Math.random().toString(36).substring(2, 9);
+      return {
+        id,
+        file,
+        preview: URL.createObjectURL(file),
+        isPrimary: false,
+      };
+    });
+
+    setImagesList((prev) => {
+      const hasPrimary = prev.some((item) => item.isPrimary);
+      const updated = [...prev, ...newItems];
+      if (!hasPrimary && updated.length > 0) {
+        updated[0].isPrimary = true;
+      }
+      return updated;
+    });
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImagesList((prev) => {
+      const target = prev.find((item) => item.id === id);
+      const updated = prev.filter((item) => item.id !== id);
+
+      if (target?.isPrimary && updated.length > 0) {
+        updated[0].isPrimary = true;
+      }
+
+      if (target && !target.file) {
+        setDeletedImageIds((prevDeleted) => [...prevDeleted, target.id]);
+      }
+
+      return updated;
+    });
+  };
+
+  const handleSetPrimary = (id: string) => {
+    setImagesList((prev) =>
+      prev.map((item) => ({
+        ...item,
+        isPrimary: item.id === id,
+      }))
+    );
+  };
+
+  const handleFormSubmit = (data: ProductFormValues) => {
+    const newImageFiles = imagesList.filter((item) => item.file !== null).map((item) => item.file!);
+    const primaryItem = imagesList.find((item) => item.isPrimary);
+
+    let primaryImageIndex = -1;
+    let primaryImageId: string | null = null;
+
+    if (primaryItem) {
+      if (primaryItem.file) {
+        const newItemsOnly = imagesList.filter((item) => item.file !== null);
+        primaryImageIndex = newItemsOnly.findIndex((item) => item.id === primaryItem.id);
+      } else {
+        primaryImageId = primaryItem.id;
+      }
+    }
+
+    onSubmit(data, newImageFiles, deletedImageIds, primaryImageIndex, primaryImageId);
+  };
   const { data: brandsData, isLoading: brandsLoading } = useBrands({ limit: 100 });
   const brands = useMemo(() => brandsData?.data?.items ?? [], [brandsData]);
 
@@ -107,7 +216,7 @@ export default function ProductForm({
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleFormSubmit)}
       className="space-y-8 max-w-6xl font-sans text-slate-800"
     >
       {/* 1. General Information */}
@@ -119,6 +228,77 @@ export default function ProductForm({
           <p className="text-xs text-slate-500 mt-0.5">
             Define basic product settings.
           </p>
+        </div>
+
+        {/* Product Image Gallery Section */}
+        <div className="space-y-3">
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+            Product Media
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {imagesList.map((item) => (
+              <div
+                key={item.id}
+                className={`group relative aspect-square rounded-xl overflow-hidden border bg-white flex items-center justify-center shadow-sm transition-all duration-200 ${
+                  item.isPrimary ? "border-indigo-500 ring-2 ring-indigo-50" : "border-slate-200 hover:border-slate-350"
+                }`}
+              >
+                <img
+                  src={item.preview}
+                  alt="Product"
+                  className="w-full h-full object-cover"
+                />
+
+                {/* Primary Badge or Set Primary Trigger */}
+                <div className="absolute top-2 left-2">
+                  {item.isPrimary ? (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-2 py-1 text-[10px] font-bold text-white shadow-sm">
+                      <FiStar className="size-3 fill-white" />
+                      Primary
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSetPrimary(item.id)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-white/90 hover:bg-white text-slate-700 hover:text-indigo-600 px-2 py-1 text-[10px] font-bold shadow-sm opacity-0 group-hover:opacity-100 transition-all cursor-pointer border border-slate-200"
+                    >
+                      <FiStar className="size-3" />
+                      Set Primary
+                    </button>
+                  )}
+                </div>
+
+                {/* Remove Button */}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(item.id)}
+                  className="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-white/90 hover:bg-rose-600 text-slate-500 hover:text-white border border-slate-200 shadow-sm opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                >
+                  <FiX className="size-3.5" />
+                </button>
+              </div>
+            ))}
+
+            {/* Add Image Card (Dashed Dropzone) */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-4 bg-slate-50/50 hover:bg-indigo-50/10 transition-all cursor-pointer aspect-square text-center group"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <div className="size-10 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 flex items-center justify-center transition-all shadow-inner border border-slate-200/50">
+                <FiPlus className="size-5" />
+              </div>
+              <p className="text-xs font-bold text-slate-700 mt-3">Add Images</p>
+              <p className="text-[9px] font-medium text-slate-400 mt-1">Upload multiple files</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">

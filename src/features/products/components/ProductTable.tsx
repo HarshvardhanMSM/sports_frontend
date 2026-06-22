@@ -3,20 +3,27 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProductRowActions from "./ProductRowActions";
+import BulkDeleteConfirmModal from "./BulkDeleteConfirmModal";
 import Badge from "@/components/ui/badge/Badge";
 import type { Product } from "@/types/product.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface ProductTableProps {
   products: Product[];
   onDelete: (id: string) => void;
+  onBulkDelete?: (ids: string[]) => void;
+  isBulkDeleting?: boolean;
 }
 
 export default function ProductTable({
   products,
   onDelete,
+  onBulkDelete,
+  isBulkDeleting,
 }: ProductTableProps) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedIds(e.target.checked ? products.map((p) => p.id) : []);
@@ -26,6 +33,12 @@ export default function ProductTable({
     setSelectedIds((prev) =>
       e.target.checked ? [...prev, id] : prev.filter((item) => item !== id)
     );
+  };
+
+  const handleBulkDelete = () => {
+    onBulkDelete?.(selectedIds);
+    setSelectedIds([]);
+    setShowBulkConfirm(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -45,15 +58,28 @@ export default function ProductTable({
           <span className="text-sm font-semibold text-indigo-900">
             {selectedIds.length} product(s) selected
           </span>
-          <button
-            onClick={() => {
-              selectedIds.forEach((id) => onDelete(id));
-              setSelectedIds([]);
-            }}
-            className="rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 transition-all"
-          >
-            Delete Selected
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelectedIds([])}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all"
+            >
+              Clear Selection
+            </button>
+            <button
+              onClick={() => setShowBulkConfirm(true)}
+              className="rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 transition-all"
+            >
+              Delete Selected
+            </button>
+          </div>
+          {showBulkConfirm && (
+            <BulkDeleteConfirmModal
+              count={selectedIds.length}
+              onClose={() => { setShowBulkConfirm(false); }}
+              onConfirm={handleBulkDelete}
+              isPending={isBulkDeleting ?? false}
+            />
+          )}
         </div>
       )}
 
@@ -94,17 +120,21 @@ export default function ProductTable({
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="size-10 rounded-lg object-cover border border-slate-100 shadow-sm"
-                    />
-                  ) : (
-                    <div className="size-10 rounded-lg bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold">
-                      N/A
-                    </div>
-                  )}
+                  {(() => {
+                    const primaryImg = product.images?.find((img) => img.isPrimary) || product.images?.[0];
+                    const imgUrl = primaryImg?.imageUrl || product.image;
+                    return imgUrl ? (
+                      <img
+                        src={resolveImageUrl(imgUrl)}
+                        alt={product.name}
+                        className="size-10 rounded-lg object-cover border border-slate-100 shadow-sm"
+                      />
+                    ) : (
+                      <div className="size-10 rounded-lg bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold">
+                        N/A
+                      </div>
+                    );
+                  })()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
                   <div className="max-w-[200px] truncate">{product.name}</div>
@@ -124,7 +154,10 @@ export default function ProductTable({
                   {product.isFeatured ? (
                     <Badge color="success">Yes</Badge>
                   ) : (
-                    <span className="text-xs text-slate-400 font-semibold">No</span>
+                    <span className="text-xs text-slate-400 font-semibold">
+                      <Badge color="error">No</Badge>
+
+                    </span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-xs" onClick={(e) => e.stopPropagation()}>

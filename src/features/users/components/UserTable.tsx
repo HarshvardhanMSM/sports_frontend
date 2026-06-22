@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { FiEye, FiEdit2, FiTrash2, FiUsers } from "react-icons/fi";
+import { FiEye, FiEdit2, FiTrash2, FiUsers, FiShield } from "react-icons/fi";
 import type { User } from "@/types/user.types";
+import { SUPER_ADMIN_ROLE } from "@/types/role.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface Props {
   users: User[];
@@ -59,21 +61,28 @@ export default function UserTable({ users, onEdit, onAssignRoles, onDelete }: Pr
           <tbody className="divide-y divide-slate-100">
             {users.map((user) => {
               const initials = user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+              const isSuperAdmin = user.roles.some((r) => r.name === SUPER_ADMIN_ROLE);
               return (
                 <tr key={user.id} className="group hover:bg-slate-50/60 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       {user.avatar ? (
-                        <img src={user.avatar} alt="" className="size-9 rounded-full object-cover border border-slate-200" />
+                        <img src={resolveImageUrl(user.avatar)} alt="" className="size-9 rounded-full object-cover border border-slate-200" />
                       ) : (
                         <div className="size-9 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700 shrink-0">
                           {initials}
                         </div>
                       )}
                       <div>
-                        <Link href={`/admin-users/${user.id}`} className="text-sm font-semibold text-slate-800 hover:text-indigo-600">
-                          {user.name}
-                        </Link>
+                        {isSuperAdmin ? (
+                          <span className="text-sm font-semibold text-slate-800">
+                            {user.name}
+                          </span>
+                        ) : (
+                          <Link href={`/admin-users/${user.id}`} className="text-sm font-semibold text-slate-800 hover:text-indigo-600">
+                            {user.name}
+                          </Link>
+                        )}
                         <p className="text-xs text-slate-400">{user.email}</p>
                       </div>
                     </div>
@@ -90,36 +99,45 @@ export default function UserTable({ users, onEdit, onAssignRoles, onDelete }: Pr
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex gap-1 justify-end">
-                      <Link
-                        href={`/admin-users/${user.id}`}
-                        className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                        title="View Details"
-                      >
-                        <FiEye className="size-4" />
-                      </Link>
-                      <button
-                        onClick={() => onEdit(user)}
-                        className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                        title="Edit"
-                      >
-                        <FiEdit2 className="size-4" />
-                      </button>
-                      <button
-                        onClick={() => onAssignRoles(user)}
-                        className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
-                        title="Assign Roles"
-                      >
-                        <FiUsers className="size-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(user)}
-                        className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
-                        title="Delete"
-                      >
-                        <FiTrash2 className="size-4" />
-                      </button>
-                    </div>
+                    {isSuperAdmin ? (
+                      <div className="flex justify-end pr-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                          <FiShield className="size-3.5 text-slate-400" />
+                          System Protected
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex gap-1 justify-end">
+                        <Link
+                          href={`/admin-users/${user.id}`}
+                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                          title="View Details"
+                        >
+                          <FiEye className="size-4" />
+                        </Link>
+                        <button
+                          onClick={() => onEdit(user)}
+                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                          title="Edit"
+                        >
+                          <FiEdit2 className="size-4" />
+                        </button>
+                        <button
+                          onClick={() => onAssignRoles(user)}
+                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
+                          title="Assign Roles"
+                        >
+                          <FiUsers className="size-4" />
+                        </button>
+                        <button
+                          onClick={() => onDelete(user)}
+                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                          title="Delete"
+                        >
+                          <FiTrash2 className="size-4" />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

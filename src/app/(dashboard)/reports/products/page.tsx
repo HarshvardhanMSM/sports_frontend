@@ -13,6 +13,7 @@ import {
   FiBarChart2,
 } from "react-icons/fi";
 import { useReportProducts, useReportInventory } from "@/hooks/useReports";
+import { resolveImageUrl } from "@/lib/image";
 
 const PRESETS = [
   { label: "Today", value: "today" },
@@ -181,7 +182,7 @@ export default function ProductPerformancePage() {
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
                           {row.imageUrl && (
-                            <img src={row.imageUrl} alt="" className="size-9 rounded-lg object-cover ring-1 ring-slate-200 shrink-0" />
+                            <img src={resolveImageUrl(row.imageUrl)} alt="" className="size-9 rounded-lg object-cover ring-1 ring-slate-200 shrink-0" />
                           )}
                           <span className="text-sm font-semibold text-slate-700">{row.productName}</span>
                         </div>
@@ -228,7 +229,7 @@ export default function ProductPerformancePage() {
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         {item.imageUrl && (
-                          <img src={item.imageUrl} alt="" className="size-9 rounded-lg object-cover ring-1 ring-slate-200 shrink-0" />
+                          <img src={resolveImageUrl(item.imageUrl)} alt="" className="size-9 rounded-lg object-cover ring-1 ring-slate-200 shrink-0" />
                         )}
                         <span className="text-sm font-semibold text-slate-700">{item.productName}</span>
                       </div>

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FiArrowLeft, FiAlertCircle } from "react-icons/fi";
 import { useOrder, useUpdateOrderStatus, useCancelOrder } from "@/hooks/useOrders";
+import { useToast } from "@/components/common/Toast/useToast";
 import type { OrderStatus } from "@/types/order.types";
 import OrderDetailsCard from "@/features/orders/components/OrderDetailsCard";
 import OrderItemsTable from "@/features/orders/components/OrderItemsTable";
@@ -22,23 +23,18 @@ export default function OrderDetailPage() {
 
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const toast = useToast();
 
   const order = data?.data;
-
-  const showToast = (type: "success" | "error", message: string) => {
-    setToast({ type, message });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const handleStatusUpdate = async (newStatus: OrderStatus) => {
     if (!id) return;
     try {
       await updateStatus({ id, status: newStatus });
-      showToast("success", `Order status updated to ${newStatus.replace(/_/g, " ")}`);
+      toast.success(`Order status updated to ${newStatus.replace(/_/g, " ")}`);
       setShowStatusModal(false);
     } catch {
-      showToast("error", "Failed to update status");
+      // onError in useUpdateOrderStatus handles toast
     }
   };
 
@@ -46,24 +42,15 @@ export default function OrderDetailPage() {
     if (!id) return;
     try {
       await cancelOrder({ id, reason });
-      showToast("success", "Order cancelled successfully");
+      toast.success("Order cancelled successfully");
       setShowCancelModal(false);
     } catch {
-      showToast("error", "Failed to cancel order");
+      // onError in useCancelOrder handles toast
     }
   };
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <div
-          className={`fixed top-4 right-4 z-50 rounded-xl px-4 py-3 text-sm font-semibold shadow-lg transition-all ${
-            toast.type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">

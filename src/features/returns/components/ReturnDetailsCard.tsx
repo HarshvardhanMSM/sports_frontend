@@ -3,6 +3,7 @@
 import React from "react";
 import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiPackage, FiShoppingCart, FiMessageSquare, FiCamera, FiDollarSign, FiTruck } from "react-icons/fi";
 import type { ReturnListItem } from "@/types/return.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface Props {
   data: ReturnListItem;
@@ -118,7 +119,7 @@ export default function ReturnDetailsCard({ data }: Props) {
             return (
               <div key={item.id} className="flex items-center gap-4">
                 {p?.productImage ? (
-                  <img src={p.productImage} alt={p.productName ?? ""} className="size-16 rounded-xl object-cover border border-slate-200" />
+                  <img src={resolveImageUrl(p.productImage)} alt={p.productName ?? ""} className="size-16 rounded-xl object-cover border border-slate-200" />
                 ) : (
                   <div className="size-16 rounded-xl bg-slate-100 flex items-center justify-center text-lg font-bold text-slate-400">
                     <FiPackage className="size-6" />

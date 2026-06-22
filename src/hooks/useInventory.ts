@@ -18,6 +18,8 @@ import {
   inventoryAnalyticsKeys,
   reportKeys,
 } from "@/services/inventory.service";
+import { useToast } from "@/components/common/Toast/useToast";
+import { normalizeApiError } from "@/lib/errors/error-handler";
 import type {
   InventoryListParams,
   CreateInventoryRequest,
@@ -70,11 +72,17 @@ export function useInventoryVariants(search: string) {
 export function useCreateInventory() {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: CreateInventoryRequest) => InventoryService.create(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Inventory item created successfully.");
       router.push("/inventory");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -82,51 +90,81 @@ export function useCreateInventory() {
 export function useUpdateInventory(id: string) {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: UpdateInventoryRequest) => InventoryService.update(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Inventory item updated successfully.");
       router.push("/inventory");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useDeleteInventory() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => InventoryService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Inventory item deleted.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useAdjustInventory(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: AdjustInventoryRequest) => InventoryService.adjust(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Inventory adjusted successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useReserveInventory(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: AdjustInventoryRequest) => InventoryService.reserve(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Stock reserved successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useReleaseInventory(id: string) {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: AdjustInventoryRequest) => InventoryService.release(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Stock released successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -154,11 +192,17 @@ export function useSupplier(id: string | undefined) {
 export function useCreateSupplier() {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: CreateSupplierRequest) => SupplierService.create(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: supplierKeys.all() });
+      toast.success("Supplier created successfully.");
       router.push("/suppliers");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -166,22 +210,34 @@ export function useCreateSupplier() {
 export function useUpdateSupplier(id: string) {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: UpdateSupplierRequest) => SupplierService.update(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: supplierKeys.all() });
+      toast.success("Supplier updated successfully.");
       router.push("/suppliers");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useDeleteSupplier() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => SupplierService.delete(id),
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: supplierKeys.all() });
       qc.removeQueries({ queryKey: supplierKeys.detail(id) });
+      toast.success("Supplier deleted.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -209,11 +265,17 @@ export function usePurchaseOrder(id: string | undefined) {
 export function useCreatePurchaseOrder() {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: CreatePurchaseOrderRequest) => PurchaseOrderService.create(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: purchaseOrderKeys.all() });
+      toast.success("Purchase order created successfully.");
       router.push("/purchase-orders");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -221,31 +283,49 @@ export function useCreatePurchaseOrder() {
 export function useUpdatePurchaseOrder(id: string) {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: UpdatePurchaseOrderRequest) => PurchaseOrderService.update(id, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: purchaseOrderKeys.all() });
+      toast.success("Purchase order updated.");
       router.push("/purchase-orders");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useApprovePurchaseOrder() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => PurchaseOrderService.approve(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: purchaseOrderKeys.all() });
+      toast.success("Purchase order approved.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useCancelPurchaseOrder() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => PurchaseOrderService.cancel(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: purchaseOrderKeys.all() });
+      toast.success("Purchase order cancelled.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -273,12 +353,18 @@ export function useGoodsReceipt(id: string | undefined) {
 export function useCreateGoodsReceipt() {
   const qc = useQueryClient();
   const router = useRouter();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: CreateGoodsReceiptRequest) => GoodsReceiptService.create(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: goodsReceiptKeys.all() });
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Goods receipt created successfully.");
       router.push("/goods-receipts");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
@@ -332,41 +418,65 @@ export function useInventoryMovements(params?: InventoryPlusListParams) {
 
 export function useAdjustInventoryPlus() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (body: InventoryPlusAdjustRequest) => InventoryPlusService.adjust(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryPlusKeys.all() });
       qc.invalidateQueries({ queryKey: inventoryKeys.all() });
+      toast.success("Inventory adjusted successfully.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useCheckAlerts() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: () => InventoryPlusService.checkAlerts(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryPlusKeys.all() });
+      toast.success("Alerts checked.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useResolveAllAlerts() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: () => InventoryPlusService.resolveAlerts(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryPlusKeys.all() });
+      toast.success("All alerts resolved.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useResolveAlert() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => InventoryPlusService.resolveAlert(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: inventoryPlusKeys.all() });
+      toast.success("Alert resolved.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }

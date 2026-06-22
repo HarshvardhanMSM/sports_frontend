@@ -33,7 +33,13 @@ export default function LoginForm() {
   };
 
   const apiErrorMessage =
-    error instanceof Error ? error.message : "Invalid email or password";
+    error instanceof Error
+      ? error.message.includes("longer than or equal to") ||
+        error.message.includes("characters") ||
+        error.message.toLowerCase().includes("password must")
+        ? "Invalid email or password"
+        : error.message
+      : "Invalid email or password";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -100,13 +106,13 @@ export default function LoginForm() {
               defaultChecked
               className="sr-only peer"
             />
-            <div className="size-4 rounded border-2 border-slate-300 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 transition-all flex items-center justify-center">
+            {/* <div className="size-4 rounded border-2 border-slate-300 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 transition-all flex items-center justify-center">
               <svg className="size-2.5 text-white opacity-0 peer-checked:opacity-100" viewBox="0 0 10 8" fill="none">
                 <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </div>
+            </div> */}
           </div>
-          <span className="text-xs font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember me</span>
+          {/* <span className="text-xs font-medium text-slate-600 group-hover:text-slate-800 transition-colors">Remember me</span> */}
         </label>
         <Link
           href="/forgot-password"

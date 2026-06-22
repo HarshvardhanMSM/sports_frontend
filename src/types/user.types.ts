@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  mobile?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,6 +39,7 @@ export interface UpdateUserRequest {
   email?: string;
   isActive?: boolean;
   avatar?: string;
+  avatarFile?: File;
 }
 
 export interface AssignRolesRequest {
@@ -49,6 +51,7 @@ export interface CurrentUser {
   name: string;
   email: string;
   avatar?: string;
+  mobile?: string;
   roles: UserRole[];
   permissions: string[];
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FiAlertCircle,
   FiUser,
@@ -14,10 +14,16 @@ import {
   FiEye,
   FiEyeOff,
   FiSave,
+  FiUpload,
+  FiPhone,
 } from "react-icons/fi";
-import { useCurrentUser, useUpdateUser } from "@/hooks/useUsers";
-import { useResetAdminPassword } from "@/hooks/useRoles";
+import {
+  useCurrentUser,
+  useUpdateProfile,
+  useChangePassword,
+} from "@/hooks/useUsers";
 import { useLogout } from "@/hooks/useAuth";
+import { resolveImageUrl } from "@/lib/image";
 
 
 /* ─── Helpers ─────────────────────────────────────────────────────────── */
@@ -93,7 +99,8 @@ function FormLabel({ children }: { children: React.ReactNode }) {
 export default function ProfilePage() {
   const { data, isLoading, error, refetch } = useCurrentUser();
   const logout = useLogout();
-  const updateUserMutation = useUpdateUser();
+  const updateProfileMutation = useUpdateProfile();
+  const changePasswordMutation = useChangePassword();
 
   const raw = (data as unknown as Record<string, unknown>)?.data ?? data;
   const profile =
@@ -103,15 +110,14 @@ export default function ProfilePage() {
           name: string;
           email: string;
           avatar?: string;
+          mobile?: string;
           roles: { id: string; name: string }[];
           permissions: string[];
         })
       : null;
 
-  const resetPasswordMutation = useResetAdminPassword(profile?.id ?? "");
-
   // Master layout tabs: permissions, edit-profile, change-password
-  const [activeTab, setActiveTab] = useState<"permissions" | "edit-profile" | "change-password">("permissions");
+  const [activeTab, setActiveTab] = useState<"edit-profile" | "change-password">("edit-profile");
   
   // Permissions tab view & search states
   const [permSearch, setPermSearch] = useState("");
@@ -121,10 +127,21 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (avatar && avatar.startsWith("blob:")) {
+        URL.revokeObjectURL(avatar);
+      }
+    };
+  }, [avatar]);
 
   // Change Password form state
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOldPass, setShowOldPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
 
@@ -148,23 +165,42 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!profile) return;
     try {
-      await updateUserMutation.mutateAsync({
-        id: profile.id,
+      await updateProfileMutation.mutateAsync({
         name,
         email,
-        avatar: avatar || undefined,
+        avatarFile: avatarFile || undefined,
       });
       showToast("success", "Profile updated successfully!");
+      setAvatarFile(null);
     } catch (err: any) {
       showToast("error", err?.message || "Failed to update profile.");
     }
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("error", "Avatar size cannot exceed 2MB.");
+      return;
+    }
+
+    setAvatarFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    if (avatar && avatar.startsWith("blob:")) {
+      URL.revokeObjectURL(avatar);
+    }
+    setAvatar(previewUrl);
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
     if (newPassword.length < 6) {
-      showToast("error", "Password must be at least 6 characters long.");
+      showToast("error", "New password must be at least 6 characters long.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -172,8 +208,12 @@ export default function ProfilePage() {
       return;
     }
     try {
-      await resetPasswordMutation.mutateAsync(newPassword);
+      await changePasswordMutation.mutateAsync({
+        currentPassword: oldPassword,
+        newPassword,
+      });
       showToast("success", "Password changed successfully!");
+      setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
@@ -282,7 +322,7 @@ export default function ProfilePage() {
               {/* Avatar */}
               {profile.avatar ? (
                 <img
-                  src={profile.avatar}
+                  src={resolveImageUrl(profile.avatar)}
                   alt={profile.name}
                   className="size-24 rounded-2xl object-cover border-4 border-white shadow-lg mx-auto"
                 />
@@ -304,11 +344,11 @@ export default function ProfilePage() {
               </div>
 
               {/* ID row */}
-              <div className="flex items-center justify-center gap-1 mt-1">
+              {/* <div className="flex items-center justify-center gap-1 mt-1">
                 <FiKey className="size-3.5 text-slate-400 shrink-0" />
                 <span className="text-xs font-mono text-slate-400">{profile.id.slice(0, 16)}…</span>
                 <CopyButton text={profile.id} />
-              </div>
+              </div> */}
             </div>
 
             {/* Divider */}
@@ -338,7 +378,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* <div className="grid grid-cols-2 gap-3">
             <StatCard
               label="Roles"
               value={profile.roles.length}
@@ -349,7 +389,7 @@ export default function ProfilePage() {
               value={safePerms.length}
               color="text-violet-600"
             />
-          </div>
+          </div> */}
 
           {/* Danger zone */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
@@ -369,7 +409,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Tab selector bar */}
           <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
-            <button
+            {/* <button
               onClick={() => setActiveTab("permissions")}
               className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-lg transition-all ${
                 activeTab === "permissions"
@@ -379,7 +419,7 @@ export default function ProfilePage() {
             >
               <FiKey className="size-3.5" />
               Permissions
-            </button>
+            </button> */}
             <button
               onClick={() => setActiveTab("edit-profile")}
               className={`flex flex-1 items-center justify-center gap-2 py-2.5 text-xs font-bold rounded-lg transition-all ${
@@ -405,133 +445,7 @@ export default function ProfilePage() {
           </div>
 
           {/* ACTIVE TAB: Permissions */}
-          {activeTab === "permissions" && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-fadeIn">
-              {/* Card header */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-6 py-5 border-b border-slate-100">
-                <div>
-                  <h2 className="text-lg font-extrabold text-slate-900">Permissions</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    All access rights granted through your roles.
-                  </p>
-                </div>
 
-                {/* Controls */}
-                <div className="flex items-center gap-2">
-                  {/* Search */}
-                  <div className="relative">
-                    <FiKey className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Search permissions…"
-                      value={permSearch}
-                      onChange={(e) => setPermSearch(e.target.value)}
-                      className="pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 w-48 transition-all"
-                    />
-                  </div>
-                  {/* View toggle */}
-                  <div className="flex rounded-xl border border-slate-200 overflow-hidden">
-                    <button
-                      onClick={() => setPermView("grid")}
-                      className={`px-3 py-2 text-xs font-semibold transition-colors ${permView === "grid" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
-                    >
-                      Grid
-                    </button>
-                    <button
-                      onClick={() => setPermView("list")}
-                      className={`px-3 py-2 text-xs font-semibold transition-colors border-l border-slate-200 ${permView === "list" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
-                    >
-                      List
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                {safePerms.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16">
-                    <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
-                      <FiKey className="size-6 text-slate-400" />
-                    </div>
-                    <p className="text-sm font-bold text-slate-700">No permissions assigned</p>
-                    <p className="text-xs text-slate-400 mt-1">Contact an admin to assign roles.</p>
-                  </div>
-                ) : filteredPerms.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-sm font-semibold text-slate-500">No permissions match "{permSearch}"</p>
-                  </div>
-                ) : permView === "grid" ? (
-                  /* ── Grid view: group by module ── */
-                  <div className="space-y-5">
-                    {Object.entries(groupedPerms)
-                      .sort(([a], [b]) => a.localeCompare(b))
-                      .map(([module, perms]) => (
-                        <div key={module}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <FiShield className="size-3.5 text-indigo-500" />
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                              {module}
-                            </span>
-                            <span className="ml-auto text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                              {perms.length}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {perms.map((perm) => {
-                              const { action } = parsePerm(perm);
-                              const colorClass =
-                                ACTION_COLORS[action] ?? "bg-slate-100 text-slate-600 ring-slate-200";
-                              return (
-                                <span
-                                  key={perm}
-                                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold ring-1 ${colorClass}`}
-                                  title={perm}
-                                >
-                                  {action || perm}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  /* ── List view ── */
-                  <div className="divide-y divide-slate-100 -mx-6 -mb-6">
-                    {filteredPerms
-                      .slice()
-                      .sort()
-                      .map((perm) => {
-                        const { module, action } = parsePerm(perm);
-                        const colorClass =
-                          ACTION_COLORS[action] ?? "bg-slate-100 text-slate-600 ring-slate-200";
-                        return (
-                          <div
-                            key={perm}
-                            className="flex items-center justify-between px-6 py-3 hover:bg-slate-50/60 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <FiKey className="size-3.5 text-slate-400 shrink-0" />
-                              <div>
-                                <p className="text-xs font-bold text-slate-700">{module}</p>
-                                <p className="text-[10px] font-mono text-slate-400">{perm}</p>
-                              </div>
-                            </div>
-                            {action && (
-                              <span
-                                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ring-1 ${colorClass}`}
-                              >
-                                {action}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* ACTIVE TAB: Edit Profile */}
           {activeTab === "edit-profile" && (
@@ -539,18 +453,18 @@ export default function ProfilePage() {
               <div className="border-b border-slate-100 px-6 py-5">
                 <h2 className="text-lg font-extrabold text-slate-900">Edit Profile</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Update your display name, email, and avatar picture.
+                  Update your display name, email, mobile number, and upload an avatar picture.
                 </p>
               </div>
               <div className="p-6">
                 <form onSubmit={handleProfileUpdate} className="space-y-5">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
                     {/* Image preview / Initials */}
-                    <div className="flex flex-col items-center gap-2 shrink-0">
+                    <div className="flex flex-col items-center gap-3 shrink-0">
                       <FormLabel>Avatar Preview</FormLabel>
                       {avatar ? (
                         <img
-                          src={avatar}
+                          src={resolveImageUrl(avatar)}
                           alt="Preview"
                           className="size-24 rounded-2xl object-cover border border-slate-200 shadow-inner"
                           onError={(e) => {
@@ -564,6 +478,21 @@ export default function ProfilePage() {
                           {initials}
                         </div>
                       )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarFileChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                      >
+                        <FiUpload className="size-3" />
+                        Upload Image
+                      </button>
                     </div>
 
                     {/* Inputs */}
@@ -591,17 +520,6 @@ export default function ProfilePage() {
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-slate-400"
                         />
                       </div>
-
-                      <div>
-                        <FormLabel>Avatar Image URL</FormLabel>
-                        <input
-                          type="url"
-                          value={avatar}
-                          onChange={(e) => setAvatar(e.target.value)}
-                          placeholder="https://example.com/your-image.jpg"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-slate-400"
-                        />
-                      </div>
                     </div>
                   </div>
 
@@ -612,6 +530,7 @@ export default function ProfilePage() {
                         setName(profile.name || "");
                         setEmail(profile.email || "");
                         setAvatar(profile.avatar || "");
+                        setAvatarFile(null);
                       }}
                       className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
                     >
@@ -619,12 +538,12 @@ export default function ProfilePage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={updateUserMutation.isPending}
+                      disabled={updateProfileMutation.isPending}
                       className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 cursor-pointer"
                       style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
                     >
                       <FiSave className="size-3.5" />
-                      {updateUserMutation.isPending ? "Saving..." : "Save Details"}
+                      {updateProfileMutation.isPending ? "Saving..." : "Save Details"}
                     </button>
                   </div>
                 </form>
@@ -643,46 +562,69 @@ export default function ProfilePage() {
               </div>
               <div className="p-6">
                 <form onSubmit={handlePasswordChange} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-4">
                     <div>
-                      <FormLabel>New Password</FormLabel>
-                      <div className="relative">
+                      <FormLabel>Current Password</FormLabel>
+                      <div className="relative max-w-md">
                         <input
-                          type={showNewPass ? "text" : "password"}
+                          type={showOldPass ? "text" : "password"}
                           required
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="At least 6 characters"
+                          value={oldPassword}
+                          onChange={(e) => setOldPassword(e.target.value)}
+                          placeholder="Enter your current password"
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-10 py-2.5 text-sm text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                         />
                         <button
                           type="button"
-                          onClick={() => setShowNewPass(!showNewPass)}
+                          onClick={() => setShowOldPass(!showOldPass)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                         >
-                          {showNewPass ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
+                          {showOldPass ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
                         </button>
                       </div>
                     </div>
 
-                    <div>
-                      <FormLabel>Confirm New Password</FormLabel>
-                      <div className="relative">
-                        <input
-                          type={showConfirmPass ? "text" : "password"}
-                          required
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Repeat new password"
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-10 py-2.5 text-sm text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPass(!showConfirmPass)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                        >
-                          {showConfirmPass ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
-                        </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <FormLabel>New Password</FormLabel>
+                        <div className="relative">
+                          <input
+                            type={showNewPass ? "text" : "password"}
+                            required
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder="At least 6 characters"
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-10 py-2.5 text-sm text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPass(!showNewPass)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          >
+                            {showNewPass ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <div className="relative">
+                          <input
+                            type={showConfirmPass ? "text" : "password"}
+                            required
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Repeat new password"
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-4 pr-10 py-2.5 text-sm text-slate-800 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPass(!showConfirmPass)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                          >
+                            {showConfirmPass ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -691,6 +633,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => {
+                        setOldPassword("");
                         setNewPassword("");
                         setConfirmPassword("");
                       }}
@@ -700,12 +643,12 @@ export default function ProfilePage() {
                     </button>
                     <button
                       type="submit"
-                      disabled={resetPasswordMutation.isPending || !newPassword || !confirmPassword}
+                      disabled={changePasswordMutation.isPending || !oldPassword || !newPassword || !confirmPassword}
                       className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 cursor-pointer"
                       style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
                     >
                       <FiLock className="size-3.5" />
-                      {resetPasswordMutation.isPending ? "Updating..." : "Update Password"}
+                      {changePasswordMutation.isPending ? "Updating..." : "Update Password"}
                     </button>
                   </div>
                 </form>

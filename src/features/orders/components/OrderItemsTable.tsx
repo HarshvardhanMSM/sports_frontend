@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { OrderItem } from "@/types/order.types";
+import { resolveImageUrl } from "@/lib/image";
 
 interface OrderItemsTableProps {
   items: OrderItem[];
@@ -31,7 +32,7 @@ export default function OrderItemsTable({ items }: OrderItemsTableProps) {
                   <div className="flex items-center gap-3">
                     {item.imageUrl ? (
                       <img
-                        src={item.imageUrl}
+                        src={resolveImageUrl(item.imageUrl)}
                         alt={item.productName}
                         className="size-10 rounded-lg object-cover border border-slate-200"
                       />

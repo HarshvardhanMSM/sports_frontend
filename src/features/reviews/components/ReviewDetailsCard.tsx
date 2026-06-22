@@ -4,6 +4,7 @@ import React from "react";
 import { FiStar, FiCalendar, FiUser, FiThumbsUp, FiCheckCircle } from "react-icons/fi";
 import type { Review } from "@/types/review.types";
 import Badge from "@/components/ui/badge/Badge";
+import { resolveImageUrl } from "@/lib/image";
 
 interface ReviewDetailsCardProps {
   review: Review;
@@ -65,7 +66,7 @@ export default function ReviewDetailsCard({ review }: ReviewDetailsCardProps) {
             <div className="bg-slate-50 rounded-xl p-4 flex items-center gap-3">
               {review.images.length > 0 ? (
                 <img
-                  src={review.images[0].imageUrl}
+                  src={resolveImageUrl(review.images[0].imageUrl)}
                   alt={review.productName}
                   className="size-12 rounded-lg object-cover border border-slate-200"
                 />

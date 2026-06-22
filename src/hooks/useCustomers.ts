@@ -2,16 +2,18 @@
 
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { CustomerService } from "@/services/customer.service";
+import { useToast } from "@/components/common/Toast/useToast";
+import { normalizeApiError } from "@/lib/errors/error-handler";
 import type { CustomerListParams } from "@/types/customer.types";
 
 export const customerKeys = {
-  all:            ()                   => ["customers"]              as const,
-  lists:          ()                   => ["customers", "list"]      as const,
-  list:           (p?: CustomerListParams) => ["customers", "list", p] as const,
-  details:        ()                   => ["customers", "detail"]    as const,
-  detail:         (id: string)         => ["customers", "detail", id]  as const,
-  stats:          ()                   => ["customers", "stats"]     as const,
-  wishlist:       (id: string)         => ["customers", "wishlist", id] as const,
+  all:            ()                       => ["customers"]              as const,
+  lists:          ()                       => ["customers", "list"]      as const,
+  list:           (p?: CustomerListParams) => ["customers", "list", p]   as const,
+  details:        ()                       => ["customers", "detail"]    as const,
+  detail:         (id: string)             => ["customers", "detail", id]  as const,
+  stats:          ()                       => ["customers", "stats"]     as const,
+  wishlist:       (id: string)             => ["customers", "wishlist", id] as const,
 };
 
 export function useCustomers(params?: CustomerListParams) {
@@ -50,20 +52,32 @@ export function useCustomerWishlist(userId: string | null) {
 
 export function useToggleCustomerActive() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => CustomerService.toggleActive(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: customerKeys.all() });
+      toast.success("Customer status updated.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }
 
 export function useDeleteCustomer() {
   const qc = useQueryClient();
+  const toast = useToast();
   return useMutation({
     mutationFn: (id: string) => CustomerService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: customerKeys.all() });
+      toast.success("Customer deleted.");
+    },
+    onError: (error) => {
+      const normalized = normalizeApiError(error);
+      toast.error(normalized.message, normalized.errors.length ? normalized.errors : undefined);
     },
   });
 }

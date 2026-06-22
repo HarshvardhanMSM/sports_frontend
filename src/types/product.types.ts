@@ -17,6 +17,7 @@ export interface Product {
   isFeatured: boolean;
   isActive: boolean;
   image?: string;
+  images?: ProductImage[];
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;

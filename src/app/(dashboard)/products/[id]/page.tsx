@@ -1,11 +1,12 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiArrowLeft, FiEdit, FiBriefcase, FiLayers, FiTag } from "react-icons/fi";
 import { useProduct } from "@/hooks/useProducts";
 import Badge from "@/components/ui/badge/Badge";
+import { resolveImageUrl } from "@/lib/image";
 
 interface ViewProductPageProps {
   params: Promise<{ id: string }>;
@@ -17,6 +18,18 @@ export default function ViewProductPage({ params }: ViewProductPageProps) {
   const { data, isLoading, isError } = useProduct(id);
 
   const product = data?.data;
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (product) {
+      if (product.images && product.images.length > 0) {
+        const primary = product.images.find((img) => img.isPrimary) || product.images[0];
+        setActiveImage(primary.imageUrl);
+      } else if (product.image) {
+        setActiveImage(product.image);
+      }
+    }
+  }, [product]);
 
   if (!id || id === "undefined") {
     return <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center font-sans">
@@ -91,18 +104,40 @@ export default function ViewProductPage({ params }: ViewProductPageProps) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          {product.image && (
+          {(activeImage || product.image) && (
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Product Image
+                Product Media
               </h3>
-              <div className="relative aspect-video w-full rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center">
+              <div className="relative aspect-square w-full rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center">
                 <img
-                  src={product.image}
+                  src={resolveImageUrl(activeImage || product.image)}
                   alt={product.name}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>
+
+              {product.images && product.images.length > 1 && (
+                <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
+                  {product.images.map((img) => (
+                    <button
+                      key={img.id}
+                      onClick={() => setActiveImage(img.imageUrl)}
+                      className={`relative size-16 rounded-lg overflow-hidden border shrink-0 transition-all ${
+                        activeImage === img.imageUrl
+                          ? "border-indigo-600 ring-2 ring-indigo-50"
+                          : "border-slate-200 hover:border-slate-350"
+                      }`}
+                    >
+                      <img
+                        src={resolveImageUrl(img.imageUrl)}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

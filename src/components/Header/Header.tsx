@@ -12,8 +12,10 @@ import {
   FiUser,
 } from "react-icons/fi";
 import { IconType } from "react-icons";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useLogout } from "@/hooks/useAuth";
+import { useCurrentUser } from "@/hooks/useUsers";
+import { resolveImageUrl } from "@/lib/image";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -36,10 +38,23 @@ function useClickOutside(
 }
 
 export const Header = ({ onMenuClick }: HeaderProps) => {
+  const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
+
+  const { data } = useCurrentUser();
+  const raw = (data as unknown as Record<string, unknown>)?.data ?? data;
+  const profile =
+    !Array.isArray(raw) && raw && typeof raw === "object" && "id" in raw
+      ? (raw as {
+          id: string;
+          name: string;
+          email: string;
+          avatar?: string;
+        })
+      : null;
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -134,14 +149,18 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             className="flex items-center gap-3 rounded-full p-1 text-left hover:bg-slate-50 transition-colors"
           >
             <div className="relative">
-              <div className="size-8 overflow-hidden rounded-full ring-2 ring-indigo-100">
-                <Image
-                  src="/avatar.png"
-                  alt="Avatar"
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                />
+              <div className="size-8 overflow-hidden rounded-full ring-2 ring-indigo-100 flex items-center justify-center bg-indigo-50">
+                {profile?.avatar ? (
+                  <img
+                    src={resolveImageUrl(profile.avatar)}
+                    alt={profile.name || "Avatar"}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <div className="size-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white">
+                    {profile?.name ? profile.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2) : "?"}
+                  </div>
+                )}
               </div>
               <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-white bg-green-500" />
             </div>
@@ -152,11 +171,12 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           {showProfileMenu && (
             <div className="absolute right-0 top-full mt-2 z-50 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-100 animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="px-3 py-2 border-b border-slate-100">
-               
+                <p className="text-xs font-semibold text-slate-800 truncate">{profile?.name || "Admin"}</p>
+                <p className="text-[10px] text-slate-500 truncate">{profile?.email || ""}</p>
               </div>
               <div className="py-1">
-                <ProfileMenuItem Icon={FiUser} label="Profile" />
-                <ProfileMenuItem Icon={FiSettings} label="Settings" onClick={() => { router.push("/settings/general")}}/>
+                <ProfileMenuItem Icon={FiUser} label="Profile" onClick={() => { router.push("/profile"); setShowProfileMenu(false); }} />
+                <ProfileMenuItem Icon={FiSettings} label="Settings" onClick={() => { router.push("/settings/general"); setShowProfileMenu(false); }}/>
               </div>
               <div className="border-t border-slate-100 pt-1.5 mt-1">
                 <ProfileMenuItem

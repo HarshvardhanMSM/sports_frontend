@@ -30,8 +30,18 @@ export const UserService = {
     return api.post<UserSingleResponse>("/admin/users", data);
   },
 
-  updateUser(id: string, data: UpdateUserRequest) {
-    return api.patch<UserSingleResponse>(`/admin/users/${id}`, data);
+  async updateUser(id: string, data: UpdateUserRequest) {
+    let currentData = { ...data };
+    if (data.avatarFile) {
+      const formData = new FormData();
+      formData.append("avatar", data.avatarFile);
+      const res = await api.patch<UserSingleResponse>(`/admin/users/${id}`, formData);
+      if (res?.data?.avatar) {
+        currentData.avatar = res.data.avatar;
+      }
+    }
+    const { avatarFile, ...jsonData } = currentData;
+    return api.patch<UserSingleResponse>(`/admin/users/${id}`, jsonData);
   },
 
   deleteUser(id: string) {
@@ -47,6 +57,23 @@ export const UserService = {
   },
 
   getCurrentUser() {
-    return api.get<{ statusCode: number; message: string; data: CurrentUser }>("/admin/users/me");
+    return api.get<{ statusCode: number; message: string; data: CurrentUser }>("/admin/profile");
+  },
+
+  updateProfile(data: { name?: string; email?: string; mobile?: string; avatarFile?: File }) {
+    if (data.avatarFile) {
+      const formData = new FormData();
+      if (data.name !== undefined) formData.append("name", data.name);
+      if (data.email !== undefined) formData.append("email", data.email);
+      if (data.mobile !== undefined) formData.append("mobile", data.mobile);
+      formData.append("avatar", data.avatarFile);
+      return api.patch<{ statusCode: number; message: string; data: CurrentUser }>("/admin/profile", formData);
+    }
+    const { avatarFile, ...jsonData } = data;
+    return api.patch<{ statusCode: number; message: string; data: CurrentUser }>("/admin/profile", jsonData);
+  },
+
+  changePassword(data: { currentPassword?: string; newPassword: string }) {
+    return api.put<{ statusCode: number; message: string }>("/admin/profile/password", data);
   },
 };
