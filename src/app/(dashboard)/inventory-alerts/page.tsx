@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, Suspense } from "react";
 import {
   FiBell,
   FiAlertOctagon,
@@ -18,7 +18,7 @@ import type { InventoryListParams } from "@/types/inventory.types";
 import InventoryAlertTable from "@/features/inventory/components/InventoryAlertTable";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
-export default function InventoryAlertsPage() {
+function InventoryAlertsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -196,5 +196,18 @@ export default function InventoryAlertsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function InventoryAlertsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
+        <p className="mt-3 text-sm font-medium text-slate-500">Loading alerts...</p>
+      </div>
+    }>
+      <InventoryAlertsContent />
+    </Suspense>
   );
 }

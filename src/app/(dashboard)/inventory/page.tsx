@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { FiPlus, FiPackage, FiAlertTriangle, FiXCircle, FiDollarSign, FiAlertCircle } from "react-icons/fi";
 import { useInventoryItems, useDeleteInventory, useAdjustInventory, useReserveInventory, useReleaseInventory } from "@/hooks/useInventory";
@@ -27,10 +27,6 @@ export default function InventoryPage() {
     search: debouncedSearch || undefined,
     status: statusFilter === "all" ? undefined : (statusFilter as "in_stock" | "low_stock" | "out_of_stock"),
   };
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
 
   const { data, isLoading, error, isRefetching, refetch } = useInventoryItems(params);
   const { mutate: deleteItem } = useDeleteInventory();
@@ -99,7 +95,7 @@ export default function InventoryPage() {
 
       <InventoryFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); }}
+        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         onRefresh={() => refetch()}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, Suspense } from "react";
 import {
   FiActivity,
   FiArrowUp,
@@ -16,7 +16,7 @@ import type { InventoryListParams } from "@/types/inventory.types";
 import StockMovementTable from "@/features/inventory/components/StockMovementTable";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
-export default function StockMovementsPage() {
+function StockMovementsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -189,5 +189,18 @@ export default function StockMovementsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function StockMovementsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
+        <p className="mt-3 text-sm font-medium text-slate-500">Loading movements...</p>
+      </div>
+    }>
+      <StockMovementsContent />
+    </Suspense>
   );
 }

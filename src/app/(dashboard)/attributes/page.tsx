@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiSliders, FiCheckCircle, FiAlertCircle, FiXCircle } from "react-icons/fi";
 import { useAttributes, useDeleteAttribute } from "@/hooks/useAttributes";
@@ -30,11 +30,7 @@ export default function AttributesPage() {
 
   const { mutateAsync: deleteAttribute, isPending: isDeleting } = useDeleteAttribute();
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
-
-  const handleSearch = useCallback((v: string) => { setSearch(v); }, [setSearch]);
+  const handleSearch = useCallback((v: string) => { setSearch(v); setPage(1); }, [setSearch]);
   const handleFilterable = useCallback((v: string) => { setIsFilterable(v); setPage(1); }, []);
 
   const handleDelete = useCallback(async () => {

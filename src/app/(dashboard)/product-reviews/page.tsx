@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { FiAlertCircle, FiStar } from "react-icons/fi";
 import { useReviews, useDeleteReview, useApproveReview, useRejectReview, useHideReview, useReviewAnalytics } from "@/hooks/useReviews";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
@@ -30,10 +30,6 @@ export default function ProductReviewsPage() {
     ...(statusFilter !== "All" ? { status: statusFilter as ReviewListParams["status"] } : {}),
     ...(ratingFilter !== undefined ? { rating: ratingFilter } : {}),
   };
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
 
   const { data, isLoading, error, isRefetching, refetch } = useReviews(params);
   const { data: analyticsData, isLoading: isAnalyticsLoading } = useReviewAnalytics();
@@ -146,7 +142,7 @@ export default function ProductReviewsPage() {
 
       <ReviewFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); }}
+        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         ratingFilter={ratingFilter}

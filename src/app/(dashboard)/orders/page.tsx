@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   FiShoppingCart,
   FiClock,
@@ -37,10 +37,6 @@ export default function OrdersPage() {
     search: debouncedSearch || undefined,
     ...(statusFilter !== "All" ? { status: statusFilter as OrderStatus } : {}),
   };
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
 
   const { data, isLoading, error, isRefetching, refetch } = useOrders(params);
   const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateOrderStatus();
@@ -132,7 +128,7 @@ export default function OrdersPage() {
 
       <OrderFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); }}
+        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         onRefresh={() => refetch()}

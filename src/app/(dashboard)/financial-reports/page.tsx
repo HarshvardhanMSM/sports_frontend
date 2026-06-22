@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { FiRefreshCw, FiAlertCircle, FiBarChart2 } from "react-icons/fi";
 import { useFinancialDashboard, useRevenueReport, useExpenseReport, useSettlementReport } from "@/hooks/useFinancialReport";
-import type { DateRange, DateRangePreset } from "@/types/financial-report.types";
+import type { DateRange } from "@/types/financial-report.types";
 import FinancialKPICards from "@/components/finance/FinancialKPICards";
 import DateRangeFilter from "@/components/finance/DateRangeFilter";
 import RevenueChart from "@/components/finance/RevenueChart";
@@ -18,11 +18,11 @@ function toDateParam(d: DateRange): Record<string, string> {
 }
 
 export default function FinancialReportsPage() {
-  const [dateRange, setDateRange] = useState<DateRange>({
+  const [dateRange, setDateRange] = useState<DateRange>(() => ({
     preset: "last30",
     from: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10),
     to: new Date().toISOString().slice(0, 10),
-  });
+  }));
 
   const dateParams = useMemo(() => toDateParam(dateRange), [dateRange]);
 

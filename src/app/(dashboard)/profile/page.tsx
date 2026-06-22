@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   FiAlertCircle,
   FiUser,
   FiShield,
-  FiKey,
   FiMail,
   FiLock,
   FiCheck,
@@ -15,7 +14,6 @@ import {
   FiEyeOff,
   FiSave,
   FiUpload,
-  FiPhone,
 } from "react-icons/fi";
 import {
   useCurrentUser,
@@ -37,22 +35,7 @@ function getInitials(name: string) {
     .slice(0, 2);
 }
 
-/** "products.read" → { module: "Products", action: "Read" } */
-function parsePerm(perm: string) {
-  const parts = perm.split(".");
-  const module = parts[0]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? perm;
-  const action = parts[1]?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "";
-  return { module, action };
-}
 
-const ACTION_COLORS: Record<string, string> = {
-  Read:    "bg-blue-50 text-blue-700 ring-blue-200",
-  Write:   "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  Create:  "bg-violet-50 text-violet-700 ring-violet-200",
-  Update:  "bg-amber-50 text-amber-700 ring-amber-200",
-  Delete:  "bg-rose-50 text-rose-700 ring-rose-200",
-  Manage:  "bg-indigo-50 text-indigo-700 ring-indigo-200",
-};
 
 const AVATAR_GRADIENT = "from-indigo-500 via-violet-500 to-purple-600";
 
@@ -120,8 +103,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"edit-profile" | "change-password">("edit-profile");
   
   // Permissions tab view & search states
-  const [permSearch, setPermSearch] = useState("");
-  const [permView, setPermView] = useState<"grid" | "list">("grid");
+  const [permSearch] = useState("");
 
   // Edit Profile form state
   const [name, setName] = useState("");
@@ -129,13 +111,13 @@ export default function ProfilePage() {
   const [avatar, setAvatar] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    return () => {
-      if (avatar && avatar.startsWith("blob:")) {
-        URL.revokeObjectURL(avatar);
-      }
-    };
-  }, [avatar]);
+  const [profileFormLoaded, setProfileFormLoaded] = useState(false);
+  if (profile && !profileFormLoaded) {
+    setProfileFormLoaded(true);
+    setName(profile.name || "");
+    setEmail(profile.email || "");
+    setAvatar(profile.avatar || "");
+  }
 
   // Change Password form state
   const [oldPassword, setOldPassword] = useState("");
@@ -153,14 +135,6 @@ export default function ProfilePage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  useEffect(() => {
-    if (profile) {
-      setName(profile.name || "");
-      setEmail(profile.email || "");
-      setAvatar(profile.avatar || "");
-    }
-  }, [profile]);
-
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
@@ -172,8 +146,8 @@ export default function ProfilePage() {
       });
       showToast("success", "Profile updated successfully!");
       setAvatarFile(null);
-    } catch (err: any) {
-      showToast("error", err?.message || "Failed to update profile.");
+    } catch (err) {
+      showToast("error", err instanceof Error ? err.message : "Failed to update profile.");
     }
   };
 
@@ -190,10 +164,10 @@ export default function ProfilePage() {
 
     setAvatarFile(file);
     const previewUrl = URL.createObjectURL(file);
-    if (avatar && avatar.startsWith("blob:")) {
-      URL.revokeObjectURL(avatar);
-    }
-    setAvatar(previewUrl);
+    setAvatar((prev) => {
+      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return previewUrl;
+    });
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -216,8 +190,8 @@ export default function ProfilePage() {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err: any) {
-      showToast("error", err?.message || "Failed to change password.");
+    } catch (err) {
+      showToast("error", err instanceof Error ? err.message : "Failed to change password.");
     }
   };
 
@@ -231,14 +205,6 @@ export default function ProfilePage() {
   const filteredPerms = safePerms.filter((p) =>
     p.toLowerCase().includes(permSearch.toLowerCase())
   );
-
-  // Group permissions by module
-  const groupedPerms = filteredPerms.reduce<Record<string, string[]>>((acc, perm) => {
-    const { module } = parsePerm(perm);
-    if (!acc[module]) acc[module] = [];
-    acc[module].push(perm);
-    return acc;
-  }, {});
 
 
   /* ── Loading ── */

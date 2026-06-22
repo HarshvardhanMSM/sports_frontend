@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiGrid, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useSubCategories, useDeleteSubCategory } from "@/hooks/useSubCategories";
@@ -32,11 +32,7 @@ export default function SubCategoriesPage() {
 
   const { mutateAsync: deleteSubCat, isPending: isDeleting } = useDeleteSubCategory();
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
-
-  const handleSearch = useCallback((v: string) => { setSearch(v); }, [setSearch]);
+  const handleSearch = useCallback((v: string) => { setSearch(v); setPage(1); }, [setSearch]);
   const handleCategory = useCallback((v: string) => { setCategoryId(v); setPage(1); }, []);
   const handleIsActive = useCallback((v: string) => { setIsActive(v); setPage(1); }, []);
 

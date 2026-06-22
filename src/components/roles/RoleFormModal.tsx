@@ -85,14 +85,15 @@ export default function RoleFormModal({
     [allRoles],
   );
 
-  // Re-fetch name/description when clone changes
-  useEffect(() => {
-    if (!cloneFromId) return;
+  // Re-fetch permissions when clone selection changes
+  const [prevCloneFromId, setPrevCloneFromId] = useState("");
+  if (cloneFromId && cloneFromId !== prevCloneFromId) {
+    setPrevCloneFromId(cloneFromId);
     const target = allRoles.find((r) => r.id === cloneFromId);
     if (target) {
-      handleClone(cloneFromId);
+      setSelectedSlugs(new Set(permissionsToSlugs(target.permissions)));
     }
-  }, [cloneFromId, allRoles, handleClone]);
+  }
 
   // Escape key
   useEffect(() => {

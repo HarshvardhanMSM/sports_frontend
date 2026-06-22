@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { FiPlus, FiBriefcase, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useBrands, useDeleteBrand } from "@/hooks/useBrands";
@@ -31,10 +31,6 @@ export default function BrandsPage() {
 
   const { data, isLoading, error, isRefetching, refetch } = useBrands(params);
   const { mutateAsync: deleteBrand, isPending: isDeleting } = useDeleteBrand();
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
 
   const items = data?.data?.items ?? [];
   const total = data?.data?.meta?.total ?? 0;
@@ -99,7 +95,7 @@ export default function BrandsPage() {
 
       <BrandFilters
         search={searchTerm}
-        onSearchChange={(v) => { setSearchTerm(v); }}
+        onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
         statusFilter={statusFilter}
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         onRefresh={() => refetch()}

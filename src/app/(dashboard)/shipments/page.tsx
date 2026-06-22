@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState } from "react";
 import { FiTruck, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { useShipments, useUpdateShipmentStatus } from "@/hooks/useShipments";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
@@ -30,10 +30,6 @@ export default function ShipmentsPage() {
 
   const { data, isLoading, error, isRefetching, refetch } = useShipments(params);
   const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateShipmentStatus();
-
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
 
   const listData = data?.data;
   const items = listData?.items ?? [];
@@ -111,7 +107,7 @@ export default function ShipmentsPage() {
 
           <ShipmentFilters
             search={search}
-            onSearchChange={(v) => { setSearch(v); }}
+            onSearchChange={(v) => { setSearch(v); setPage(1); }}
             statusFilter={statusFilter}
             onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
             onRefresh={() => refetch()}

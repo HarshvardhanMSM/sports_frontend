@@ -21,8 +21,8 @@ export interface WishlistItem {
   id: string;
   productId: string;
   variantId: string;
-  product: { id: string; name: string; imageUrl?: string }; 
-  variant: { id: string; sku: string; price: string };
+  product?: { id: string; name: string; imageUrl?: string } | null; 
+  variant?: { id: string; sku: string; price: string } | null;
   addedAt: string;
 }
 

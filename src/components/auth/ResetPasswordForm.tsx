@@ -36,17 +36,17 @@ export default function ResetPasswordForm({ email }: ResetPasswordFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const [passwordValue, setPasswordValue] = useState("");
+
   const {
     register,
     handleSubmit,
-    watch,
+    getValues,
     formState: { errors },
   } = useForm<ResetFormValues>({
     resolver: zodResolver(resetSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
   });
-
-  const newPassword = watch("newPassword", "");
 
   const onSubmit = (data: ResetFormValues) => {
     resetPassword(
@@ -95,7 +95,7 @@ export default function ResetPasswordForm({ email }: ResetPasswordFormProps) {
         <div className="relative">
           <FiLock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
           <input
-            {...register("newPassword")}
+            {...register("newPassword", { onChange: (e) => setPasswordValue(e.target.value) })}
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
             placeholder="Create a strong password"
@@ -116,7 +116,7 @@ export default function ResetPasswordForm({ email }: ResetPasswordFormProps) {
             {errors.newPassword.message}
           </p>
         )}
-        <PasswordStrength password={newPassword} />
+        <PasswordStrength password={passwordValue} />
       </div>
 
       {/* Confirm Password */}

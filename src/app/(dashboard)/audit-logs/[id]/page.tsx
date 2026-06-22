@@ -62,7 +62,7 @@ export default function AuditLogDetailPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <AuditDetailsCard entry={entry as any} />
+            <AuditDetailsCard entry={entry} />
             {(entry.oldValues || entry.newValues) && (
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-6 py-5 border-b border-slate-100">

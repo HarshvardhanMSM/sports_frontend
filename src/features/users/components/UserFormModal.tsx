@@ -56,15 +56,16 @@ export default function UserFormModal({ mode, user, roles, onClose, onConfirm, i
     setAvatar(previewUrl);
   };
 
-  useEffect(() => {
-    if (mode === "edit" && user) {
-      setName(user.name);
-      setEmail(user.email);
-      setIsActive(user.isActive);
-      setAvatar(user.avatar ?? "");
-      setSelectedRoleIds(user.roles.map((r) => r.id));
-    }
-  }, [mode, user]);
+  // Populate form fields once on mount in edit mode
+  const [initialized, setInitialized] = useState(false);
+  if (mode === "edit" && user && !initialized) {
+    setInitialized(true);
+    setName(user.name);
+    setEmail(user.email);
+    setIsActive(user.isActive);
+    setAvatar(user.avatar ?? "");
+    setSelectedRoleIds(user.roles.map((r) => r.id));
+  }
 
   const handleSubmit = () => {
     if (mode === "create") {

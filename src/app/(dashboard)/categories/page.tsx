@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiLayers, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useCategories, useDeleteCategory } from "@/hooks/useCategories";
@@ -30,12 +30,9 @@ export default function CategoriesPage() {
 
   const { mutateAsync: deleteCategory, isPending: isDeleting } = useDeleteCategory();
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
-
   const handleSearch = useCallback((v: string) => {
     setSearch(v);
+    setPage(1);
   }, [setSearch]);
 
   const handleIsActive = useCallback((v: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import {
@@ -44,9 +44,6 @@ export default function CustomersPage() {
   const params: CustomerListParams = { page, limit: 10 };
   if (debouncedQuery) params.search = debouncedQuery;
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedQuery]);
   if (isActive) params.isActive = isActive === "true";
   if (isEmailVerified) params.isEmailVerified = isEmailVerified === "true";
 
@@ -147,7 +144,7 @@ export default function CustomersPage() {
             type="text"
             placeholder="Search by name or email..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
             className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-400"
           />
         </div>

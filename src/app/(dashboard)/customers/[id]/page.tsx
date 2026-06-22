@@ -14,6 +14,7 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 import { useCustomer, useCustomerWishlist, useToggleCustomerActive, useDeleteCustomer } from "@/hooks/useCustomers";
+import type { WishlistItem } from "@/types/customer.types";
 import { resolveImageUrl } from "@/lib/image";
 
 export default function CustomerDetailPage() {
@@ -25,13 +26,13 @@ export default function CustomerDetailPage() {
   const { data: wishlistRes } = useCustomerWishlist(id ?? null);
 
   const customer = res?.data;
-  const wishlistItems = (() => {
+  const wishlistItems: WishlistItem[] = (() => {
     if (!wishlistRes) return [];
     const d = wishlistRes as unknown as Record<string, unknown>;
-    const nested = d.data as Array<unknown> | { items: Array<unknown> } | undefined;
+    const nested = d.data as WishlistItem[] | { items: WishlistItem[] } | undefined;
     if (Array.isArray(nested)) return nested;
     if (nested && "items" in nested && Array.isArray(nested.items)) return nested.items;
-    if ("items" in d && Array.isArray(d.items)) return d.items;
+    if ("items" in d && Array.isArray(d.items)) return d.items as WishlistItem[];
     return [];
   })();
 
@@ -222,21 +223,21 @@ export default function CustomerDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {wishlistItems.map((item) => (
+                  {wishlistItems.map((item: WishlistItem) => (
                     <div key={item.id} className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 hover:bg-slate-50">
                       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-400">
-                        {resolveImageUrl(item.product.imageUrl) ? (
+                        {item.product && resolveImageUrl(item.product.imageUrl) ? (
                           <img src={resolveImageUrl(item.product.imageUrl)} alt={item.product.name} className="h-full w-full object-cover rounded-lg" />
                         ) : (
                           <FiHeart className="size-5 text-slate-300" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-800 truncate">{item.product.name}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">SKU: {item.variant.sku}</p>
+                        <p className="text-sm font-semibold text-slate-800 truncate">{item.product?.name || "Unknown Product"}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">SKU: {item.variant?.sku || "N/A"}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-bold text-slate-800">${(Number(item.variant.price) || 0).toFixed(2)}</p>
+                        <p className="text-sm font-bold text-slate-800">${(Number(item.variant?.price) || 0).toFixed(2)}</p>
                         <p className="text-xs text-slate-400 mt-0.5">{new Date(item.addedAt).toLocaleDateString()}</p>
                       </div>
                     </div>

@@ -30,13 +30,14 @@ export function useFuzzySearch<T>(
   }, [query, debounceMs]);
 
   // Nested key helper: e.g. "profile.name"
-  const getNestedValue = (obj: any, path: string): string => {
+  const getNestedValue = (obj: Record<string, unknown>, path: string): string => {
     if (!obj) return "";
     const parts = path.split(".");
-    let current = obj;
+    let current: Record<string, unknown> = obj;
     for (const part of parts) {
-      if (current[part] === undefined || current[part] === null) return "";
-      current = current[part];
+      const val = current[part];
+      if (val == null) return "";
+      current = val as Record<string, unknown>;
     }
     return String(current);
   };
@@ -93,7 +94,7 @@ export function useFuzzySearch<T>(
       .map((item) => {
         let maxScore = 0;
         for (const key of keys) {
-          const val = typeof key === "string" ? getNestedValue(item, key) : String(item[key]);
+          const val = typeof key === "string" ? getNestedValue(item as unknown as Record<string, unknown>, key) : String(item[key as keyof T]);
           if (val) {
             const score = fuzzyMatchScore(val, debouncedQuery);
             if (score > maxScore) {

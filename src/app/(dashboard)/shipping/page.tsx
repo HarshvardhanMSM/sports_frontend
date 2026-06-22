@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   FiTruck,
   FiNavigation,
@@ -74,10 +74,6 @@ export default function ShippingPage() {
     isServerSide: false,
   });
 
-  useEffect(() => {
-    setPage(1);
-  }, [search]);
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * PAGE_SIZE;
@@ -145,7 +141,7 @@ export default function ShippingPage() {
             type="text"
             placeholder="Search by shipment ID, customer, tracking #..."
             value={search}
-            onChange={(e) => { setSearch(e.target.value); }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
         </div>

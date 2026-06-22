@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState, useEffect } from "react";
+import React, { use, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiArrowLeft, FiEdit, FiBriefcase, FiLayers, FiTag } from "react-icons/fi";
@@ -18,18 +18,16 @@ export default function ViewProductPage({ params }: ViewProductPageProps) {
   const { data, isLoading, isError } = useProduct(id);
 
   const product = data?.data;
-  const [activeImage, setActiveImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (product) {
-      if (product.images && product.images.length > 0) {
-        const primary = product.images.find((img) => img.isPrimary) || product.images[0];
-        setActiveImage(primary.imageUrl);
-      } else if (product.image) {
-        setActiveImage(product.image);
-      }
+  const defaultImage = useMemo(() => {
+    if (!product) return null;
+    if (product.images && product.images.length > 0) {
+      const primary = product.images.find((img) => img.isPrimary) || product.images[0];
+      return primary.imageUrl;
     }
+    return product.image ?? null;
   }, [product]);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const displayImage = activeImage ?? defaultImage;
 
   if (!id || id === "undefined") {
     return <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center font-sans">
@@ -104,14 +102,14 @@ export default function ViewProductPage({ params }: ViewProductPageProps) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          {(activeImage || product.image) && (
+          {displayImage && (
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Product Media
               </h3>
               <div className="relative aspect-square w-full rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center">
                 <img
-                  src={resolveImageUrl(activeImage || product.image)}
+                  src={resolveImageUrl(displayImage)}
                   alt={product.name}
                   className="max-h-full max-w-full object-contain"
                 />
@@ -124,7 +122,7 @@ export default function ViewProductPage({ params }: ViewProductPageProps) {
                       key={img.id}
                       onClick={() => setActiveImage(img.imageUrl)}
                       className={`relative size-16 rounded-lg overflow-hidden border shrink-0 transition-all ${
-                        activeImage === img.imageUrl
+                        displayImage === img.imageUrl
                           ? "border-indigo-600 ring-2 ring-indigo-50"
                           : "border-slate-200 hover:border-slate-350"
                       }`}

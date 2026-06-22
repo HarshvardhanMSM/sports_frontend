@@ -31,7 +31,7 @@ export const UserService = {
   },
 
   async updateUser(id: string, data: UpdateUserRequest) {
-    let currentData = { ...data };
+    const currentData = { ...data };
     if (data.avatarFile) {
       const formData = new FormData();
       formData.append("avatar", data.avatarFile);

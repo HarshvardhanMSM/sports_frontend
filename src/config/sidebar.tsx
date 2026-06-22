@@ -183,12 +183,12 @@ export const Sidebar = () => {
             href="/customer-support"
             open={open}
           />
-          <Option
+          {/* <Option
             Icon={FiHeart}
             title="Wishlist Analytics"
             href="/wishlist-analytics"
             open={open}
-          />
+          /> */}
 
           {/* ── MARKETING ─────────────────────────────── */}
           {/* <SectionLabel label="MARKETING" open={open} />

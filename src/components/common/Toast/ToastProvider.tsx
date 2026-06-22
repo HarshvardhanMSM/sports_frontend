@@ -230,9 +230,7 @@ function ToastPortal({
   toasts: ToastItem[];
   onDismiss: (id: string) => void;
 }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
+  if (typeof document === "undefined") return null;
 
   return createPortal(
     <div

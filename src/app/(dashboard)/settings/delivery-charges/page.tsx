@@ -96,17 +96,17 @@ export default function DeliveryChargesPage() {
     ? allCharges.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
     : allCharges;
 
-  const openCreate = useCallback(() => {
+  const openCreate = () => {
     setEditing(null);
     setShowForm(true);
-  }, []);
+  };
 
-  const openEdit = useCallback((c: DeliveryCharge) => {
+  const openEdit = (c: DeliveryCharge) => {
     setEditing(c);
     setShowForm(true);
-  }, []);
+  };
 
-  const handleFormSubmit = useCallback(async (data: FormValues) => {
+  const handleFormSubmit = async (data: FormValues) => {
     if (editing) {
       await updateCharge({ id: editing.id, data });
     } else {
@@ -114,17 +114,17 @@ export default function DeliveryChargesPage() {
     }
     setShowForm(false);
     setEditing(null);
-  }, [editing, createCharge, updateCharge]);
+  };
 
-  const handleDeleteConfirm = useCallback(async () => {
+  const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     await deleteCharge(deleteTarget.id);
     setDeleteTarget(null);
-  }, [deleteTarget, deleteCharge]);
+  };
 
-  const handleToggle = useCallback(async (id: string) => {
+  const handleToggle = async (id: string) => {
     await toggleCharge(id);
-  }, [toggleCharge]);
+  };
 
   const isFormPending = isCreating || isUpdating;
 
@@ -413,10 +413,10 @@ function FormModal({
             <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Active</label>
             <button
               type="button"
-              onClick={() => setValue("isActive", !watch("isActive"))}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${watch("isActive") ? "bg-emerald-500" : "bg-slate-300"}`}
+              onClick={() => setValue("isActive", !getValues("isActive"))}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${getValues("isActive") ? "bg-emerald-500" : "bg-slate-300"}`}
             >
-              <span className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform ${watch("isActive") ? "translate-x-[22px]" : "translate-x-[2px]"}`} />
+              <span className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform ${getValues("isActive") ? "translate-x-[22px]" : "translate-x-[2px]"}`} />
             </button>
           </div>
 
