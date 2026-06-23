@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiSliders, FiCheckCircle, FiAlertCircle, FiXCircle } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useAttributes, useDeleteAttribute } from "@/hooks/useAttributes";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import AttributeTable from "@/features/attributes/components/AttributeTable";
@@ -78,9 +79,11 @@ export default function AttributesPage() {
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Product Attributes</h1>
           <p className="text-sm text-slate-500">Define configurable attributes like size, color, and material for products.</p>
         </div>
-        <Link href="/attributes/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
-          <FiPlus className="size-4" /> Add Attribute
-        </Link>
+        <Can permission="attribute.create">
+          <Link href="/attributes/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+            <FiPlus className="size-4" /> Add Attribute
+          </Link>
+        </Can>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">

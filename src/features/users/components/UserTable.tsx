@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { FiEye, FiEdit2, FiTrash2, FiUsers, FiShield } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import type { User } from "@/types/user.types";
 import { SUPER_ADMIN_ROLE } from "@/types/role.types";
 import { resolveImageUrl } from "@/lib/image";
@@ -115,27 +116,33 @@ export default function UserTable({ users, onEdit, onAssignRoles, onDelete }: Pr
                         >
                           <FiEye className="size-4" />
                         </Link>
-                        <button
-                          onClick={() => onEdit(user)}
-                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                          title="Edit"
-                        >
-                          <FiEdit2 className="size-4" />
-                        </button>
-                        <button
-                          onClick={() => onAssignRoles(user)}
-                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
-                          title="Assign Roles"
-                        >
-                          <FiUsers className="size-4" />
-                        </button>
-                        <button
-                          onClick={() => onDelete(user)}
-                          className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
-                          title="Delete"
-                        >
-                          <FiTrash2 className="size-4" />
-                        </button>
+                        <Can permission="admin.update">
+                          <button
+                            onClick={() => onEdit(user)}
+                            className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                            title="Edit"
+                          >
+                            <FiEdit2 className="size-4" />
+                          </button>
+                        </Can>
+                        <Can permission="roles.manage">
+                          <button
+                            onClick={() => onAssignRoles(user)}
+                            className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
+                            title="Assign Roles"
+                          >
+                            <FiUsers className="size-4" />
+                          </button>
+                        </Can>
+                        <Can permission="admin.delete">
+                          <button
+                            onClick={() => onDelete(user)}
+                            className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
+                            title="Delete"
+                          >
+                            <FiTrash2 className="size-4" />
+                          </button>
+                        </Can>
                       </div>
                     )}
                   </td>

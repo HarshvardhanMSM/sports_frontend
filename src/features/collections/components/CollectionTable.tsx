@@ -2,6 +2,7 @@
 
 import React from "react";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import type { Collection } from "@/types/collection.types";
 import Badge from "@/components/ui/badge/Badge";
 import { getImageUrl } from "@/lib/utils";
@@ -52,8 +53,12 @@ export default function CollectionTable({ collections, onEdit, onDelete, onView 
               <td className="px-6 py-4 whitespace-nowrap text-right text-xs">
                 <div className="flex items-center justify-end gap-1">
                   <button onClick={() => onView(col.id)} className="rounded-lg p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"><FiEye className="size-4" /></button>
-                  <button onClick={() => onEdit(col.id)} className="rounded-lg p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"><FiEdit2 className="size-4" /></button>
-                  <button onClick={() => onDelete(col.id)} className="rounded-lg p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"><FiTrash2 className="size-4" /></button>
+                  <Can permission="collection.update">
+                    <button onClick={() => onEdit(col.id)} className="rounded-lg p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"><FiEdit2 className="size-4" /></button>
+                  </Can>
+                  <Can permission="collection.delete">
+                    <button onClick={() => onDelete(col.id)} className="rounded-lg p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"><FiTrash2 className="size-4" /></button>
+                  </Can>
                 </div>
               </td>
             </tr>

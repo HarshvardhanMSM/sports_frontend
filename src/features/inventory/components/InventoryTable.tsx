@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { FiEye, FiEdit2, FiTrash2, FiMinusCircle, FiLock, FiUnlock, FiMoreVertical } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import type { InventoryItem } from "@/types/inventory.types";
 import Badge from "@/components/ui/badge/Badge";
 
@@ -72,22 +73,26 @@ function ActionDropdown({ item, onDelete, deletingId, onAdjust, onReserve, onRel
             <FiEye className="size-4 text-slate-400" />
             View Details
           </Link>
-          <Link
-            href={`/inventory/${item.id}/edit`}
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-          >
-            <FiEdit2 className="size-4 text-slate-400" />
-            Edit
-          </Link>
+          <Can permission="inventory.update">
+            <Link
+              href={`/inventory/${item.id}/edit`}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <FiEdit2 className="size-4 text-slate-400" />
+              Edit
+            </Link>
+          </Can>
           <div className="border-t border-slate-100 my-1" />
-          <button
-            onClick={() => { setOpen(false); onAdjust?.(item); }}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
-          >
-            <FiMinusCircle className="size-4 text-slate-400" />
-            Adjust Stock
-          </button>
+          <Can permission="inventory.adjust">
+            <button
+              onClick={() => { setOpen(false); onAdjust?.(item); }}
+              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+            >
+              <FiMinusCircle className="size-4 text-slate-400" />
+              Adjust Stock
+            </button>
+          </Can>
           <button
             onClick={() => { setOpen(false); onReserve?.(item); }}
             disabled={item.availableQuantity <= 0}
@@ -113,14 +118,16 @@ function ActionDropdown({ item, onDelete, deletingId, onAdjust, onReserve, onRel
             Release Stock
           </button>
           <div className="border-t border-slate-100 my-1" />
-          <button
-            onClick={() => { setOpen(false); onDelete?.(item.id); }}
-            disabled={deletingId === item.id}
-            className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors text-left disabled:opacity-40"
-          >
-            <FiTrash2 className="size-4" />
-            Delete
-          </button>
+          <Can permission="inventory.delete">
+            <button
+              onClick={() => { setOpen(false); onDelete?.(item.id); }}
+              disabled={deletingId === item.id}
+              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors text-left disabled:opacity-40"
+            >
+              <FiTrash2 className="size-4" />
+              Delete
+            </button>
+          </Can>
         </div>
       )}
     </div>

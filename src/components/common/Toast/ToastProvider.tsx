@@ -231,10 +231,7 @@ function ToastPortal({
   onDismiss: (id: string) => void;
 }) {
   const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) return null;
 

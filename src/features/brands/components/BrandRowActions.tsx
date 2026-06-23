@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { FiMoreHorizontal, FiEdit, FiTrash2 } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 
 interface BrandRowActionsProps {
   id: string;
@@ -40,26 +41,28 @@ export default function BrandRowActions({
 
       {open && (
         <div className="absolute right-0 z-50 mt-1 w-36 origin-top-right rounded-lg bg-white p-1 shadow-lg border border-slate-200 focus:outline-none">
-          <Link
-            href={`/brands/edit/${id}`}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-          >
-            <FiEdit className="size-3.5" />
-            Edit
-          </Link>
-          <button
-            type="button"
-            onClick={() => {
-              // if (confirm("Are you sure you want to delete this brand?")) {
-              // }
-              onDelete(id);
-              setOpen(false);
-            }}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-          >
-            <FiTrash2 className="size-3.5" />
-            Delete
-          </button>
+          <Can permission="brand.update">
+            <Link
+              href={`/brands/edit/${id}`}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+            >
+              <FiEdit className="size-3.5" />
+              Edit
+            </Link>
+          </Can>
+          <Can permission="brand.delete">
+            <button
+              type="button"
+              onClick={() => {
+                onDelete(id);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+            >
+              <FiTrash2 className="size-3.5" />
+              Delete
+            </button>
+          </Can>
         </div>
       )}
     </div>

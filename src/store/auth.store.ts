@@ -10,11 +10,15 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  permissions: string[];
+  isPermissionsLoaded: boolean;
 }
 
 interface AuthActions {
   setAuth: (user: User, accessToken: string, refreshToken: string) => void;
   setTokens: (accessToken: string, refreshToken?: string) => void;
+  setProfile: (user: User) => void;
+  hasPermission: (slug: string) => boolean;
   logout: () => void;
 }
 
@@ -25,11 +29,13 @@ const INITIAL: AuthState = {
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
+  permissions: [],
+  isPermissionsLoaded: false,
 };
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...INITIAL,
 
       setAuth: (user, accessToken, refreshToken) => {
@@ -43,6 +49,24 @@ export const useAuthStore = create<AuthStore>()(
           accessToken,
           refreshToken: refreshToken ?? prev.refreshToken,
         }));
+      },
+
+      setProfile: (user) => {
+        set({
+          user,
+          permissions: user.permissions?.map((p) => p.slug) ?? [],
+          isPermissionsLoaded: true,
+        });
+      },
+
+      hasPermission: (slug: string) => {
+        const state = get();
+        if (!state.isPermissionsLoaded) return true;
+        const isSuperAdmin = state.user?.roles?.some(
+          (r) => r.slug === "super_admin",
+        );
+        if (isSuperAdmin) return true;
+        return state.permissions.includes(slug);
       },
 
       logout: () => {

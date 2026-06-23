@@ -10,6 +10,7 @@ import {
   FiEdit2,
   FiTrash2,
 } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 
 interface Page {
   id: string;
@@ -46,9 +47,11 @@ export default function PagesPage() {
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Pages</h1>
           <p className="text-sm text-slate-500">Manage static and dynamic content pages across your storefront.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
-          <FiPlus className="size-4" /> New Page
-        </button>
+        <Can permission="cms.manage">
+          <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+            <FiPlus className="size-4" /> New Page
+          </button>
+        </Can>
       </div>
 
       {/* Stats */}

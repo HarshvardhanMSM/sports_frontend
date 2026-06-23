@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { FiUserPlus, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useAssignRoles, useRemoveRoles } from "@/hooks/useUsers";
 import { useRoles } from "@/hooks/useRoles";
 import { useToast } from "@/components/common/Toast/useToast";
@@ -78,13 +79,15 @@ export default function AdminUsersPage() {
             <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
             Refresh
           </button>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm"
-          >
-            <FiUserPlus className="size-4" />
-            Create User
-          </button>
+          <Can permission="admin.create">
+            <button
+              onClick={() => setShowCreate(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm"
+            >
+              <FiUserPlus className="size-4" />
+              Create User
+            </button>
+          </Can>
         </div>
       </div>
 

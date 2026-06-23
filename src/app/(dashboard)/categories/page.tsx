@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiLayers, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useCategories, useDeleteCategory } from "@/hooks/useCategories";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import CategoryTable from "@/features/categories/components/CategoryTable";
@@ -114,14 +115,16 @@ export default function CategoriesPage() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Categories</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage your sportswear product catalog categories.</p>
         </div>
-        <Link
-          href="/categories/create"
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
-          style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
-        >
-          <FiPlus className="size-4" />
-          Add Category
-        </Link>
+        <Can permission="category.create">
+          <Link
+            href="/categories/create"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+          >
+            <FiPlus className="size-4" />
+            Add Category
+          </Link>
+        </Can>
       </div>
 
       {/* Stats */}

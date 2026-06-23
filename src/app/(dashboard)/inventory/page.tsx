@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { FiPlus, FiPackage, FiAlertTriangle, FiXCircle, FiDollarSign, FiAlertCircle } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useInventoryItems, useDeleteInventory, useAdjustInventory, useReserveInventory, useReleaseInventory } from "@/hooks/useInventory";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { InventoryItem, InventoryListParams } from "@/types/inventory.types";
@@ -69,14 +70,16 @@ export default function InventoryPage() {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inventory Management</h1>
           <p className="text-sm text-slate-500 mt-0.5">Monitor and manage stock levels across all products and SKUs.</p>
         </div>
-        <Link
-          href="/inventory/create"
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
-          style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
-        >
-          <FiPlus className="size-4" />
-          Add Inventory
-        </Link>
+        <Can permission="inventory.create">
+          <Link
+            href="/inventory/create"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+          >
+            <FiPlus className="size-4" />
+            Add Inventory
+          </Link>
+        </Can>
       </div>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

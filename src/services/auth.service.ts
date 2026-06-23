@@ -22,6 +22,7 @@ import type {
   ResetPasswordRequest,
   ResetPasswordResponse,
   User,
+  ProfileResponse,
 } from "@/types/auth.types";
 
 export const AuthService = {
@@ -38,7 +39,7 @@ export const AuthService = {
   },
 
   getProfile(): Promise<User> {
-    return api.get<User>("/admin/profile");
+    return api.get<ProfileResponse>("/admin/profile").then((res) => res.data);
   },
 
   forgotPassword(body: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {

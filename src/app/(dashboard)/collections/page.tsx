@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiPlus, FiGrid, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useCollections, useDeleteCollection } from "@/hooks/useCollections";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import CollectionTable from "@/features/collections/components/CollectionTable";
@@ -80,9 +81,11 @@ export default function CollectionsPage() {
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Collections</h1>
           <p className="text-sm text-slate-500">Group products into curated collections and featured sets.</p>
         </div>
-        <Link href="/collections/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
-          <FiPlus className="size-4" /> Add Collection
-        </Link>
+        <Can permission="collection.create">
+          <Link href="/collections/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+            <FiPlus className="size-4" /> Add Collection
+          </Link>
+        </Can>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">

@@ -2,12 +2,36 @@
 // AUTH TYPES
 // ─────────────────────────────────────────────────────────────────
 
+export interface PermissionInfo {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface RoleInfo {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role?: string;
   avatar?: string;
+  isActive?: boolean;
+  roles?: RoleInfo[];
+  permissions?: PermissionInfo[];
+  lastLoginAt?: string;
+  createdAt?: string;
+}
+
+/** Full envelope from GET /admin/profile */
+export interface ProfileResponse {
+  statusCode: number;
+  message: string;
+  data: User;
 }
 
 // ── Login ─────────────────────────────────────────────────────────────

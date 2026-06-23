@@ -22,7 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${outfit.variable} h-full antialiased`}>
-      <body className="h-full overflow-hidden flex flex-col font-sans bg-slate-50 text-slate-800">
+      <body
+        className="h-full overflow-hidden flex flex-col font-sans bg-slate-50 text-slate-800"
+        suppressHydrationWarning
+      >
         <ErrorBoundary>
           <ToastProvider>
             <QueryProvider>{children}</QueryProvider>
