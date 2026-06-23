@@ -261,16 +261,19 @@ export const Sidebar = () => {
         
 
           {/* ── CONTENT MANAGEMENT ────────────────────── */}
-         {(hasAccess("/pages") || hasAccess("/faq") || hasAccess("/terms") || hasAccess("/privacy") || hasAccess("/contact-messages")) && (
+         {(hasAccess("/cms") || hasAccess("/pages") || hasAccess("/faq") || hasAccess("/terms") || hasAccess("/privacy") || hasAccess("/contact-messages")) && (
             <SectionLabel label="CONTENT MANAGEMENT" open={open} />
           )}
-          {hasAccess("/pages") && (
+          {hasAccess("/cms") && (
+            <Option Icon={FiFile} title="CMS Pages" href="/cms" open={open} />
+          )}
+          {/* {hasAccess("/pages") && (
             <Option Icon={FiFile} title="Pages" href="/pages" open={open} />
-          )}
-          {hasAccess("/faq") && (
+          )} */}
+          {/* {hasAccess("/faq") && (
             <Option Icon={FiHelpCircle} title="FAQ" href="/faq" open={open} />
-          )}
-          {hasAccess("/terms") && (
+          )} */}
+          {/* {hasAccess("/terms") && (
             <Option
               Icon={FiFileText}
               title="Terms & Conditions"
@@ -293,7 +296,7 @@ export const Sidebar = () => {
               href="/contact-messages"
               open={open}
             />
-          )}
+          )} */}
 
           {/* ── FINANCE ──────────────────────────────── */}
           {/* <SectionLabel label="FINANCE" open={open} /> */}

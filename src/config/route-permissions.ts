@@ -27,6 +27,7 @@ export const ROUTE_PERMISSIONS: Record<string, string> = {
   "/customers": "customer.view",
   "/customer-support": "support.view",
 
+  "/cms": "cms.view",
   "/pages": "cms.view",
   "/faq": "cms.view",
   "/terms": "cms.view",

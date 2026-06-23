@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { SubCategory } from "@/types/sub-category.types";
 import { useCategories } from "@/hooks/useCategories";
 import { useSubCategories } from "@/hooks/useSubCategories";
+import CategoryImageUpload from "../../categories/components/CategoryImageUpload";
 
 const subCategorySchema = z.object({
   categoryId: z.string().min(1, "Please select a parent category"),
@@ -22,7 +23,7 @@ type SubCategoryFormValues = z.infer<typeof subCategorySchema>;
 
 interface SubCategoryFormProps {
   initialData?: SubCategory;
-  onSubmit: (data: SubCategoryFormValues) => void;
+  onSubmit: (data: SubCategoryFormValues & { imageFile: File | null }) => void;
   onCancel: () => void;
   isPending?: boolean;
 }
@@ -33,6 +34,7 @@ export default function SubCategoryForm({
   onCancel,
   isPending,
 }: SubCategoryFormProps) {
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const { data: catsData } = useCategories({ limit: 100 });
   const categories = useMemo(() => catsData?.data?.items ?? [], [catsData]);
 
@@ -75,8 +77,12 @@ export default function SubCategoryForm({
     }
   }, [nameVal, setValue, initialData]);
 
+  const handleFormSubmit = (data: SubCategoryFormValues) => {
+    onSubmit({ ...data, imageFile });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-slate-800">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-slate-800">
           {initialData ? "Edit Sub Category" : "Create New Sub Category"}
@@ -123,38 +129,40 @@ export default function SubCategoryForm({
           {errors.slug && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.slug.message}</p>}
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Image URL</label>
-          <input
-            type="text"
-            placeholder="https://cdn.sport.com/sub-categories/..."
-            {...register("image")}
-            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+        <div className="md:col-span-2">
+          <CategoryImageUpload
+            currentImage={initialData?.image}
+            onFileSelect={setImageFile}
+            label="Sub Category Image"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Sort Order</label>
-          <input
-            type="number"
-            min="0"
-            placeholder="0"
-            {...register("sortOrder")}
-            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
-          />
-          {errors.sortOrder && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.sortOrder.message}</p>}
-        </div>
+        {initialData && (
+          <>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Sort Order</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                {...register("sortOrder")}
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+              />
+              {errors.sortOrder && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.sortOrder.message}</p>}
+            </div>
 
-        <div className="flex items-center pt-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              {...register("isActive")}
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 size-4"
-            />
-            <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Active</span>
-          </label>
-        </div>
+            <div className="flex items-center pt-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  {...register("isActive")}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 size-4"
+                />
+                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Active</span>
+              </label>
+            </div>
+          </>
+        )}
 
         <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Description</label>

@@ -10,8 +10,26 @@ export default function CreateSubCategoryPage() {
   const router = useRouter();
   const { mutateAsync: createSubCategory, isPending } = useCreateSubCategory();
 
-  const handleSubmit = async (data: { categoryId: string; name: string; slug?: string; image?: string; description?: string; sortOrder: number; isActive: boolean }) => {
-    await createSubCategory({ ...data, sortOrder: Number(data.sortOrder) });
+  const handleSubmit = async (data: {
+    categoryId: string;
+    name: string;
+    slug?: string;
+    description?: string;
+    sortOrder: number;
+    isActive: boolean;
+    imageFile: File | null;
+  }) => {
+    const fd = new FormData();
+    fd.append("categoryId", data.categoryId);
+    fd.append("name", data.name);
+    if (data.slug) fd.append("slug", data.slug);
+    if (data.description) fd.append("description", data.description);
+    fd.append("sortOrder", String(data.sortOrder));
+    fd.append("isActive", String(data.isActive));
+    if (data.imageFile) {
+      fd.append("image", data.imageFile);
+    }
+    await createSubCategory(fd);
   };
 
   return (

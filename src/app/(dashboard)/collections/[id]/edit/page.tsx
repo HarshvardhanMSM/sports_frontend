@@ -7,6 +7,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import { useCollection, useUpdateCollection } from "@/hooks/useCollections";
 import CollectionForm from "@/features/collections/components/CollectionForm";
 import type { UpdateCollectionRequest } from "@/types/collection.types";
+import { CollectionService } from "@/services/collection.service";
 
 interface EditCollectionPageProps {
   params: Promise<{ id: string }>;
@@ -18,8 +19,30 @@ export default function EditCollectionPage({ params }: EditCollectionPageProps) 
   const { data, isPending: isLoading, isError } = useCollection(id);
   const { mutateAsync: updateCollection, isPending: isSaving } = useUpdateCollection(id);
 
-  const handleSubmit = async (data: UpdateCollectionRequest) => {
-    await updateCollection(data);
+  const handleSubmit = async (formData: {
+    name: string;
+    slug?: string;
+    description?: string;
+    isActive: boolean;
+    bannerImageFile: File | null;
+  }) => {
+    const jsonPayload = {
+      name: formData.name,
+      slug: formData.slug,
+      description: formData.description,
+      isActive: Boolean(formData.isActive),
+    };
+
+    if (formData.bannerImageFile) {
+      const fd = new FormData();
+      fd.append("name", formData.name);
+      if (formData.slug) fd.append("slug", formData.slug);
+      if (formData.description) fd.append("description", formData.description);
+      fd.append("image", formData.bannerImageFile);
+      await CollectionService.updateCollection(id, fd);
+    }
+
+    await updateCollection(jsonPayload as unknown as UpdateCollectionRequest);
   };
 
   if (isLoading) {

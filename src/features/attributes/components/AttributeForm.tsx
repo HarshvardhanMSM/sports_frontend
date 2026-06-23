@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,7 +18,7 @@ type AttributeFormValues = z.infer<typeof attributeSchema>;
 
 interface AttributeFormProps {
   initialData?: Attribute;
-  onSubmit: (data: AttributeFormValues) => void;
+  onSubmit: (data: AttributeFormValues & { values?: string[] }) => void;
   onCancel: () => void;
   isPending?: boolean;
 }
@@ -29,6 +29,14 @@ export default function AttributeForm({
   onCancel,
   isPending,
 }: AttributeFormProps) {
+  const [values, setValues] = useState<string[]>(() => {
+    if (initialData?.values) {
+      return initialData.values.map((v) => v.value);
+    }
+    return [];
+  });
+  const [inputValue, setInputValue] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -55,14 +63,34 @@ export default function AttributeForm({
     }
   }, [nameVal, setValue, initialData]);
 
+  const handleAddValue = () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+    if (values.includes(trimmed)) return;
+    if (values.length >= 10) return;
+    setValues([...values, trimmed]);
+    setInputValue("");
+  };
+
+  const handleRemoveValue = (indexToRemove: number) => {
+    setValues(values.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleFormSubmit = (data: AttributeFormValues) => {
+    onSubmit({
+      ...data,
+      values: values.length > 0 ? values : undefined,
+    });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-slate-800">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-slate-800">
           {initialData ? "Edit Attribute" : "Create New Attribute"}
         </h2>
         <p className="text-xs text-slate-500 mt-1">
-          {initialData ? "Modify your attribute details below." : "Add a new product attribute."}
+          {initialData ? "Modify your attribute details below." : "Add a new product attribute with inline values."}
         </p>
       </div>
 
@@ -120,6 +148,63 @@ export default function AttributeForm({
             <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Required</span>
           </label>
         </div>
+
+          <div className="md:col-span-2 space-y-3">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+              Attribute Values (Optional)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Type a value (e.g. Red) and click Add or press Enter"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddValue();
+                  }
+                }}
+                disabled={values.length >= 10}
+                className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-400"
+              />
+              <button
+                type="button"
+                onClick={handleAddValue}
+                disabled={values.length >= 10 || !inputValue.trim()}
+                className="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-900 transition-colors disabled:bg-slate-150 disabled:text-slate-400"
+              >
+                Add
+              </button>
+            </div>
+            
+            {values.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                {values.map((val, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm"
+                  >
+                    {val}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveValue(idx)}
+                      className="text-slate-400 hover:text-rose-600 font-bold text-sm focus:outline-none ml-1 cursor-pointer transition-colors"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            
+            <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
+              <span>Max 10 values per attribute.</span>
+              <span className={values.length >= 10 ? "text-amber-600 font-bold" : "text-slate-400"}>
+                {values.length} / 10 values added
+              </span>
+            </div>
+          </div>
       </div>
 
       <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">

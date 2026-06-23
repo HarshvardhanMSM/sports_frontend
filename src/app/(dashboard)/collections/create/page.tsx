@@ -11,8 +11,21 @@ export default function CreateCollectionPage() {
   const router = useRouter();
   const { mutateAsync: createCollection, isPending } = useCreateCollection();
 
-  const handleSubmit = async (data: CreateCollectionRequest) => {
-    await createCollection(data);
+  const handleSubmit = async (data: {
+    name: string;
+    slug?: string;
+    description?: string;
+    isActive?: boolean;
+    bannerImageFile: File | null;
+  }) => {
+    const fd = new FormData();
+    fd.append("name", data.name);
+    if (data.slug) fd.append("slug", data.slug);
+    if (data.description) fd.append("description", data.description);
+    if (data.bannerImageFile) {
+      fd.append("image", data.bannerImageFile);
+    }
+    await createCollection(fd as unknown as CreateCollectionRequest);
   };
 
   return (

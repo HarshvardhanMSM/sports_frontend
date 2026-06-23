@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { FiMoreHorizontal, FiEye,  FiTrash2 } from "react-icons/fi";
+import { useDropdownDirection } from "@/hooks/useDropdownDirection";
 
 interface ReviewRowActionsProps {
   id: string;
@@ -21,20 +22,7 @@ export default function ReviewRowActions({
   // onHide,
   onDelete,
 }: ReviewRowActionsProps) {
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const { ref: dropdownRef, open, setOpen, direction } = useDropdownDirection();
 
   const close = () => setOpen(false);
 
@@ -49,7 +37,7 @@ export default function ReviewRowActions({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-1 w-40 origin-top-right rounded-lg bg-white p-1 shadow-lg border border-slate-200 focus:outline-none">
+        <div className={`absolute right-0 z-50 w-40 rounded-lg bg-white p-1 shadow-lg border border-slate-200 focus:outline-none ${direction === "up" ? "bottom-full mb-1 origin-bottom-right" : "top-full mt-1 origin-top-right"}`}>
           <Link
             href={`/product-reviews/${id}`}
             className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900"

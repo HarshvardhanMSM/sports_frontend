@@ -34,11 +34,22 @@ const CARDS: {
   { label: "Profit Margin",      key: "profitMargin",               suffix: "%", color: "from-violet-500 to-violet-600", icon: <FiPercent className="size-5" />, isPercentage: true },
 ];
 
-function formatValue(val: number, isPercentage?: boolean): string {
-  if (isPercentage) return val.toFixed(1);
-  if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + "M";
-  if (val >= 1_000) return (val / 1_000).toFixed(1) + "K";
-  return val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function formatValue(val: number, prefix = "", suffix = "", isPercentage?: boolean): string {
+  if (isPercentage) return `${val.toFixed(1)}${suffix}`;
+  const absVal = Math.abs(val);
+  let formatted = "";
+  if (absVal >= 1_000_000) {
+    formatted = (absVal / 1_000_000).toFixed(1) + "M";
+  } else if (absVal >= 1_000) {
+    formatted = (absVal / 1_000).toFixed(1) + "K";
+  } else {
+    formatted = absVal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  
+  if (val < 0) {
+    return `-${prefix}${formatted}${suffix}`;
+  }
+  return `${prefix}${formatted}${suffix}`;
 }
 
 export default function FinancialKPICards({ data, isLoading }: Props) {
@@ -67,7 +78,7 @@ export default function FinancialKPICards({ data, isLoading }: Props) {
               <span className="text-white">{c.icon}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 leading-none">
-              {c.prefix ?? ""}{formatValue(val, c.isPercentage)}{c.suffix ?? ""}
+              {formatValue(val, c.prefix, c.suffix, c.isPercentage)}
             </p>
             <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">{c.label}</p>
           </div>

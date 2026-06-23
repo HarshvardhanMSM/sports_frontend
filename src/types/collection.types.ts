@@ -3,6 +3,7 @@ export interface Collection {
   name: string;
   slug: string;
   bannerImage?: string;
+  image?: string;
   description?: string;
   isActive: boolean;
   createdAt: string;

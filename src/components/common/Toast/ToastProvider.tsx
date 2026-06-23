@@ -208,8 +208,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   // Cleanup all timers on unmount
   useEffect(() => {
+    const timers = timersRef.current;
     return () => {
-      timersRef.current.forEach(clearTimeout);
+      timers.forEach(clearTimeout);
     };
   }, []);
 
@@ -231,6 +232,7 @@ function ToastPortal({
   onDismiss: (id: string) => void;
 }) {
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) return null;

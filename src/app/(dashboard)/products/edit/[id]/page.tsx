@@ -52,10 +52,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       fd.append("primaryImageIndex", String(primaryImageIndex));
     }
 
-    // Append deleted image IDs if any
-    if (deletedImageIds.length > 0) {
-      fd.append("deletedImageIds", JSON.stringify(deletedImageIds));
-    }
+
 
     // Append primary image ID if an existing one was set as primary
     if (primaryImageId) {
@@ -70,6 +67,13 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     }
 
     try {
+      if (deletedImageIds.length > 0) {
+        const uniqueIds = Array.from(new Set(deletedImageIds));
+        await Promise.all(
+          uniqueIds.map((imageId) => ProductService.deleteProductImage(imageId))
+        );
+      }
+
       await updateMutation.mutateAsync(fd as unknown as UpdateProductRequest);
 
       // Update boolean fields via JSON patch request

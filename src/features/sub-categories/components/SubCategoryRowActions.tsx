@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { FiMoreHorizontal, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
+import { useDropdownDirection } from "@/hooks/useDropdownDirection";
 
 interface SubCategoryRowActionsProps {
   id: string;
@@ -10,16 +10,7 @@ interface SubCategoryRowActionsProps {
 }
 
 export default function SubCategoryRowActions({ id, onDelete }: SubCategoryRowActionsProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  const { ref, open, setOpen, direction } = useDropdownDirection();
 
   return (
     <div className="relative inline-block text-left" ref={ref}>
@@ -32,7 +23,7 @@ export default function SubCategoryRowActions({ id, onDelete }: SubCategoryRowAc
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-1 w-40 origin-top-right rounded-lg bg-white p-1 shadow-lg border border-slate-200">
+        <div className={`absolute right-0 z-50 w-40 rounded-lg bg-white p-1 shadow-lg border border-slate-200 ${direction === "up" ? "bottom-full mb-1 origin-bottom-right" : "top-full mt-1 origin-top-right"}`}>
           <Link
             href={`/sub-categories/${id}`}
             className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"

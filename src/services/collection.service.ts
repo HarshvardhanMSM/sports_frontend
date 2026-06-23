@@ -25,11 +25,11 @@ export const CollectionService = {
     return api.get<CollectionSingleResponse>(`/admin/collections/${id}`);
   },
 
-  createCollection(data: CreateCollectionRequest) {
+  createCollection(data: CreateCollectionRequest | FormData) {
     return api.post<CollectionSingleResponse>("/admin/collections", data);
   },
 
-  updateCollection(id: string, data: UpdateCollectionRequest) {
+  updateCollection(id: string, data: UpdateCollectionRequest | FormData) {
     return api.patch<CollectionSingleResponse>(`/admin/collections/${id}`, data);
   },
 

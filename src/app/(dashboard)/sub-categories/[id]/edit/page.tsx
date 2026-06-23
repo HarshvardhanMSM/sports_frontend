@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
 import { useSubCategory, useUpdateSubCategory } from "@/hooks/useSubCategories";
 import SubCategoryForm from "@/features/sub-categories/components/SubCategoryForm";
+import { SubCategoryService } from "@/services/sub-category.service";
 
 interface EditSubCategoryPageProps {
   params: Promise<{ id: string }>;
@@ -17,8 +18,35 @@ export default function EditSubCategoryPage({ params }: EditSubCategoryPageProps
   const { data, isLoading, isError } = useSubCategory(id);
   const { mutateAsync: updateSubCategory, isPending } = useUpdateSubCategory(id);
 
-  const handleSubmit = async (formData: { categoryId: string; name: string; slug?: string; image?: string; description?: string; sortOrder: number; isActive: boolean }) => {
-    await updateSubCategory({ ...formData, sortOrder: Number(formData.sortOrder) });
+  const handleSubmit = async (formData: {
+    categoryId: string;
+    name: string;
+    slug?: string;
+    description?: string;
+    sortOrder: number;
+    isActive: boolean;
+    imageFile: File | null;
+  }) => {
+    const jsonPayload = {
+      categoryId: formData.categoryId,
+      name: formData.name,
+      slug: formData.slug,
+      description: formData.description,
+      sortOrder: Number(formData.sortOrder),
+      isActive: Boolean(formData.isActive),
+    };
+
+    if (formData.imageFile) {
+      const fd = new FormData();
+      fd.append("categoryId", formData.categoryId);
+      fd.append("name", formData.name);
+      if (formData.slug) fd.append("slug", formData.slug);
+      if (formData.description) fd.append("description", formData.description);
+      fd.append("image", formData.imageFile);
+      await SubCategoryService.updateSubCategory(id, fd);
+    }
+
+    await updateSubCategory(jsonPayload);
   };
 
   if (isLoading) {

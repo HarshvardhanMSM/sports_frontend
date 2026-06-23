@@ -24,11 +24,11 @@ export const SubCategoryService = {
     return api.get<SubCategorySingleResponse>(`/admin/sub-categories/${id}`);
   },
 
-  createSubCategory(data: CreateSubCategoryRequest) {
+  createSubCategory(data: CreateSubCategoryRequest | FormData) {
     return api.post<SubCategorySingleResponse>("/admin/sub-categories", data);
   },
 
-  updateSubCategory(id: string, data: UpdateSubCategoryRequest) {
+  updateSubCategory(id: string, data: UpdateSubCategoryRequest | FormData) {
     return api.patch<SubCategorySingleResponse>(`/admin/sub-categories/${id}`, data);
   },
 

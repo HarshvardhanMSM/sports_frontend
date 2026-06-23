@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { FiUpload, FiX } from "react-icons/fi";
+import { getImageUrl } from "@/lib/utils";
 
 interface BrandImageUploadProps {
   currentLogo?: string;
@@ -43,7 +44,7 @@ export default function BrandImageUpload({ currentLogo, onFileChange }: BrandIma
             >
               <FiX className="size-3" />
             </button>
-            <img src={src} alt="Brand logo preview" className="size-full object-contain" />
+            <img src={getImageUrl(src)} alt="Brand logo preview" className="size-full object-contain" />
           </div>
         )}
         <button

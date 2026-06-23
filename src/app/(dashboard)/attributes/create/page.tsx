@@ -10,8 +10,15 @@ export default function CreateAttributePage() {
   const router = useRouter();
   const { mutateAsync: createAttribute, isPending } = useCreateAttribute();
 
-  const handleSubmit = async (data: { name: string; slug?: string; isFilterable: boolean; isRequired: boolean; sortOrder: number }) => {
-    await createAttribute({ ...data, sortOrder: Number(data.sortOrder) });
+  const handleSubmit = async (data: {
+    name: string;
+    slug?: string;
+    isFilterable: boolean;
+    isRequired: boolean;
+    sortOrder: number;
+    values?: string[];
+  }) => {
+    await createAttribute({ ...data, sortOrder: Number(data.sortOrder), values: data.values });
   };
 
   return (

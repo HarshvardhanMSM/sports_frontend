@@ -7,9 +7,14 @@ import { getImageUrl } from "@/lib/utils";
 interface CategoryImageUploadProps {
   currentImage?: string;
   onFileSelect: (file: File | null) => void;
+  label?: string;
 }
 
-export default function CategoryImageUpload({ currentImage, onFileSelect }: CategoryImageUploadProps) {
+export default function CategoryImageUpload({
+  currentImage,
+  onFileSelect,
+  label = "Category Image",
+}: CategoryImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -32,7 +37,7 @@ export default function CategoryImageUpload({ currentImage, onFileSelect }: Cate
   return (
     <div>
       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-        Category Image
+        {label}
       </label>
       <div className="flex items-start gap-4">
         <div className="relative size-28 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">

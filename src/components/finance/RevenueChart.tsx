@@ -21,73 +21,77 @@ export default function RevenueChart({ data, isLoading }: Props) {
   const items = data ?? [];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-6 py-5 border-b border-slate-100">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[456px] flex flex-col">
+      <div className="px-6 py-5 border-b border-slate-100 shrink-0">
         <h2 className="text-lg font-bold text-slate-800">Revenue Trend</h2>
         <p className="text-xs text-slate-500 mt-0.5">Daily revenue and transaction volume</p>
       </div>
       {isLoading ? (
-        <div className="p-6 animate-pulse"><div className="h-64 bg-slate-200 rounded-xl" /></div>
+        <div className="p-6 flex-1 flex items-center justify-center animate-pulse">
+          <div className="h-[340px] w-full bg-slate-100 rounded-2xl" />
+        </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <FiDollarSign className="size-8 text-slate-300 mb-2" />
           <p className="text-sm font-semibold text-slate-500">No revenue data available</p>
         </div>
       ) : (
-        <div className="p-6">
-          <ReactApexChart
-            options={{
-              chart: { type: "line", fontFamily: "Outfit, sans-serif", toolbar: { show: false }, zoom: { enabled: false } },
-              colors: ["#6366f1", "#10b981"],
-              xaxis: {
-                type: "datetime",
-                categories: items.map((m) => m.date),
-                labels: {
-                  format: "MMM dd",
-                  style: { colors: "#64748b", fontFamily: "Outfit, sans-serif" },
-                },
-                axisBorder: { show: false },
-                axisTicks: { show: false },
-              },
-              yaxis: [
-                {
+        <div className="p-6 flex-1 flex items-center justify-center">
+          <div className="w-full">
+            <ReactApexChart
+              options={{
+                chart: { type: "line", fontFamily: "Outfit, sans-serif", toolbar: { show: false }, zoom: { enabled: false } },
+                colors: ["#6366f1", "#10b981"],
+                xaxis: {
+                  type: "datetime",
+                  categories: items.map((m) => m.date),
                   labels: {
+                    format: "MMM dd",
                     style: { colors: "#64748b", fontFamily: "Outfit, sans-serif" },
-                    formatter: (val: number) => `$${(val / 1000).toFixed(0)}K`,
                   },
+                  axisBorder: { show: false },
+                  axisTicks: { show: false },
                 },
-                {
-                  opposite: true,
-                  labels: {
-                    style: { colors: "#64748b", fontFamily: "Outfit, sans-serif" },
-                    formatter: (val: number) => val.toFixed(0),
+                yaxis: [
+                  {
+                    labels: {
+                      style: { colors: "#64748b", fontFamily: "Outfit, sans-serif" },
+                      formatter: (val: number) => `$${(val / 1000).toFixed(0)}K`,
+                    },
                   },
-                },
-              ],
-              grid: { borderColor: "#f1f5f9", strokeDashArray: 0 },
-              stroke: { curve: "smooth", width: [3, 2] },
-              markers: { size: [4, 0], colors: ["#6366f1"], strokeColors: "#fff", strokeWidth: 2 },
-              tooltip: {
-                shared: true,
-                x: { format: "MMM dd, yyyy" },
-                y: [
-                  { formatter: (val: number) => `$${val.toLocaleString()}` },
-                  { formatter: (val: number) => `${val} transactions` },
+                  {
+                    opposite: true,
+                    labels: {
+                      style: { colors: "#64748b", fontFamily: "Outfit, sans-serif" },
+                      formatter: (val: number) => val.toFixed(0),
+                    },
+                  },
                 ],
-              },
-              dataLabels: { enabled: false },
-              fill: {
-                type: "gradient",
-                gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0, stops: [0, 90, 100] },
-              },
-            }}
-            series={[
-              { name: "Revenue", data: items.map((m) => ({ x: new Date(m.date).getTime(), y: m.revenue ?? 0 })) },
-              { name: "Transactions", data: items.map((m) => ({ x: new Date(m.date).getTime(), y: m.transactions ?? 0 })) },
-            ]}
-            type="area"
-            height={340}
-          />
+                grid: { borderColor: "#f1f5f9", strokeDashArray: 0 },
+                stroke: { curve: "smooth", width: [3, 2] },
+                markers: { size: [4, 0], colors: ["#6366f1"], strokeColors: "#fff", strokeWidth: 2 },
+                tooltip: {
+                  shared: true,
+                  x: { format: "MMM dd, yyyy" },
+                  y: [
+                    { formatter: (val: number) => `$${val.toLocaleString()}` },
+                    { formatter: (val: number) => `${val} transactions` },
+                  ],
+                },
+                dataLabels: { enabled: false },
+                fill: {
+                  type: "gradient",
+                  gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0, stops: [0, 90, 100] },
+                },
+              }}
+              series={[
+                { name: "Revenue", data: items.map((m) => ({ x: new Date(m.date).getTime(), y: m.revenue ?? 0 })) },
+                { name: "Transactions", data: items.map((m) => ({ x: new Date(m.date).getTime(), y: m.transactions ?? 0 })) },
+              ]}
+              type="area"
+              height={320}
+            />
+          </div>
         </div>
       )}
     </div>

@@ -46,9 +46,9 @@ export default function ViewCollectionPage({ params }: ViewCollectionPageProps) 
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        {collection.bannerImage && (
+        {(collection.image || collection.bannerImage) && (
           <div className="w-full h-48 bg-slate-100">
-            <img src={getImageUrl(collection.bannerImage)} alt={collection.name} className="w-full h-full object-cover" />
+            <img src={getImageUrl(collection.image || collection.bannerImage)} alt={collection.name} className="w-full h-full object-cover" />
           </div>
         )}
         <div className="p-6 space-y-6">

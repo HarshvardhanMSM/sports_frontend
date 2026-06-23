@@ -2,19 +2,16 @@
 
 import React from "react";
 import Link from "next/link";
-import { FiMoreHorizontal, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiMoreHorizontal, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
 import { useDropdownDirection } from "@/hooks/useDropdownDirection";
 
-interface BrandRowActionsProps {
+interface CmsRowActionsProps {
   id: string;
   onDelete: (id: string) => void;
 }
 
-export default function BrandRowActions({
-  id,
-  onDelete,
-}: BrandRowActionsProps) {
+export default function CmsRowActions({ id, onDelete }: CmsRowActionsProps) {
   const { ref: dropdownRef, open, setOpen, direction } = useDropdownDirection();
 
   return (
@@ -29,16 +26,23 @@ export default function BrandRowActions({
 
       {open && (
         <div className={`absolute right-0 z-50 w-36 rounded-lg bg-white p-1 shadow-lg border border-slate-200 focus:outline-none ${direction === "up" ? "bottom-full mb-1 origin-bottom-right" : "top-full mt-1 origin-top-right"}`}>
-          <Can permission="brand.update">
+          <Link
+            href={`/cms/${id}`}
+            className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+          >
+            <FiEye className="size-3.5" />
+            View
+          </Link>
+          <Can permission="cms.manage">
             <Link
-              href={`/brands/edit/${id}`}
+              href={`/cms/edit/${id}`}
               className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900"
             >
               <FiEdit className="size-3.5" />
               Edit
             </Link>
           </Can>
-          <Can permission="brand.delete">
+          <Can permission="cms.manage">
             <button
               type="button"
               onClick={() => {

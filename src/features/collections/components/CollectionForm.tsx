@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { Collection } from "@/types/collection.types";
+import CategoryImageUpload from "../../categories/components/CategoryImageUpload";
 
 const collectionSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -18,7 +19,7 @@ type CollectionFormValues = z.infer<typeof collectionSchema>;
 
 interface CollectionFormProps {
   initialData?: Collection;
-  onSubmit: (data: CollectionFormValues) => void;
+  onSubmit: (data: CollectionFormValues & { bannerImageFile: File | null }) => void;
   onCancel: () => void;
   isPending?: boolean;
 }
@@ -29,6 +30,7 @@ export default function CollectionForm({
   onCancel,
   isPending,
 }: CollectionFormProps) {
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
   const {
     register,
     handleSubmit,
@@ -40,7 +42,7 @@ export default function CollectionForm({
     defaultValues: {
       name: initialData?.name ?? "",
       slug: initialData?.slug ?? "",
-      bannerImage: initialData?.bannerImage ?? "",
+      bannerImage: (initialData?.image || initialData?.bannerImage) ?? "",
       description: initialData?.description ?? "",
       isActive: initialData?.isActive ?? true,
     },
@@ -55,8 +57,12 @@ export default function CollectionForm({
     }
   }, [nameVal, setValue, initialData]);
 
+  const handleFormSubmit = (data: CollectionFormValues) => {
+    onSubmit({ ...data, bannerImageFile });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 font-sans text-slate-800">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 font-sans text-slate-800">
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-bold text-slate-800">{initialData ? "Edit Collection" : "Create New Collection"}</h2>
         <p className="text-xs text-slate-500 mt-1">{initialData ? "Modify your collection details below." : "Add a new product collection."}</p>
@@ -76,13 +82,11 @@ export default function CollectionForm({
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Banner Image URL</label>
-          <input type="url" placeholder="https://cdn.sport.com/collections/summer-banner.jpg" {...register("bannerImage")} className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
-          {watch("bannerImage") && (
-            <div className="mt-2 rounded-lg border border-slate-200 overflow-hidden max-w-xs">
-              <img src={watch("bannerImage")} alt="Banner preview" className="w-full h-24 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-            </div>
-          )}
+          <CategoryImageUpload
+            currentImage={initialData?.image || initialData?.bannerImage}
+            onFileSelect={setBannerImageFile}
+            label="Banner Image"
+          />
         </div>
 
         <div className="md:col-span-2">

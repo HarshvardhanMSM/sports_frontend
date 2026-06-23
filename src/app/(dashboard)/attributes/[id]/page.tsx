@@ -91,6 +91,23 @@ export default function ViewAttributePage({ params }: ViewAttributePageProps) {
               </div>
             </div>
           </div>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Attribute Values</h3>
+            {attr.values && attr.values.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {attr.values.map((val) => (
+                  <span
+                    key={val.id}
+                    className="inline-flex items-center rounded-lg bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
+                  >
+                    {val.value}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic">No values defined for this attribute.</p>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">

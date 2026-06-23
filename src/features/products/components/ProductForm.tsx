@@ -9,6 +9,7 @@ import * as z from "zod";
 import { useBrands, useBrandCategories } from "@/hooks/useBrands";
 import { useSubCategories } from "@/hooks/useSubCategories";
 import type { Product } from "@/types/product.types";
+import { useToast } from "@/components/common/Toast/useToast";
 
 const productSchema = z.object({
   brandId: z.string().min(1, "Please select a brand"),
@@ -50,6 +51,7 @@ export default function ProductForm({
   onCancel,
   isPending,
 }: ProductFormProps) {
+  const toast = useToast();
   const [imagesList, setImagesList] = useState<{
     id: string;
     file: File | null;
@@ -85,6 +87,18 @@ export default function ProductForm({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
+    const currentCount = imagesList.length;
+
+    if (currentCount + files.length > 5) {
+      toast.error("You can upload a maximum of 5 images.");
+      const remainingSlots = 5 - currentCount;
+      if (remainingSlots <= 0) {
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      files.splice(remainingSlots);
+    }
+
     const newItems = files.map((file) => {
       const id = Math.random().toString(36).substring(2, 9);
       return {
@@ -103,6 +117,10 @@ export default function ProductForm({
       }
       return updated;
     });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleRemoveImage = (id: string) => {
@@ -280,24 +298,26 @@ export default function ProductForm({
             ))}
 
             {/* Add Image Card (Dashed Dropzone) */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-4 bg-slate-50/50 hover:bg-indigo-50/10 transition-all cursor-pointer aspect-square text-center group"
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <div className="size-10 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 flex items-center justify-center transition-all shadow-inner border border-slate-200/50">
-                <FiPlus className="size-5" />
+            {imagesList.length < 5 && (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-4 bg-slate-50/50 hover:bg-indigo-50/10 transition-all cursor-pointer aspect-square text-center group"
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <div className="size-10 rounded-xl bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 flex items-center justify-center transition-all shadow-inner border border-slate-200/50">
+                  <FiPlus className="size-5" />
+                </div>
+                <p className="text-xs font-bold text-slate-700 mt-3">Add Images</p>
+                <p className="text-[9px] font-medium text-slate-400 mt-1">Upload multiple files</p>
               </div>
-              <p className="text-xs font-bold text-slate-700 mt-3">Add Images</p>
-              <p className="text-[9px] font-medium text-slate-400 mt-1">Upload multiple files</p>
-            </div>
+            )}
           </div>
         </div>
 

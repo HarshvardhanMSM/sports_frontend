@@ -1,3 +1,10 @@
+export interface AttributeValue {
+  id: string;
+  value: string;
+  slug: string;
+  sortOrder: number;
+}
+
 export interface Attribute {
   id: string;
   name: string;
@@ -7,6 +14,7 @@ export interface Attribute {
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
+  values?: AttributeValue[];
 }
 
 export interface AttributeListResponse {
@@ -33,6 +41,7 @@ export interface CreateAttributeRequest {
   isFilterable?: boolean;
   isRequired?: boolean;
   sortOrder?: number;
+  values?: string[];
 }
 
 export type UpdateAttributeRequest = Partial<CreateAttributeRequest>;

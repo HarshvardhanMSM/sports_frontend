@@ -141,7 +141,7 @@ export default function BrandForm({
         </div>
 
         {/* Linked Categories */}
-        <div className="md:col-span-2">
+        {/* <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Linked Categories
           </label>
@@ -167,7 +167,7 @@ export default function BrandForm({
           {selectedCategoryIds.length > 0 && (
             <p className="text-xs text-slate-400 mt-1">{selectedCategoryIds.length} selected</p>
           )}
-        </div>
+        </div> */}
 
         {/* Status Toggle */}
         <div className="md:col-span-2">

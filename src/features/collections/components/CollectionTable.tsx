@@ -32,10 +32,10 @@ export default function CollectionTable({ collections, onEdit, onDelete, onView 
         <tbody className="divide-y divide-slate-100">
           {collections.map((col) => (
             <tr key={col.id} className="group hover:bg-slate-50/50 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap">
-                {col.bannerImage ? (
+               <td className="px-6 py-4 whitespace-nowrap">
+                {col.image || col.bannerImage ? (
                   <img
-                    src={getImageUrl(col.bannerImage)}
+                    src={getImageUrl(col.image || col.bannerImage)}
                     alt={col.name}
                     className="size-10 rounded-lg object-cover border border-slate-100 shadow-sm"
                   />
