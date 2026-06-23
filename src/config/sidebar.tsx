@@ -56,14 +56,14 @@ import {
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
 
-  const permissions = useAuthStore((s) => s.permissions);
+  const hasPermission = useAuthStore((s) => s.hasPermission);
   const isPermissionsLoaded = useAuthStore((s) => s.isPermissionsLoaded);
 
   const hasAccess = (href: string) => {
     if (!isPermissionsLoaded) return true;
     const slug = ROUTE_PERMISSIONS[href];
     if (!slug) return true;
-    return permissions.includes(slug);
+    return hasPermission(slug);
   };
 
   return (

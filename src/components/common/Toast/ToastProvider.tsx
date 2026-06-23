@@ -21,7 +21,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -213,41 +212,26 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  return (
-    <ToastContext.Provider value={{ show, dismiss }}>
-      {children}
-      <ToastPortal toasts={toasts} onDismiss={dismiss} />
-    </ToastContext.Provider>
-  );
-}
-
-// ── Portal renderer ───────────────────────────────────────────────
-
-function ToastPortal({
-  toasts,
-  onDismiss,
-}: {
-  toasts: ToastItem[];
-  onDismiss: (id: string) => void;
-}) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  if (!mounted) return null;
-
-  return createPortal(
-    <div
-      aria-live="polite"
-      aria-atomic="false"
-      className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-2 items-end pointer-events-none"
-    >
-      {toasts.map((t) => (
-        <div key={t.id} className="pointer-events-auto">
-          <ToastMessage toast={t} onDismiss={onDismiss} />
+  return (
+    <ToastContext.Provider value={{ show, dismiss }}>
+      {children}
+      {mounted && (
+        <div
+          aria-live="polite"
+          aria-atomic="false"
+          className="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse gap-2 items-end pointer-events-none"
+        >
+          {toasts.map((t) => (
+            <div key={t.id} className="pointer-events-auto">
+              <ToastMessage toast={t} onDismiss={dismiss} />
+            </div>
+          ))}
         </div>
-      ))}
-    </div>,
-    document.body
+      )}
+    </ToastContext.Provider>
   );
 }
 
