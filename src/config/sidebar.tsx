@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconType } from "react-icons";
 import {
-  FiChevronDown,
+  // FiChevronDown,
   FiChevronsRight,
   FiHome,
   FiLayers,
@@ -17,38 +17,38 @@ import {
   FiPackage,
   FiRefreshCw,
   FiBell,
-  FiMapPin,
+  // FiMapPin,
   FiFileText,
   FiClipboard,
   FiRotateCcw,
   FiTruck,
-  FiNavigation,
+  // FiNavigation,
   FiUsers,
   FiDollarSign,
   FiMessageCircle,
-  FiHeart,
-  FiImage,
-  FiPercent,
-  FiGift,
-  FiMail,
-  FiSend,
+  // FiHeart,
+  // FiImage,
+  // FiPercent,
+  // FiGift,
+  // FiMail,
+  // FiSend,
   FiFile,
   FiHelpCircle,
-  FiVolume2,
+  // FiVolume2,
   FiLock,
   FiMessageSquare,
   FiBarChart2,
-  FiTrendingUp,
+  // FiTrendingUp,
   FiPieChart,
   FiActivity,
   FiUser,
   FiShield,
   FiList,
   FiSettings,
-  FiCreditCard,
-  FiTool,
+  // FiCreditCard,
+  // FiTool,
   FiKey,
-  FiLink,
+  // FiLink,
 } from "react-icons/fi";
 
 export const Sidebar = () => {
@@ -60,12 +60,13 @@ export const Sidebar = () => {
         width: open ? 250 : 75,
         transition: "width 0.25s ease-in-out",
       }}
-      className="sticky top-0 h-screen shrink-0 border-r border-slate-200 bg-white p-2 overflow-y-auto overflow-x-hidden flex flex-col justify-between"
+      className="sticky top-0 h-screen shrink-0 border-r border-slate-200 bg-white flex flex-col justify-between overflow-hidden"
     >
-      <div>
+      <div className="p-2 pb-0 shrink-0">
         <TitleSection open={open} />
+      </div>
 
-        <div className="space-y-1 mt-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 pt-0  space-y-1">
           {/* ── DASHBOARD ─────────────────────────────── */}
           <Option
             Icon={FiHome}
@@ -334,10 +335,9 @@ export const Sidebar = () => {
             href="/settings/delivery-charges"
             open={open}
           />
-        </div>
       </div>
 
-      <div className="relative pb-14">
+      <div className="relative pb-14 shrink-0 bg-white">
         <ToggleClose open={open} setOpen={setOpen} />
       </div>
     </nav>
@@ -393,7 +393,7 @@ const Option = React.memo(
     const selected = pathname === href || pathname.startsWith(href + "/");
 
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block" title={!open ? title : undefined}>
         <div
           className={`relative flex h-10 w-full items-center rounded-lg cursor-pointer transition-colors duration-150 ${
             selected
@@ -459,7 +459,7 @@ const TitleSection = ({ open }: TitleSectionProps) => (
 // Logo
 // ---------------------------------------------------------------------------
 const Logo = () => (
-  <div className="grid size-10 shrink-0 place-content-center rounded-md">
+  <div className="grid size-12 shrink-0 place-content-center rounded-md">
     <img
           src="/assets/logos/Final file_Logo + wordmark.png"
           alt="MSM Logo"
@@ -480,6 +480,7 @@ const ToggleClose = ({ open, setOpen }: ToggleCloseProps) => (
   <button
     onClick={() => setOpen((pv) => !pv)}
     className="absolute bottom-0 left-0 right-0 border-t border-slate-300 transition-colors duration-150 hover:bg-slate-100"
+    title={!open ? "Expand" : undefined}
   >
     <div className="flex items-center p-2">
       <div className="grid h-10 w-10 shrink-0 place-content-center text-lg">

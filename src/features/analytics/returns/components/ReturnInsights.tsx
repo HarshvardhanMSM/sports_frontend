@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiZap, FiTrendingUp, FiAlertTriangle, FiBarChart2 } from "react-icons/fi";
+import { FiZap, FiTrendingUp, FiAlertTriangle } from "react-icons/fi";
 import type { ReturnSummary, ReturnReason, ReturnProduct } from "@/types/return-analytics.types";
 
 interface Props {

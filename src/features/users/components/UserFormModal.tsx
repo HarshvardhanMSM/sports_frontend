@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiUserPlus, FiEdit2, FiUpload } from "react-icons/fi";
 import type { User, CreateUserRequest, UpdateUserRequest } from "@/types/user.types";
-import { UserService } from "@/services/user.service";
+// import { UserService } from "@/services/user.service";
 import { resolveImageUrl } from "@/lib/image";
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   isPending: boolean;
 }
 
-export default function UserFormModal({ mode, user, roles, onClose, onConfirm, isPending }: Props) {
+export default function UserFormModal({ mode, user, onClose, onConfirm, isPending }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

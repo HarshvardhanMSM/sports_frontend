@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiClock, FiUser, FiBox, FiMonitor, FiGlobe } from "react-icons/fi";
+import { FiClock,  FiBox, FiMonitor, FiGlobe } from "react-icons/fi";
 import type { AuditEntry } from "@/types/audit.types";
 import ActionBadge from "./ActionBadge";
 

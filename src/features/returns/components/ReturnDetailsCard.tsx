@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiPackage, FiShoppingCart, FiMessageSquare, FiCamera, FiDollarSign, FiTruck } from "react-icons/fi";
+import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiPackage, FiShoppingCart, FiMessageSquare, FiTruck } from "react-icons/fi";
 import type { ReturnListItem } from "@/types/return.types";
 import { resolveImageUrl } from "@/lib/image";
 
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function ReturnDetailsCard({ data }: Props) {
-  const firstItem = data.items?.[0];
+  // const firstItem = data.items?.[0];
 
   return (
     <div className="space-y-6">

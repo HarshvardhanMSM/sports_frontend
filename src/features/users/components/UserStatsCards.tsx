@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiUsers, FiUserCheck, FiUserX, FiShield, FiUserPlus, FiUser } from "react-icons/fi";
+import { FiUsers, FiUserCheck, FiUserX} from "react-icons/fi";
 
 interface Props {
   total: number;

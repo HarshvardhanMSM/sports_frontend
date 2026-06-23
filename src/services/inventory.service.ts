@@ -27,7 +27,7 @@ import type {
   InventoryPlusAdjustRequest,
   InventoryAnalyticsSummaryResponse,
   TopSellingItem,
-  SlowMovingItem,
+  // SlowMovingItem,
   SlowMovingItemsResponse,
   StockValueData,
   AlertStats,

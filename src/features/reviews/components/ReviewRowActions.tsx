@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { FiMoreHorizontal, FiEye, FiCheck, FiX, FiEyeOff, FiTrash2 } from "react-icons/fi";
+import { FiMoreHorizontal, FiEye,  FiTrash2 } from "react-icons/fi";
 
 interface ReviewRowActionsProps {
   id: string;
@@ -15,10 +15,10 @@ interface ReviewRowActionsProps {
 
 export default function ReviewRowActions({
   id,
-  status,
-  onApprove,
-  onReject,
-  onHide,
+  // status,
+  // onApprove,
+  // onReject,
+  // onHide,
   onDelete,
 }: ReviewRowActionsProps) {
   const [open, setOpen] = useState(false);

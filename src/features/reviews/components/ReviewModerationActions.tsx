@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiCheck, FiX, FiEyeOff, FiTrash2 } from "react-icons/fi";
+import {  FiTrash2 } from "react-icons/fi";
 
 interface ReviewModerationActionsProps {
   status: string;
@@ -16,14 +16,14 @@ interface ReviewModerationActionsProps {
 }
 
 export default function ReviewModerationActions({
-  status,
-  onApprove,
-  onReject,
-  onHide,
+  // status,
+  // onApprove,
+  // onReject,
+  // onHide,
   onDelete,
-  isApproving,
-  isRejecting,
-  isHiding,
+  // isApproving,
+  // isRejecting,
+  // isHiding,
   isDeleting,
 }: ReviewModerationActionsProps) {
   return (

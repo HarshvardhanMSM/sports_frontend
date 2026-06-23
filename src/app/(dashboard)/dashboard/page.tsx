@@ -24,6 +24,7 @@ import type {
   DashboardSummaryResponse,
   OrderStatus,
 } from "@/types/dashboard.types";
+import Link from "next/link";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -1155,20 +1156,28 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
+          <Link href="/products">
           <div className="flex justify-center mt-3 pt-3 border-t border-slate-100">
             <button className="text-[11px] font-bold text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-1.5 rounded-lg bg-white shadow-2xs transition-colors">
               View All Products
             </button>
           </div>
+          </Link>
         </div>
 
         {/* Recent Orders */}
         <div className="md:col-span-2 xl:col-span-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
             <h3 className="font-semibold text-slate-800">Recent Orders</h3>
-            <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+            <Link href="/orders">
+                <button className="text-[11px] font-bold text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-1.5 rounded-lg bg-white shadow-2xs transition-colors">
+                  View All
+                </button>
+            </Link>
+
+            {/* <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
               View All <FiArrowRight className="size-3" />
-            </button>
+            </button> */}
           </div>
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left text-xs text-slate-600 border-collapse">

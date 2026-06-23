@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
-import type { ShipmentStatus } from "@/types/shipment.types";
+// import type { ShipmentStatus } from "@/types/shipment.types";
 
 const STATUSES: { label: string; value: string }[] = [
   { label: "All Statuses", value: "All" },

@@ -45,7 +45,7 @@ export function toApiError(err: unknown): ApiError {
 
 // ── Generic helpers ───────────────────────────────────────────────
 
-type ParamPrimitive = string | number | boolean;
+// type ParamPrimitive = string | number | boolean;
 
 /** Convert params object to a record of strings (booleans/numbers become "true"/"1"). */
 function toPlainParams(params?: object): Record<string, string> | undefined {

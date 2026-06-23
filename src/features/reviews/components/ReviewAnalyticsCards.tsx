@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FiStar, FiThumbsUp, FiClock, FiCheckCircle, FiXCircle, FiEyeOff } from "react-icons/fi";
+import { FiStar, FiThumbsUp } from "react-icons/fi";
 import type { ReviewAnalytics } from "@/types/review.types";
 
 interface ReviewAnalyticsCardsProps {

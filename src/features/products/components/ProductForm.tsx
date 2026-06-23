@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { FiUpload, FiX, FiImage, FiPlus, FiStar } from "react-icons/fi";
+import { FiX,  FiPlus, FiStar } from "react-icons/fi";
 import { resolveImageUrl } from "@/lib/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

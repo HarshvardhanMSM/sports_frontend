@@ -40,7 +40,7 @@ export const UserService = {
         currentData.avatar = res.data.avatar;
       }
     }
-    const { avatarFile, ...jsonData } = currentData;
+    const { ...jsonData } = currentData;
     return api.patch<UserSingleResponse>(`/admin/users/${id}`, jsonData);
   },
 
@@ -69,7 +69,7 @@ export const UserService = {
       formData.append("avatar", data.avatarFile);
       return api.patch<{ statusCode: number; message: string; data: CurrentUser }>("/admin/profile", formData);
     }
-    const { avatarFile, ...jsonData } = data;
+    const {    ...jsonData } = data;
     return api.patch<{ statusCode: number; message: string; data: CurrentUser }>("/admin/profile", jsonData);
   },
 

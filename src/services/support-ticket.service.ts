@@ -10,7 +10,7 @@ import type {
   AssignTicketRequest,
   ReplyTicketRequest,
   AddNoteRequest,
-  AddTagRequest,
+  // AddTagRequest,
 } from "@/types/support-ticket.types";
 
 export const SupportTicketService = {
