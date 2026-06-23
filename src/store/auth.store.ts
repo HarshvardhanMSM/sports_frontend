@@ -62,10 +62,12 @@ export const useAuthStore = create<AuthStore>()(
       hasPermission: (slug: string) => {
         const state = get();
         if (!state.isPermissionsLoaded) return true;
-        const isSuperAdmin = state.user?.roles?.some(
+       
+        
+        const isSuperAdmin = state.user?.roles?.find(
           (r) => r.slug === "super_admin",
         );
-        if (isSuperAdmin) return true;
+        if (isSuperAdmin?.slug) return true;
         return state.permissions.includes(slug);
       },
 
