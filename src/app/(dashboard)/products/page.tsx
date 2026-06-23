@@ -4,6 +4,7 @@ import React, { useState, Suspense, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiPlus, FiAlertCircle } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useProducts, useDeleteProduct, useBulkDeleteProducts } from "@/hooks/useProducts";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import ProductFilters from "@/features/products/components/ProductFilters";
@@ -89,13 +90,15 @@ function ProductsContent() {
             View, search, filter, and manage products.
           </p>
         </div>
-        <Link
-          href="/products/create"
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
-        >
-          <FiPlus className="size-4" />
-          Add Product
-        </Link>
+        <Can permission="product.create">
+          <Link
+            href="/products/create"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
+          >
+            <FiPlus className="size-4" />
+            Add Product
+          </Link>
+        </Can>
       </div>
 
       <ProductFilters

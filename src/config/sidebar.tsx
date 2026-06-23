@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { IconType } from "react-icons";
+import { useAuthStore } from "@/store/auth.store";
+import { ROUTE_PERMISSIONS } from "@/config/route-permissions";
 import {
   FiChevronDown,
   FiChevronsRight,
@@ -54,6 +56,16 @@ import {
 export const Sidebar = () => {
   const [open, setOpen] = useState(true);
 
+  const permissions = useAuthStore((s) => s.permissions);
+  const isPermissionsLoaded = useAuthStore((s) => s.isPermissionsLoaded);
+
+  const hasAccess = (href: string) => {
+    if (!isPermissionsLoaded) return true;
+    const slug = ROUTE_PERMISSIONS[href];
+    if (!slug) return true;
+    return permissions.includes(slug);
+  };
+
   return (
     <nav
       style={{
@@ -67,101 +79,134 @@ export const Sidebar = () => {
 
         <div className="space-y-1 mt-4">
           {/* ── DASHBOARD ─────────────────────────────── */}
-          <Option
-            Icon={FiHome}
-            title="Dashboard"
-            href="/dashboard"
-            open={open}
-          />
+          {hasAccess("/dashboard") && (
+            <Option
+              Icon={FiHome}
+              title="Dashboard"
+              href="/dashboard"
+              open={open}
+            />
+          )}
 
           {/* ── CATALOG ───────────────────────────────── */}
-          <SectionLabel label="CATALOG" open={open} />
-          <Option
-            Icon={FiLayers}
-            title="Categories"
-            href="/categories"
-            open={open}
-          />
-          <Option
-            Icon={FiList}
-            title="Sub Categories"
-            href="/sub-categories"
-            open={open}
-          />
-          <Option
-            Icon={FiShoppingCart}
-            title="Products"
-            href="/products"
-            open={open}
-          />
-          <Option Icon={FiTag} title="Brands" href="/brands" open={open} />
-          <Option
-            Icon={FiGrid}
-            title="Collections"
-            href="/collections"
-            open={open}
-          />
-          <Option
-            Icon={FiSliders}
-            title="Attributes"
-            href="/attributes"
-            open={open}
-          />
-          <Option
-            Icon={FiStar}
-            title="Product Reviews"
-            href="/product-reviews"
-            open={open}
-          />
+         {(hasAccess("/categories")||hasAccess("/sub-categories")||hasAccess("/products")||hasAccess("/brands")||hasAccess("/collections")||hasAccess("/attributes")||hasAccess("/product-reviews")) && <SectionLabel label="CATALOG" open={open} />}
+          {hasAccess("/categories") && (
+            <Option
+              Icon={FiLayers}
+              title="Categories"
+              href="/categories"
+              open={open}
+            />
+          )}
+          {hasAccess("/sub-categories") && (
+            <Option
+              Icon={FiList}
+              title="Sub Categories"
+              href="/sub-categories"
+              open={open}
+            />
+          )}
+          {hasAccess("/products") && (
+            <Option
+              Icon={FiShoppingCart}
+              title="Products"
+              href="/products"
+              open={open}
+            />
+          )}
+          {hasAccess("/brands") && (
+            <Option Icon={FiTag} title="Brands" href="/brands" open={open} />
+          )}
+          {hasAccess("/collections") && (
+            <Option
+              Icon={FiGrid}
+              title="Collections"
+              href="/collections"
+              open={open}
+            />
+          )}
+          {hasAccess("/attributes") && (
+            <Option
+              Icon={FiSliders}
+              title="Attributes"
+              href="/attributes"
+              open={open}
+            />
+          )}
+          {hasAccess("/product-reviews") && (
+            <Option
+              Icon={FiStar}
+              title="Product Reviews"
+              href="/product-reviews"
+              open={open}
+            />
+          )}
 
           {/* ── INVENTORY ─────────────────────────────── */}
-          <SectionLabel label="INVENTORY" open={open} />
-          <Option
-            Icon={FiPackage}
-            title="Inventory Management"
-            href="/inventory"
-            open={open}
-          />
-          <Option
-            Icon={FiRefreshCw}
-            title="Stock Movements"
-            href="/stock-movements"
-            open={open}
-          />
-          <Option
-            Icon={FiBell}
-            title="Inventory Alerts"
-            href="/inventory-alerts"
-            open={open}
-          />
-          
-          <Option
-            Icon={FiFileText}
-            title="Inventory Reports"
-            href="/inventory-reports"
-            open={open}
-          />
+        {(hasAccess("/inventory")||hasAccess("/stock-movements")||hasAccess("/inventory-alerts")||hasAccess("/inventory-reports")) && (
+            <SectionLabel label="INVENTORY" open={open} />
+          )}
+          {hasAccess("/inventory") && (
+            <Option
+              Icon={FiPackage}
+              title="Inventory Management"
+              href="/inventory"
+              open={open}
+            />
+          )}
+          {hasAccess("/stock-movements") && (
+            <Option
+              Icon={FiRefreshCw}
+              title="Stock Movements"
+              href="/stock-movements"
+              open={open}
+            />
+          )}
+          {hasAccess("/inventory-alerts") && (
+            <Option
+              Icon={FiBell}
+              title="Inventory Alerts"
+              href="/inventory-alerts"
+              open={open}
+            />
+          )}
+          {hasAccess("/inventory-reports") && (
+            <Option
+              Icon={FiFileText}
+              title="Inventory Reports"
+              href="/inventory-reports"
+              open={open}
+            />
+          )}
 
           {/* ── ORDERS ────────────────────────────────── */}
-          <SectionLabel label="ORDERS" open={open} />
-          <Option
-            Icon={FiClipboard}
-            title="Orders"
-            href="/orders"
-            open={open}
-          />
-          <Option
-            Icon={FiRotateCcw}
-            title="Returns & Refunds"
-            href="/returns"
-            open={open}
-          />
-          <Option
-            Icon={FiTruck}
-            title="Shipments"
-            href="/shipments"
-            open={open}
-          />
+      {(hasAccess("/orders")||hasAccess("/returns")||hasAccess("/shipments") )&& (
+            <SectionLabel label="ORDERS" open={open} />
+          )}
+          {hasAccess("/orders") && (
+            <Option
+              Icon={FiClipboard}
+              title="Orders"
+              href="/orders"
+              open={open}
+            />
+          )}
+          {hasAccess("/returns") && (
+            <Option
+              Icon={FiRotateCcw}
+              title="Returns & Refunds"
+              href="/returns"
+              open={open}
+            />
+          )}
+          {hasAccess("/shipments") && (
+            <Option
+              Icon={FiTruck}
+              title="Shipments"
+              href="/shipments"
+              open={open}
+            />
+          )}
           {/* <Option
             Icon={FiNavigation}
             title="Order Tracking"
@@ -170,19 +215,25 @@ export const Sidebar = () => {
           /> */}
 
           {/* ── CUSTOMERS ─────────────────────────────── */}
-          <SectionLabel label="CUSTOMERS" open={open} />
-          <Option
-            Icon={FiUsers}
-            title="Customers"
-            href="/customers"
-            open={open}
-          />
-          <Option
-            Icon={FiMessageCircle}
-            title="Customer Support"
-            href="/customer-support"
-            open={open}
-          />
+     {(hasAccess("/customers")||hasAccess("/customer-support")) && (
+            <SectionLabel label="CUSTOMERS" open={open} />
+          )}
+          {hasAccess("/customers") && (
+            <Option
+              Icon={FiUsers}
+              title="Customers"
+              href="/customers"
+              open={open}
+            />
+          )}
+          {hasAccess("/customer-support") && (
+            <Option
+              Icon={FiMessageCircle}
+              title="Customer Support"
+              href="/customer-support"
+              open={open}
+            />
+          )}
           {/* <Option
             Icon={FiHeart}
             title="Wishlist Analytics"
@@ -209,131 +260,146 @@ export const Sidebar = () => {
         
 
           {/* ── CONTENT MANAGEMENT ────────────────────── */}
-          <SectionLabel label="CONTENT MANAGEMENT" open={open} />
-          <Option Icon={FiFile} title="Pages" href="/pages" open={open} />
-          <Option Icon={FiHelpCircle} title="FAQ" href="/faq" open={open} />
-          {/* <Option
-            Icon={FiVolume2}
-            title="Announcements"
-            href="/announcements"
-            open={open}
-          /> */}
-          <Option
-            Icon={FiFileText}
-            title="Terms & Conditions"
-            href="/terms"
-            open={open}
-          />
-          <Option
-            Icon={FiLock}
-            title="Privacy Policy"
-            href="/privacy"
-            open={open}
-          />
-          <Option
-            Icon={FiMessageSquare}
-            title="Contact Messages"
-            href="/contact-messages"
-            open={open}
-          />
+         {(hasAccess("/pages") || hasAccess("/faq") || hasAccess("/terms") || hasAccess("/privacy") || hasAccess("/contact-messages")) && (
+            <SectionLabel label="CONTENT MANAGEMENT" open={open} />
+          )}
+          {hasAccess("/pages") && (
+            <Option Icon={FiFile} title="Pages" href="/pages" open={open} />
+          )}
+          {hasAccess("/faq") && (
+            <Option Icon={FiHelpCircle} title="FAQ" href="/faq" open={open} />
+          )}
+          {hasAccess("/terms") && (
+            <Option
+              Icon={FiFileText}
+              title="Terms & Conditions"
+              href="/terms"
+              open={open}
+            />
+          )}
+          {hasAccess("/privacy") && (
+            <Option
+              Icon={FiLock}
+              title="Privacy Policy"
+              href="/privacy"
+              open={open}
+            />
+          )}
+          {hasAccess("/contact-messages") && (
+            <Option
+              Icon={FiMessageSquare}
+              title="Contact Messages"
+              href="/contact-messages"
+              open={open}
+            />
+          )}
 
           {/* ── FINANCE ──────────────────────────────── */}
           {/* <SectionLabel label="FINANCE" open={open} /> */}
       
 
           {/* ── ANALYTICS & REPORTS ───────────────────── */}
-          <SectionLabel label="ANALYTICS & REPORTS" open={open} />
-          <Option
-            Icon={FiBarChart2}
-            title="Sales Reports"
-            href="/reports/sales"
-            open={open}
-          />
-          {/* <Option
-            Icon={FiTrendingUp}
-            title="Revenue Analytics"
-            href="/reports/revenue"
-            open={open}
-          /> */}
-              <Option
-            Icon={FiDollarSign}
-            title="Financial Reports"
-            href="/financial-reports"
-            open={open}
-          />
-          <Option
-            Icon={FiPieChart}
-            title="Product Performance"
-            href="/reports/products"
-            open={open}
-          />
-          <Option
-            Icon={FiActivity}
-            title="Customer Analytics"
-            href="/reports/customers"
-            open={open}
-          />
-          <Option
-            Icon={FiRotateCcw}
-            title="Returns Analytics"
-            href="/analytics/returns"
-            open={open}
-          />
-      
+       {(hasAccess("/reports/sales") || hasAccess("/financial-reports") || hasAccess("/reports/products") || hasAccess("/reports/customers") || hasAccess("/analytics/returns")) && (
+            <SectionLabel label="ANALYTICS & REPORTS" open={open} />
+          )}
+          {hasAccess("/reports/sales") && (
+            <Option
+              Icon={FiBarChart2}
+              title="Sales Reports"
+              href="/reports/sales"
+              open={open}
+            />
+          )}
+          {hasAccess("/financial-reports") && (
+            <Option
+              Icon={FiDollarSign}
+              title="Financial Reports"
+              href="/financial-reports"
+              open={open}
+            />
+          )}
+          {hasAccess("/reports/products") && (
+            <Option
+              Icon={FiPieChart}
+              title="Product Performance"
+              href="/reports/products"
+              open={open}
+            />
+          )}
+          {hasAccess("/reports/customers") && (
+            <Option
+              Icon={FiActivity}
+              title="Customer Analytics"
+              href="/reports/customers"
+              open={open}
+            />
+          )}
+          {hasAccess("/analytics/returns") && (
+            <Option
+              Icon={FiRotateCcw}
+              title="Returns Analytics"
+              href="/analytics/returns"
+              open={open}
+            />
+          )}
 
           {/* ── USER MANAGEMENT ───────────────────────── */}
-          <SectionLabel label="USER MANAGEMENT" open={open} />
-          <Option
-            Icon={FiUser}
-            title="Admin Users"
-            href="/admin-users"
-            open={open}
-          />
-          <Option
-            Icon={FiShield}
-            title="Roles & Permissions"
-            href="/roles"
-            open={open}
-          />
-          <Option
-            Icon={FiKey}
-            title="Permissions"
-            href="/permissions"
-            open={open}
-          />
-          <Option
-            Icon={FiList}
-            title="Audit Logs"
-            href="/audit-logs"
-            open={open}
-          />
+{(hasAccess("/admin-users") || hasAccess("/roles") || hasAccess("/permissions") || hasAccess("/audit-logs")) && (
+            <SectionLabel label="USER MANAGEMENT" open={open} />
+          ) }
+          {hasAccess("/admin-users") && (
+            <Option
+              Icon={FiUser}
+              title="Admin Users"
+              href="/admin-users"
+              open={open}
+            />
+          )}
+          {hasAccess("/roles") && (
+            <Option
+              Icon={FiShield}
+              title="Roles & Permissions"
+              href="/roles"
+              open={open}
+            />
+          )}
+          {hasAccess("/permissions") && (
+            <Option
+              Icon={FiKey}
+              title="Permissions"
+              href="/permissions"
+              open={open}
+            />
+          )}
+          {hasAccess("/audit-logs") && (
+            <Option
+              Icon={FiList}
+              title="Audit Logs"
+              href="/audit-logs"
+              open={open}
+            />
+          )}
 
           {/* ── SETTINGS ──────────────────────────────── */}
+{(hasAccess("/settings/delivery-charges") || hasAccess("/settings/general")) && (
           <SectionLabel label="SETTINGS" open={open} />
-          <Option
-            Icon={FiSettings}
-            title="General Settings"
-            href="/settings/general"
-            open={open}
-          />
-          {/* <Option
-            Icon={FiCreditCard}
-            title="Payment Methods"
-            href="/settings/payments"
-            open={open}
-          /> */}
-          {/* <Option
-            Icon={FiTruck}
-            title="Shipping Settings"
-            href="/settings/shipping"
-            open={open}
-          /> */}
-          <Option
-            Icon={FiTruck}
-            title="Delivery Charges"
-            href="/settings/delivery-charges"
-            open={open}
-          />
+        ) }
+          {hasAccess("/settings/general") && (
+            <Option
+              Icon={FiSettings}
+              title="General Settings"
+              href="/settings/general"
+              open={open}
+            />
+          )}
+          {hasAccess("/settings/delivery-charges") && (
+            <Option
+              Icon={FiTruck}
+              title="Delivery Charges"
+              href="/settings/delivery-charges"
+              open={open}
+            />
+          )}
         </div>
       </div>
 

@@ -10,6 +10,7 @@ import {
   FiEdit2,
   FiTrash2,
 } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 
 interface FAQ {
   id: string;
@@ -68,9 +69,11 @@ export default function FAQPage() {
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">FAQ Management</h1>
           <p className="text-sm text-slate-500">Manage frequently asked questions displayed on your storefront.</p>
         </div>
-        <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
-          <FiPlus className="size-4" /> Add Question
-        </button>
+        <Can permission="cms.manage">
+          <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+            <FiPlus className="size-4" /> Add Question
+          </button>
+        </Can>
       </div>
 
       {/* Stats */}

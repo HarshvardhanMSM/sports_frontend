@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { FiMoreHorizontal, FiEdit, FiTrash2, FiEye } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 
 interface AttributeRowActionsProps {
   id: string;
@@ -41,22 +42,26 @@ export default function AttributeRowActions({ id, onDelete }: AttributeRowAction
             <FiEye className="size-3.5" />
             View Details
           </Link>
-          <Link
-            href={`/attributes/${id}/edit`}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
-            onClick={() => setOpen(false)}
-          >
-            <FiEdit className="size-3.5" />
-            Edit
-          </Link>
-          <button
-            type="button"
-            onClick={() => { setOpen(false); if (id) onDelete(id); }}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50"
-          >
-            <FiTrash2 className="size-3.5" />
-            Delete
-          </button>
+          <Can permission="attribute.update">
+            <Link
+              href={`/attributes/${id}/edit`}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              onClick={() => setOpen(false)}
+            >
+              <FiEdit className="size-3.5" />
+              Edit
+            </Link>
+          </Can>
+          <Can permission="attribute.delete">
+            <button
+              type="button"
+              onClick={() => { setOpen(false); if (id) onDelete(id); }}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50"
+            >
+              <FiTrash2 className="size-3.5" />
+              Delete
+            </button>
+          </Can>
         </div>
       )}
     </div>

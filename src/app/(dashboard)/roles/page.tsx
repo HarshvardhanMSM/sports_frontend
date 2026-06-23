@@ -13,6 +13,7 @@ import {
   FiRefreshCw,
   FiSave,
 } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useRoles, useCreateRole, useDeleteRole } from "@/hooks/useRoles";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
@@ -244,13 +245,15 @@ export default function RolesPage() {
             Manage role-based access control for your admin team. Define roles and assign granular permissions.
           </p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md self-start sm:self-auto"
-        >
-          <FiPlus className="size-4" />
-          Create Role
-        </button>
+        <Can permission="roles.manage">
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md self-start sm:self-auto"
+          >
+            <FiPlus className="size-4" />
+            Create Role
+          </button>
+        </Can>
       </div>
 
       {/* ═══ Stats Grid ══════════════════════════════════════════════ */}

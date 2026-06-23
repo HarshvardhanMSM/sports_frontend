@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { FiSearch, FiPlus, FiGrid, FiList } from "react-icons/fi";
+import { Can } from "@/components/common/Can";
 import { useAllPermissions, useCreatePermission, useUpdatePermission, useDeletePermission } from "@/hooks/usePermissions";
 import PermissionFormModal from "@/components/permissions/PermissionFormModal";
 import DeletePermissionDialog from "@/components/permissions/DeletePermissionDialog";
@@ -76,13 +77,15 @@ export default function PermissionsPage() {
           <h1 className="text-2xl font-bold text-slate-800">Permissions</h1>
           <p className="text-sm text-slate-500 mt-1">Manage permission slugs across all modules</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-        >
-          <FiPlus className="size-4" />
-          Create Permission
-        </button>
+        <Can permission="permissions.manage">
+          <button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+          >
+            <FiPlus className="size-4" />
+            Create Permission
+          </button>
+        </Can>
       </div>
 
       {!isLoading && !error && (
