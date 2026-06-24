@@ -13,6 +13,7 @@ import {
   FiBarChart2,
 } from "react-icons/fi";
 import { useReportSales, useReportReturns } from "@/hooks/useReports";
+import Select from "@/components/ui/select/Select";
 
 const PRESETS = [
   { label: "Today", value: "today" },
@@ -22,6 +23,7 @@ const PRESETS = [
   { label: "This Month", value: "thisMonth" },
   { label: "This Year", value: "thisYear" },
 ];
+
 
 function dateParams(preset: string) {
   const now = new Date();
@@ -88,16 +90,13 @@ export default function SalesReportsPage() {
           <p className="text-sm text-slate-500 mt-0.5">Daily sales performance and return analytics.</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-            <FiCalendar className="size-4 text-slate-400 shrink-0" />
-            <select
-              value={preset}
-              onChange={(e) => setPreset(e.target.value)}
-              className="text-sm font-medium text-slate-700 outline-none bg-transparent"
-            >
-              {PRESETS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-            </select>
-          </div>
+          <Select
+            value={preset}
+            onChange={setPreset}
+            options={PRESETS}
+            Icon={FiCalendar}
+            className="min-w-[150px]"
+          />
           <button
             onClick={handleRefresh}
             disabled={isLoading}

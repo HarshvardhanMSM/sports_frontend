@@ -1,6 +1,7 @@
 "use client";
 
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface ReviewFiltersProps {
   search: string;
@@ -12,6 +13,23 @@ interface ReviewFiltersProps {
   onRefresh: () => void;
   isRefetching: boolean;
 }
+
+const statusOptions = [
+  { value: "All", label: "All Statuses" },
+  { value: "PENDING", label: "Pending" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "HIDDEN", label: "Hidden" },
+];
+
+const ratingOptions = [
+  { value: "", label: "All Ratings" },
+  { value: "5", label: "5 Stars" },
+  { value: "4", label: "4 Stars" },
+  { value: "3", label: "3 Stars" },
+  { value: "2", label: "2 Stars" },
+  { value: "1", label: "1 Star" },
+];
 
 export default function ReviewFilters({
   search,
@@ -36,38 +54,31 @@ export default function ReviewFilters({
         />
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status:</span>
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="All">All Statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="APPROVED">Approved</option>
-          <option value="REJECTED">Rejected</option>
-          <option value="HIDDEN">Hidden</option>
-        </select>
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Status:</span>
+          <Select
+            value={statusFilter}
+            onChange={onStatusFilterChange}
+            options={statusOptions}
+            className="min-w-[140px]"
+          />
+        </div>
 
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-2">Rating:</span>
-        <select
-          value={ratingFilter ?? ""}
-          onChange={(e) => onRatingFilterChange(e.target.value ? Number(e.target.value) : undefined)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="">All Ratings</option>
-          <option value="5">5 Stars</option>
-          <option value="4">4 Stars</option>
-          <option value="3">3 Stars</option>
-          <option value="2">2 Stars</option>
-          <option value="1">1 Star</option>
-        </select>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Rating:</span>
+          <Select
+            value={ratingFilter !== undefined ? String(ratingFilter) : ""}
+            onChange={(val) => onRatingFilterChange(val ? Number(val) : undefined)}
+            options={ratingOptions}
+            className="min-w-[130px]"
+          />
+        </div>
 
         <button
           onClick={onRefresh}
           disabled={isRefetching}
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors h-[34px] flex items-center justify-center cursor-pointer"
           title="Refresh"
         >
           <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -76,3 +87,4 @@ export default function ReviewFilters({
     </div>
   );
 }
+

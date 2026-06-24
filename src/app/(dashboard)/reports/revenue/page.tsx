@@ -7,7 +7,9 @@ import {
   FiRotateCcw,
   FiPieChart,
   FiDownload,
+  FiCalendar,
 } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface RevenueByCategory {
   category: string;
@@ -40,6 +42,13 @@ const paymentMethods: PaymentMethod[] = [
   { method: "Bank Transfer", revenue: 6210, percentage: 4.1, icon: "🏦" },
 ];
 
+const dateRangeOptions = [
+  { value: "Last 7 Days", label: "Last 7 Days" },
+  { value: "Last 30 Days", label: "Last 30 Days" },
+  { value: "Last 3 Months", label: "Last 3 Months" },
+  { value: "This Year", label: "This Year" },
+];
+
 export default function RevenueAnalyticsPage() {
   const [dateRange, setDateRange] = useState("Last 30 Days");
 
@@ -52,16 +61,14 @@ export default function RevenueAnalyticsPage() {
           <p className="text-sm text-slate-500">Deep-dive into revenue streams, margins, and growth trends.</p>
         </div>
         <div className="flex items-center gap-3">
-          <select
+          <Select
             value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            <option>Last 7 Days</option>
-            <option>Last 30 Days</option>
-            <option>Last 3 Months</option>
-            <option>This Year</option>
-          </select>
+            onChange={setDateRange}
+            options={dateRangeOptions}
+            Icon={FiCalendar}
+            className="min-w-[150px]"
+          />
+
           <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors">
             <FiDownload className="size-4" />
             Export Report

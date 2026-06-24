@@ -1,6 +1,7 @@
 "use client";
 
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface AttributeFiltersProps {
   search: string;
@@ -10,6 +11,12 @@ interface AttributeFiltersProps {
   onRefresh: () => void;
   isRefreshing: boolean;
 }
+
+const filterableOptions = [
+  { value: "", label: "All" },
+  { value: "true", label: "Filterable Only" },
+  { value: "false", label: "Non-Filterable" },
+];
 
 export default function AttributeFilters({
   search,
@@ -32,21 +39,18 @@ export default function AttributeFilters({
         />
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Filterable:</span>
-        <select
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Filterable:</span>
+        <Select
           value={isFilterable}
-          onChange={(e) => onFilterableChange(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="">All</option>
-          <option value="true">Filterable Only</option>
-          <option value="false">Non-Filterable</option>
-        </select>
+          onChange={onFilterableChange}
+          options={filterableOptions}
+          className="min-w-[150px]"
+        />
         <button
           type="button"
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors h-[34px] flex items-center justify-center cursor-pointer"
         >
           <FiRefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
         </button>
@@ -54,3 +58,4 @@ export default function AttributeFilters({
     </div>
   );
 }
+

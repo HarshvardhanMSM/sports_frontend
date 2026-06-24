@@ -1,6 +1,7 @@
 "use client";
 
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface CategoryFiltersProps {
   search: string;
@@ -10,6 +11,12 @@ interface CategoryFiltersProps {
   onRefresh: () => void;
   isRefreshing: boolean;
 }
+
+const statusOptions = [
+  { value: "", label: "All Categories" },
+  { value: "true", label: "Active Only" },
+  { value: "false", label: "Inactive Only" },
+];
 
 export default function CategoryFilters({
   search,
@@ -32,23 +39,20 @@ export default function CategoryFilters({
         />
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">
           Status:
         </span>
-        <select
+        <Select
           value={isActive}
-          onChange={(e) => onIsActiveChange(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="">All Categories</option>
-          <option value="true">Active Only</option>
-          <option value="false">Inactive Only</option>
-        </select>
+          onChange={onIsActiveChange}
+          options={statusOptions}
+          className="min-w-[150px]"
+        />
         <button
           type="button"
           onClick={onRefresh}
           disabled={isRefreshing}
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors h-[34px] flex items-center justify-center cursor-pointer"
         >
           <FiRefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
         </button>
@@ -56,3 +60,4 @@ export default function CategoryFilters({
     </div>
   );
 }
+

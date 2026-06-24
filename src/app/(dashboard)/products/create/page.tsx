@@ -35,8 +35,6 @@ export default function CreateProductPage() {
     if (data.metaTitle) fd.append("metaTitle", data.metaTitle as string);
     if (data.metaDescription) fd.append("metaDescription", data.metaDescription as string);
     if (data.metaKeywords) fd.append("metaKeywords", data.metaKeywords as string);
-    // Omit boolean fields isFeatured and isActive from FormData because NestJS validator expects true booleans.
-    // We will update them via JSON Patch in the next step.
 
     // Append multiple files under the key "images"
     if (newImages.length > 0) {
@@ -52,12 +50,15 @@ export default function CreateProductPage() {
     if (Array.isArray(data.tagIds) && data.tagIds.length > 0) {
       fd.append("tagIds", JSON.stringify(data.tagIds));
     }
+    if (Array.isArray(data.variants) && data.variants.length > 0) {
+      fd.append("variants", JSON.stringify(data.variants));
+    }
 
     try {
       const response = await createMutation.mutateAsync(fd as unknown as CreateProductRequest);
       const createdProductId = response.data.id;
 
-      // Update boolean fields via JSON patch request
+      // Update boolean fields via JSON patch request to ensure synchronization
       await ProductService.updateProduct(createdProductId, {
         isFeatured: data.isFeatured as boolean,
         isActive: data.isActive as boolean,

@@ -289,11 +289,11 @@ export default function RolesPage() {
       </div>
 
       {/* ═══ Main Area ═══════════════════════════════════════════════ */}
-      <div className="flex flex-col gap-6 lg:flex-row">
+      <div className="flex flex-col gap-6 lg:flex-row lg:h-[calc(100vh-280px)] lg:min-h-[600px]">
         {/* ── Left Panel: Roles List ──────────────────────────────── */}
-        <div className="w-full shrink-0 lg:w-80">
-          <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 px-4 py-3">
+        <div className="w-full shrink-0 lg:w-80 lg:h-full lg:flex lg:flex-col">
+          <div className="rounded-xl border border-slate-200 bg-white shadow-sm lg:flex lg:flex-col lg:h-full lg:overflow-hidden">
+            <div className="border-b border-slate-100 px-4 py-3 shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-bold text-slate-700">All Roles</h2>
                 <span className="text-xs font-medium text-slate-400">
@@ -311,7 +311,7 @@ export default function RolesPage() {
                 />
               </div>
             </div>
-            <div className="p-2 max-h-[580px] overflow-y-auto">
+            <div className="p-2 overflow-y-auto lg:flex-1 lg:max-h-none max-h-[580px]">
               {filteredRoles.length === 0 ? (
                 <p className="text-xs text-slate-400 text-center py-8">
                   No matching roles found
@@ -328,9 +328,9 @@ export default function RolesPage() {
         </div>
 
         {/* ── Right Panel: Permission Management ─────────────────── */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 lg:h-full lg:flex lg:flex-col">
           {!selectedRole ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-20 px-6">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-20 px-6 lg:h-full">
               <div className="flex size-16 items-center justify-center rounded-2xl bg-slate-50 mb-4">
                 <FiShield className="size-8 text-slate-300" />
               </div>
@@ -343,9 +343,9 @@ export default function RolesPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-0 lg:flex-1 lg:flex lg:flex-col lg:h-full lg:overflow-hidden">
               {/* Selected Role Header */}
-              <div className="flex items-start justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:mb-4 shrink-0">
                 <div className="flex items-start gap-3">
                   <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                     <FiShield className="size-5" />
@@ -378,7 +378,7 @@ export default function RolesPage() {
               </div>
 
               {/* Global Actions & Search */}
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 lg:mb-4 shrink-0">
                 <button
                   type="button"
                   onClick={handleSelectAll}
@@ -407,7 +407,7 @@ export default function RolesPage() {
 
               {/* Unsaved changes indicator */}
               {isDirty && (
-                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5">
+                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 lg:mb-4 shrink-0">
                   <FiAlertCircle className="size-4 text-amber-500 shrink-0" />
                   <span className="text-xs font-medium text-amber-700">
                     You have unsaved changes
@@ -416,7 +416,7 @@ export default function RolesPage() {
               )}
 
               {/* Permission Module Cards */}
-              <div className="space-y-3">
+              <div className="space-y-3 lg:flex-1 lg:overflow-y-auto pr-1 lg:mb-4">
                 {filteredModules.map((mod) => (
                   <PermissionModuleCard
                     key={mod.module}
@@ -437,7 +437,7 @@ export default function RolesPage() {
               </div>
 
               {/* Sticky Footer */}
-              <div className="sticky bottom-0 rounded-xl border border-slate-200 bg-white/95 backdrop-blur-sm shadow-lg p-4 mt-4">
+              <div className="sticky bottom-0 rounded-xl border border-slate-200 bg-white/95 backdrop-blur-sm shadow-lg p-4 mt-4 lg:mt-0 shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <span className="text-sm text-slate-600">

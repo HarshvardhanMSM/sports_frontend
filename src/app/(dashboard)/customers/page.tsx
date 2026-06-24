@@ -16,6 +16,19 @@ import { useCustomers, useCustomerStats } from "@/hooks/useCustomers";
 import type { CustomerListParams } from "@/types/customer.types";
 import CustomerWishlistDrawer from "@/features/customers/components/CustomerWishlistDrawer";
 import Pagination from "@/components/ui/pagination/Pagination";
+import Select from "@/components/ui/select/Select";
+
+const statusOptions = [
+  { value: "", label: "All Statuses" },
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
+
+const verifiedOptions = [
+  { value: "", label: "All Verified" },
+  { value: "true", label: "Verified" },
+  { value: "false", label: "Unverified" },
+];
 
 function getInitials(first: string, last: string) {
   return (first[0] ?? "").toUpperCase() + (last[0] ?? "").toUpperCase();
@@ -148,24 +161,18 @@ export default function CustomersPage() {
             className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-400"
           />
         </div>
-        <select
+        <Select
           value={isActive}
-          onChange={(e) => { setIsActive(e.target.value); setPage(1); }}
-          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 hover:bg-white transition-all"
-        >
-          <option value="">All Statuses</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
-        <select
+          onChange={(val) => { setIsActive(val); setPage(1); }}
+          options={statusOptions}
+          className="min-w-[140px]"
+        />
+        <Select
           value={isEmailVerified}
-          onChange={(e) => { setIsEmailVerified(e.target.value); setPage(1); }}
-          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 hover:bg-white transition-all"
-        >
-          <option value="">All Verified</option>
-          <option value="true">Verified</option>
-          <option value="false">Unverified</option>
-        </select>
+          onChange={(val) => { setIsEmailVerified(val); setPage(1); }}
+          options={verifiedOptions}
+          className="min-w-[140px]"
+        />
       </div>
 
       {isLoading ? (

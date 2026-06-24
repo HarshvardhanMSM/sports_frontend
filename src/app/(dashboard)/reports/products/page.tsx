@@ -11,11 +11,14 @@ import {
   FiRefreshCw,
   FiAlertCircle,
   FiBarChart2,
+  FiCalendar,
 } from "react-icons/fi";
 import { useReportProducts, useReportInventory } from "@/hooks/useReports";
 import { resolveImageUrl } from "@/lib/image";
+import Select from "@/components/ui/select/Select";
 
 const PRESETS = [
+
   { label: "Today", value: "today" },
   { label: "Last 7 Days", value: "last7" },
   { label: "Last 30 Days", value: "last30" },
@@ -75,13 +78,13 @@ export default function ProductPerformancePage() {
           <p className="text-sm text-slate-500">Analyze product-level sales metrics and inventory health.</p>
         </div>
         <div className="flex items-center gap-3">
-          <select
+          <Select
             value={preset}
-            onChange={(e) => setPreset(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            {PRESETS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
-          </select>
+            onChange={setPreset}
+            options={PRESETS}
+            Icon={FiCalendar}
+            className="min-w-[150px]"
+          />
           <button
             onClick={handleRefresh}
             disabled={isLoading}

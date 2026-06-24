@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
-// import type { ShipmentStatus } from "@/types/shipment.types";
+import Select from "@/components/ui/select/Select";
 
 const STATUSES: { label: string; value: string }[] = [
   { label: "All Statuses", value: "All" },
@@ -38,19 +38,16 @@ export default function ShipmentFilters({
           className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
         />
       </div>
-      <select
+      <Select
         value={statusFilter}
-        onChange={(e) => onStatusFilterChange(e.target.value)}
-        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-      >
-        {STATUSES.map((s) => (
-          <option key={s.value} value={s.value}>{s.label}</option>
-        ))}
-      </select>
+        onChange={onStatusFilterChange}
+        options={STATUSES}
+        className="min-w-[170px]"
+      />
       <button
         onClick={onRefresh}
         disabled={isRefetching}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all"
+        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all cursor-pointer h-[36px]"
       >
         <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
         Refresh
@@ -58,3 +55,4 @@ export default function ShipmentFilters({
     </div>
   );
 }
+

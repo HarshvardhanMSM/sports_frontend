@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
 import { useProduct, useUpdateProduct } from "@/hooks/useProducts";
 import ProductForm from "@/features/products/components/ProductForm";
-import type { UpdateProductRequest } from "@/types/product.types";
+import type { UpdateProductRequest, CreateProductVariantRequest } from "@/types/product.types";
 import { ProductService } from "@/services/product.service";
 
 interface EditProductPageProps {
@@ -38,11 +38,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     fd.append("shortDescription", (data.shortDescription as string) || "");
     fd.append("description", (data.description as string) || "");
     fd.append("status", data.status as string);
-    fd.append("metaTitle", (data.metaTitle as string) || "");
-    fd.append("metaDescription", (data.metaDescription as string) || "");
-    fd.append("metaKeywords", (data.metaKeywords as string) || "");
-    // Omit boolean fields isFeatured and isActive from FormData because NestJS validator expects true booleans.
-    // We will update them via JSON Patch in the next step.
+    if (data.metaTitle) fd.append("metaTitle", data.metaTitle as string);
+    if (data.metaDescription) fd.append("metaDescription", data.metaDescription as string);
+    if (data.metaKeywords) fd.append("metaKeywords", data.metaKeywords as string);
 
     // Append multiple files under the key "images"
     if (newImages.length > 0) {
@@ -65,6 +63,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     if (Array.isArray(data.tagIds)) {
       fd.append("tagIds", JSON.stringify(data.tagIds));
     }
+    if (Array.isArray(data.variants)) {
+      fd.append("variants", JSON.stringify(data.variants));
+    }
 
     try {
       if (deletedImageIds.length > 0) {
@@ -76,10 +77,11 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
       await updateMutation.mutateAsync(fd as unknown as UpdateProductRequest);
 
-      // Update boolean fields via JSON patch request
+      // Update boolean and variants fields via JSON patch request
       await ProductService.updateProduct(id, {
         isFeatured: data.isFeatured as boolean,
         isActive: data.isActive as boolean,
+        variants: data.variants as CreateProductVariantRequest[],
       });
 
       router.push("/products");

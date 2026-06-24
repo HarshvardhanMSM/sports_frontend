@@ -1,6 +1,7 @@
 "use client";
 
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface InventoryFiltersProps {
   search: string;
@@ -10,6 +11,13 @@ interface InventoryFiltersProps {
   onRefresh: () => void;
   isRefetching: boolean;
 }
+
+const statusOptions = [
+  { value: "all", label: "All Statuses" },
+  { value: "in_stock", label: "In Stock" },
+  { value: "low_stock", label: "Low Stock" },
+  { value: "out_of_stock", label: "Out of Stock" },
+];
 
 export default function InventoryFilters({
   search,
@@ -33,21 +41,17 @@ export default function InventoryFilters({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status:</span>
-        <select
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Status:</span>
+        <Select
           value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="all">All Statuses</option>
-          <option value="in_stock">In Stock</option>
-          <option value="low_stock">Low Stock</option>
-          <option value="out_of_stock">Out of Stock</option>
-        </select>
+          onChange={onStatusFilterChange}
+          options={statusOptions}
+          className="min-w-[140px]"
+        />
         <button
           onClick={onRefresh}
           disabled={isRefetching}
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors h-[34px] flex items-center justify-center cursor-pointer"
           title="Refresh"
         >
           <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -56,3 +60,4 @@ export default function InventoryFilters({
     </div>
   );
 }
+
