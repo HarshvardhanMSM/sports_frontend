@@ -10,6 +10,13 @@ import type { CmsPageListParams, CmsPage } from "@/types/cms.types";
 import CmsTable from "@/features/cms/components/CmsTable";
 import DeleteCmsDialog from "@/features/cms/components/DeleteCmsDialog";
 import Pagination from "@/components/ui/pagination/Pagination";
+import Select from "@/components/ui/select/Select";
+
+const statusOptions = [
+  { value: "All", label: "All Pages" },
+  { value: "published", label: "Published" },
+  { value: "draft", label: "Draft" },
+];
 
 export default function CmsPagesPage() {
   const { query: searchTerm, setQuery: setSearchTerm, debouncedQuery: debouncedSearch } = useFuzzySearch(null, {
@@ -108,15 +115,12 @@ export default function CmsPagesPage() {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status:</span>
-          <select
+          <Select
             value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            <option value="All">All Pages</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-          </select>
+            onChange={(val) => { setStatusFilter(val); setPage(1); }}
+            options={statusOptions}
+            className="min-w-[130px]"
+          />
           <button
             onClick={() => refetch()}
             disabled={isRefetching}

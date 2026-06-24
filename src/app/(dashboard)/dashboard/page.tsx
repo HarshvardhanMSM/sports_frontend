@@ -30,6 +30,9 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
+import Select from "@/components/ui/select/Select";
+
+
 // Helper for sparkline configurations
 const getSparklineOptions = (color: string): ApexOptions => ({
   chart: {
@@ -657,16 +660,17 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select
+          <Select
             value={filters.globalPeriod}
-            onChange={(e) => setters.setGlobalPeriod(e.target.value as GlobalPeriod)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 outline-none hover:bg-slate-50"
-          >
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="this_month">This Month</option>
-            <option value="this_year">This Year</option>
-          </select>
+            onChange={(val) => setters.setGlobalPeriod(val as GlobalPeriod)}
+            options={[
+              { value: "7d", label: "Last 7 Days" },
+              { value: "30d", label: "Last 30 Days" },
+              { value: "this_month", label: "This Month" },
+              { value: "this_year", label: "This Year" },
+            ]}
+            className="min-w-[130px]"
+          />
         </div>
       </div>
 
@@ -770,15 +774,16 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <select
+            <Select
               value={filters.salesGranularity}
-              onChange={(e) => setters.setSalesGranularity(e.target.value as ChartGranularity)}
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 outline-none hover:bg-slate-50"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
+              onChange={(val) => setters.setSalesGranularity(val as ChartGranularity)}
+              options={[
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+                { value: "monthly", label: "Monthly" },
+              ]}
+              className="min-w-[100px]"
+            />
           </div>
           <div className="w-full">
             {queries.salesOverview.isPending ? (
@@ -800,14 +805,15 @@ export default function DashboardPage() {
         <div className="md:col-span-1 xl:col-span-3 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Sales by Category</h3>
-            <select
+            <Select
               value={filters.categoryPeriod}
-              onChange={(e) => setters.setCategoryPeriod(e.target.value as ChartPeriod)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-600 outline-none hover:bg-slate-50"
-            >
-              <option value="this_week">This Week</option>
-              <option value="this_month">This Month</option>
-            </select>
+              onChange={(val) => setters.setCategoryPeriod(val as ChartPeriod)}
+              options={[
+                { value: "this_week", label: "This Week" },
+                { value: "this_month", label: "This Month" },
+              ]}
+              className="min-w-[110px]"
+            />
           </div>
           <div className="flex items-center justify-center gap-4 flex-1 flex-wrap">
             {queries.byCategory.isPending ? (
@@ -847,14 +853,15 @@ export default function DashboardPage() {
         <div className="md:col-span-1 xl:col-span-3 rounded-2xl border min-h-[280px] border-slate-200 bg-white p-3 shadow-sm flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Sales by Payment Method</h3>
-            <select
+            <Select
               value={filters.paymentPeriod}
-              onChange={(e) => setters.setPaymentPeriod(e.target.value as ChartPeriod)}
-              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-600 outline-none hover:bg-slate-50"
-            >
-              <option value="this_week">This Week</option>
-              <option value="this_month">This Month</option>
-            </select>
+              onChange={(val) => setters.setPaymentPeriod(val as ChartPeriod)}
+              options={[
+                { value: "this_week", label: "This Week" },
+                { value: "this_month", label: "This Month" },
+              ]}
+              className="min-w-[110px]"
+            />
           </div>
           <div className="flex items-center justify-center gap-4 flex-1 flex-wrap">
             {queries.byPayment.isPending ? (
@@ -915,15 +922,16 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <select
+            <Select
               value={filters.usersGranularity}
-              onChange={(e) => setters.setUsersGranularity(e.target.value as ChartGranularity)}
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 outline-none hover:bg-slate-50"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
+              onChange={(val) => setters.setUsersGranularity(val as ChartGranularity)}
+              options={[
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+                { value: "monthly", label: "Monthly" },
+              ]}
+              className="min-w-[100px]"
+            />
           </div>
           <div className="w-full">
             {queries.usersOverview.isPending ? (
@@ -984,14 +992,15 @@ export default function DashboardPage() {
         <div className="md:col-span-1 xl:col-span-3 rounded-2xl border border-slate-200 min-h-[280px] bg-white p-3 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">New Users Signups</h3>
-            <select
+            <Select
               value={filters.signupsGranularity}
-              onChange={(e) => setters.setSignupsGranularity(e.target.value as SignupsGranularity)}
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 outline-none hover:bg-slate-50"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-            </select>
+              onChange={(val) => setters.setSignupsGranularity(val as SignupsGranularity)}
+              options={[
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+              ]}
+              className="min-w-[100px]"
+            />
           </div>
           <div className="w-full">
             {queries.signups.isPending ? (

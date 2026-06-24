@@ -17,6 +17,12 @@ import { useStockAlerts, useCheckAlerts, useResolveAllAlerts, useResolveAlert } 
 import type { InventoryListParams } from "@/types/inventory.types";
 import InventoryAlertTable from "@/features/inventory/components/InventoryAlertTable";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import Select from "@/components/ui/select/Select";
+
+const statusOptions = [
+  { value: "unresolved", label: "Unresolved" },
+  { value: "resolved", label: "Resolved" },
+];
 
 function InventoryAlertsContent() {
   const searchParams = useSearchParams();
@@ -125,14 +131,12 @@ function InventoryAlertsContent() {
             className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
         </div>
-        <select
+        <Select
           value={status}
-          onChange={(e) => updateParams({ status: e.target.value, page: "1" })}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="unresolved">Unresolved</option>
-          <option value="resolved">Resolved</option>
-        </select>
+          onChange={(val) => updateParams({ status: val, page: "1" })}
+          options={statusOptions}
+          className="min-w-[130px]"
+        />
       </div>
 
       {isLoading ? (

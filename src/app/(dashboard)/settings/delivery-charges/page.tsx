@@ -31,6 +31,7 @@ import {
   useDeliveryChargeHistory,
 } from "@/hooks/useDeliveryCharges";
 import type { DeliveryCharge } from "@/types/delivery-charge.types";
+import { useDropdownDirection } from "@/hooks/useDropdownDirection";
 
 // ── Form Schema ──────────────────────────────────────────────
 const formSchema = z.object({
@@ -90,7 +91,6 @@ export default function DeliveryChargesPage() {
   const [viewing, setViewing] = useState<DeliveryCharge | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeliveryCharge | null>(null);
   const [historyTarget, setHistoryTarget] = useState<DeliveryCharge | null>(null);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const filtered = search
     ? allCharges.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
@@ -249,36 +249,23 @@ export default function DeliveryChargesPage() {
                       <button
                         onClick={() => handleToggle(charge.id)}
                         disabled={isToggling}
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors ${
-                          charge.isActive
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors ${charge.isActive
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                             : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
-                        }`}
+                          }`}
                       >
                         {charge.isActive ? <FiToggleRight className="size-3.5" /> : <FiToggleLeft className="size-3.5" />}
                         {charge.isActive ? "Active" : "Inactive"}
                       </button>
                     </td>
                     <td className="px-5 py-4 text-sm text-slate-500">{fmtDate(charge.createdAt)}</td>
-                    <td className="px-5 py-4 text-right relative">
-                      <button
-                        onClick={() => setOpenMenuId(openMenuId === charge.id ? null : charge.id)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                      >
-                        <FiMoreVertical className="size-4" />
-                      </button>
-                      {openMenuId === charge.id && (
-                        <>
-                          <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
-                          <div className="absolute right-5 top-12 z-50 w-48 rounded-xl border border-slate-200 bg-white shadow-xl py-1.5">
-                            <MenuBtn icon={FiEye} label="View" onClick={() => { setViewing(charge); setOpenMenuId(null); }} />
-                            <MenuBtn icon={FiEdit2} label="Edit" onClick={() => { openEdit(charge); setOpenMenuId(null); }} />
-                            <MenuBtn icon={FiClock} label="History" onClick={() => { setHistoryTarget(charge); setOpenMenuId(null); }} />
-                            <div className="border-t border-slate-100 my-1" />
-                            <MenuBtn icon={FiTrash2} label="Delete" onClick={() => { setDeleteTarget(charge); setOpenMenuId(null); }} className="text-red-600 hover:bg-red-50" />
-                          </div>
-                        </>
-                      )}
+                    <td className="px-5 py-4 text-right">
+                      <RowActions
+                        charge={charge}
+                        onView={() => setViewing(charge)}
+                        onEdit={() => openEdit(charge)}
+                        onDelete={() => setDeleteTarget(charge)}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -345,6 +332,70 @@ function MenuBtn({ icon: Icon, label, onClick, className }: { icon: React.Compon
   );
 }
 
+// ── Row Actions ──────────────────────────────────────────────
+function RowActions({
+  charge,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  charge: DeliveryCharge;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { ref: dropdownRef, open, setOpen, direction } = useDropdownDirection();
+
+  return (
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+      >
+        <FiMoreVertical className="size-4" />
+      </button>
+      {open && (
+        <div
+          className={`absolute right-0 z-50 w-48 rounded-xl border border-slate-200 bg-white shadow-xl py-1.5 focus:outline-none ${
+            direction === "up"
+              ? "bottom-full mb-1 origin-bottom-right"
+              : "top-full mt-1 origin-top-right"
+          }`}
+        >
+          <MenuBtn
+            icon={FiEye}
+            label="View"
+            onClick={() => {
+              onView();
+              setOpen(false);
+            }}
+          />
+          <MenuBtn
+            icon={FiEdit2}
+            label="Edit"
+            onClick={() => {
+              onEdit();
+              setOpen(false);
+            }}
+          />
+          {/* <MenuBtn icon={FiClock} label="History" onClick={() => { onHistory(); setOpen(false); }} /> */}
+          <div className="border-t border-slate-100 my-1" />
+          <MenuBtn
+            icon={FiTrash2}
+            label="Delete"
+            onClick={() => {
+              onDelete();
+              setOpen(false);
+            }}
+            className="text-red-600 hover:bg-red-50"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Form Modal ───────────────────────────────────────────────
 function FormModal({
   editing,
@@ -357,7 +408,7 @@ function FormModal({
   onSubmit: (data: FormValues) => void;
   isPending: boolean;
 }) {
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormInput, unknown, FormValues>({
+  const { register, handleSubmit, watch, setValue, getValues, formState: { errors } } = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: editing?.name ?? "",

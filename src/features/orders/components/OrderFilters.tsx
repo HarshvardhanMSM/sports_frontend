@@ -1,6 +1,7 @@
 "use client";
 
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface OrderFiltersProps {
   search: string;
@@ -10,6 +11,20 @@ interface OrderFiltersProps {
   onRefresh: () => void;
   isRefetching: boolean;
 }
+
+const statusOptions = [
+  { value: "All", label: "All Statuses" },
+  { value: "PENDING", label: "Pending" },
+  { value: "CONFIRMED", label: "Confirmed" },
+  { value: "PROCESSING", label: "Processing" },
+  { value: "PACKED", label: "Packed" },
+  { value: "SHIPPED", label: "Shipped" },
+  { value: "OUT_FOR_DELIVERY", label: "Out for Delivery" },
+  { value: "DELIVERED", label: "Delivered" },
+  { value: "CANCELLED", label: "Cancelled" },
+  { value: "RETURN_REQUESTED", label: "Return Requested" },
+  { value: "RETURNED", label: "Returned" },
+];
 
 export default function OrderFilters({
   search,
@@ -28,31 +43,20 @@ export default function OrderFilters({
           placeholder="Search by order ID or customer..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-400"
+          className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-400"
         />
       </div>
       <div className="flex items-center gap-2">
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 hover:bg-white transition-all"
-        >
-          <option value="All">All Statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="PROCESSING">Processing</option>
-          <option value="PACKED">Packed</option>
-          <option value="SHIPPED">Shipped</option>
-          <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
-          <option value="DELIVERED">Delivered</option>
-          <option value="CANCELLED">Cancelled</option>
-          <option value="RETURN_REQUESTED">Return Requested</option>
-          <option value="RETURNED">Returned</option>
-        </select>
+          onChange={onStatusFilterChange}
+          options={statusOptions}
+          className="min-w-[170px]"
+        />
         <button
           onClick={onRefresh}
           disabled={isRefetching}
-          className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-500 hover:bg-white disabled:opacity-50 transition-all"
+          className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors h-[34px] flex items-center justify-center cursor-pointer"
           title="Refresh"
         >
           <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -61,3 +65,4 @@ export default function OrderFilters({
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { FiSearch } from "react-icons/fi";
 import { useBrands } from "@/hooks/useBrands";
 import { useCategories } from "@/hooks/useCategories";
+import Select from "@/components/ui/select/Select";
 
 interface ProductFiltersProps {
   search: string;
@@ -38,6 +39,34 @@ export default function ProductFilters({
   const brands = useMemo(() => brandsData?.data?.items ?? [], [brandsData]);
   const categories = useMemo(() => categoriesData?.data?.items ?? [], [categoriesData]);
 
+  // Memoize options for the custom Select components
+  const categoryOptions = useMemo(() => {
+    return [
+      { value: "All", label: "All Categories" },
+      ...categories.map((c) => ({ value: c.id, label: c.name })),
+    ];
+  }, [categories]);
+
+  const brandOptions = useMemo(() => {
+    return [
+      { value: "All", label: "All Brands" },
+      ...brands.map((b) => ({ value: b.id, label: b.name })),
+    ];
+  }, [brands]);
+
+  const statusOptions = useMemo(() => [
+    { value: "All", label: "All Statuses" },
+    { value: "DRAFT", label: "Draft" },
+    { value: "ACTIVE", label: "Active" },
+    { value: "INACTIVE", label: "Inactive" },
+  ], []);
+
+  const featuredOptions = useMemo(() => [
+    { value: "All", label: "All" },
+    { value: "true", label: "Featured Only" },
+    { value: "false", label: "Non-Featured" },
+  ], []);
+
   return (
     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
       <div className="relative">
@@ -56,71 +85,55 @@ export default function ProductFilters({
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Category
           </label>
-          <select
+          <Select
             value={categoryId}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            <option value="All">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+            onChange={onCategoryChange}
+            options={categoryOptions}
+            placeholder="All Categories"
+          />
         </div>
 
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Brand
           </label>
-          <select
+          <Select
             value={brandId}
-            onChange={(e) => onBrandChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            <option value="All">All Brands</option>
-            {brands.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
+            onChange={onBrandChange}
+            options={brandOptions}
+            placeholder="All Brands"
+          />
         </div>
 
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Status
           </label>
-          <select
+          <Select
             value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            <option value="All">All Statuses</option>
-            <option value="DRAFT">Draft</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-            {/* <option value="ARCHIVED">Archived</option> */}
-          </select>
+            onChange={onStatusChange}
+            options={statusOptions}
+            placeholder="All Statuses"
+          />
         </div>
 
         <div>
           <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Featured
           </label>
-          <select
+          <Select
             value={isFeatured}
-            onChange={(e) => onFeaturedChange(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-          >
-            <option value="All">All</option>
-            <option value="true">Featured Only</option>
-            <option value="false">Non-Featured</option>
-          </select>
+            onChange={onFeaturedChange}
+            options={featuredOptions}
+            placeholder="All"
+          />
         </div>
 
         <div>
           <button
             type="button"
             onClick={onReset}
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer h-[34px]"
           >
             Clear Filters
           </button>
@@ -129,3 +142,4 @@ export default function ProductFilters({
     </div>
   );
 }
+

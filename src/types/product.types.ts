@@ -1,5 +1,21 @@
 export type ProductStatus = "Draft" | "Active" | "Inactive";
 
+export interface ProductVariant {
+  id?: string;
+  sku: string;
+  price: number;
+  compareAtPrice?: number;
+  costPrice?: number;
+  isDefault: boolean;
+  attributeValues?: {
+    id?: string;
+    attributeValueId?: string;
+    attributeId?: string;
+    value?: string;
+    attribute?: { id: string; name: string };
+  }[];
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -23,6 +39,7 @@ export interface Product {
   metaKeywords?: string;
   collectionIds?: string[];
   tagIds?: string[];
+  variants?: ProductVariant[];
   createdAt: string;
   updatedAt: string;
 }
@@ -47,26 +64,6 @@ export interface ProductSingleResponse {
   data: Product;
 }
 
-export interface CreateProductRequest {
-  brandId: string;
-  categoryId: string;
-  subCategoryId?: string;
-  name: string;
-  slug: string;
-  skuPrefix?: string;
-  shortDescription?: string;
-  description?: string;
-  status: ProductStatus;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  isFeatured?: boolean;
-  isActive?: boolean;
-  collectionIds?: string[];
-  tagIds?: string[];
-}
-
-export type UpdateProductRequest = Partial<CreateProductRequest>;
 
 export interface ProductListParams {
   page?: number;
@@ -106,3 +103,39 @@ export interface UpdateProductImageRequest {
   sortOrder?: number;
   isPrimary?: boolean;
 }
+
+export interface ProductAttributeMapping {
+  attributeId: string;
+  attributeValueId: string;
+}
+
+export interface CreateProductVariantRequest {
+  sku: string;
+  price: number;
+  compareAtPrice?: number;
+  costPrice?: number;
+  isDefault: boolean;
+  attributes: ProductAttributeMapping[];
+}
+
+export interface CreateProductRequest {
+  brandId: string;
+  categoryId: string;
+  subCategoryId?: string;
+  name: string;
+  slug: string;
+  skuPrefix?: string;
+  shortDescription?: string;
+  description?: string;
+  status: ProductStatus;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  isFeatured?: boolean;
+  isActive?: boolean;
+  collectionIds?: string[];
+  tagIds?: string[];
+  variants?: CreateProductVariantRequest[] | string;
+}
+
+export type UpdateProductRequest = Partial<CreateProductRequest>;

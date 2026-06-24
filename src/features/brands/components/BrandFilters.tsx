@@ -1,6 +1,7 @@
 "use client";
 
 import { FiSearch, FiRefreshCw } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 
 interface BrandFiltersProps {
   search: string;
@@ -10,6 +11,12 @@ interface BrandFiltersProps {
   onRefresh: () => void;
   isRefetching: boolean;
 }
+
+const statusOptions = [
+  { value: "All", label: "All Brands" },
+  { value: "active", label: "Active Only" },
+  { value: "inactive", label: "Inactive Only" },
+];
 
 export default function BrandFilters({
   search,
@@ -33,20 +40,17 @@ export default function BrandFilters({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status:</span>
-        <select
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Status:</span>
+        <Select
           value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="All">All Brands</option>
-          <option value="active">Active Only</option>
-          <option value="inactive">Inactive Only</option>
-        </select>
+          onChange={onStatusFilterChange}
+          options={statusOptions}
+          className="min-w-[140px]"
+        />
         <button
           onClick={onRefresh}
           disabled={isRefetching}
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors h-[34px] flex items-center justify-center cursor-pointer"
           title="Refresh"
         >
           <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
@@ -55,3 +59,4 @@ export default function BrandFilters({
     </div>
   );
 }
+

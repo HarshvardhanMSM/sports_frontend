@@ -15,6 +15,24 @@ import {
 } from "react-icons/fi";
 import { useSupportTickets } from "@/hooks/useSupportTickets";
 import type { SupportTicketListParams } from "@/types/support-ticket.types";
+import Select from "@/components/ui/select/Select";
+
+const statusOptions = [
+  { value: "", label: "All Statuses" },
+  { value: "OPEN", label: "Open" },
+  { value: "IN_PROGRESS", label: "In Progress" },
+  { value: "RESOLVED", label: "Resolved" },
+  { value: "CLOSED", label: "Closed" },
+  { value: "ESCALATED", label: "Escalated" },
+];
+
+const priorityOptions = [
+  { value: "", label: "All Priorities" },
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
+  { value: "URGENT", label: "Urgent" },
+];
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN:        "bg-blue-50 text-blue-700",
@@ -126,29 +144,18 @@ export default function CustomerSupportPage() {
             className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
         </div>
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="">All Statuses</option>
-          <option value="OPEN">Open</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="RESOLVED">Resolved</option>
-          <option value="CLOSED">Closed</option>
-          <option value="ESCALATED">Escalated</option>
-        </select>
-        <select
+          onChange={(val) => { setStatusFilter(val); setPage(1); }}
+          options={statusOptions}
+          className="min-w-[140px]"
+        />
+        <Select
           value={priorityFilter}
-          onChange={(e) => { setPriorityFilter(e.target.value); setPage(1); }}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50"
-        >
-          <option value="">All Priorities</option>
-          <option value="LOW">Low</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HIGH">High</option>
-          <option value="URGENT">Urgent</option>
-        </select>
+          onChange={(val) => { setPriorityFilter(val); setPage(1); }}
+          options={priorityOptions}
+          className="min-w-[140px]"
+        />
       </div>
 
       {isLoading ? (
