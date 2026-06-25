@@ -122,7 +122,7 @@ export function useUpdateProfile() {
     mutationFn: (data: { name?: string; email?: string; mobile?: string; avatarFile?: File }) =>
       UserService.updateProfile(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: userKeys.current() });
+      qc.invalidateQueries({ queryKey: userKeys.all() });
       toast.success("Profile updated successfully.");
     },
     onError: (error) => {

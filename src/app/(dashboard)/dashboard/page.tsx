@@ -1022,44 +1022,46 @@ export default function DashboardPage() {
       {/* Row 4: Sales Overview (This Month), Top Selling Products, Recent Orders */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
         {/* Sales Overview (This Month) */}
-        <div className="md:col-span-1 xl:col-span-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm">
-          <h3 className="mb-4 font-semibold text-slate-800">
+        <div className="md:col-span-1 xl:col-span-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm flex flex-col">
+          <h3 className="mb-3 font-semibold text-slate-800">
             Sales Overview{" "}
             <span className="text-xs font-normal text-slate-400">
               (This Month)
             </span>
           </h3>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-3 flex-1">
             {/* Total Sales */}
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Total Sales
+            <div className="rounded-xl border border-slate-200 bg-white p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Total Sales
+                </div>
+
+                <div className="mt-1 text-2xl font-bold text-slate-800">
+                  {monthSummaryQuery.isPending || !monthSummaryData ? (
+                    <SkeletonText />
+                  ) : (
+                    getSummaryValue(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales")
+                  )}
+                </div>
+
+                <div className="mt-1.5 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold text-emerald-600">
+                  {monthSummaryQuery.isPending || !monthSummaryData ? (
+                    <SkeletonTrend />
+                  ) : (
+                    <>
+                      <FiArrowUpRight className="size-3 shrink-0" style={{ transform: getSummaryTrend(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales") === "down" ? "rotate(90deg)" : "none" }} />
+                      {getSummaryChange(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales")}
+                      <span className="font-medium text-slate-400">
+                        vs last month
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
 
-              <div className="mt-1 text-xl font-bold text-slate-800">
-                {monthSummaryQuery.isPending || !monthSummaryData ? (
-                  <SkeletonText />
-                ) : (
-                  getSummaryValue(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales")
-                )}
-              </div>
-
-              <div className="mt-1 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold text-emerald-600">
-                {monthSummaryQuery.isPending || !monthSummaryData ? (
-                  <SkeletonTrend />
-                ) : (
-                  <>
-                    <FiArrowUpRight className="size-3 shrink-0" style={{ transform: getSummaryTrend(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales") === "down" ? "rotate(90deg)" : "none" }} />
-                    {getSummaryChange(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales")}
-                    <span className="font-medium text-slate-400">
-                      vs last month
-                    </span>
-                  </>
-                )}
-              </div>
-
-              <div className="mt-2 h-8">
+              <div className="mt-3 h-8">
                 {monthSummaryQuery.isPending || !monthSummaryData ? (
                   <div className="h-8 w-full bg-slate-50 rounded-sm animate-pulse" />
                 ) : (
@@ -1074,34 +1076,36 @@ export default function DashboardPage() {
             </div>
 
             {/* Total Orders */}
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                Total Orders
+            <div className="rounded-xl border border-slate-200 bg-white p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                  Total Orders
+                </div>
+
+                <div className="mt-1 text-2xl font-bold text-slate-800">
+                  {monthSummaryQuery.isPending || !monthSummaryData ? (
+                    <SkeletonText />
+                  ) : (
+                    getSummaryValue(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders")
+                  )}
+                </div>
+
+                <div className="mt-1.5 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold text-emerald-600">
+                  {monthSummaryQuery.isPending || !monthSummaryData ? (
+                    <SkeletonTrend />
+                  ) : (
+                    <>
+                      <FiArrowUpRight className="size-3 shrink-0" style={{ transform: getSummaryTrend(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders") === "down" ? "rotate(90deg)" : "none" }} />
+                      {getSummaryChange(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders")}
+                      <span className="font-medium text-slate-400">
+                        vs last month
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
 
-              <div className="mt-1 text-xl font-bold text-slate-800">
-                {monthSummaryQuery.isPending || !monthSummaryData ? (
-                  <SkeletonText />
-                ) : (
-                  getSummaryValue(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders")
-                )}
-              </div>
-
-              <div className="mt-1 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold text-emerald-600">
-                {monthSummaryQuery.isPending || !monthSummaryData ? (
-                  <SkeletonTrend />
-                ) : (
-                  <>
-                    <FiArrowUpRight className="size-3 shrink-0" style={{ transform: getSummaryTrend(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders") === "down" ? "rotate(90deg)" : "none" }} />
-                    {getSummaryChange(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders")}
-                    <span className="font-medium text-slate-400">
-                      vs last month
-                    </span>
-                  </>
-                )}
-              </div>
-
-              <div className="mt-2 h-8">
+              <div className="mt-3 h-8">
                 {monthSummaryQuery.isPending || !monthSummaryData ? (
                   <div className="h-8 w-full bg-slate-50 rounded-sm animate-pulse" />
                 ) : (
@@ -1122,8 +1126,8 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-800">Top Selling Products</h3>
           </div>
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-xs text-slate-600 border-collapse">
+          <div className="overflow-x-auto flex-1 flex flex-col">
+            <table className="w-full text-left text-xs text-slate-600 border-collapse flex-1">
               <thead>
                 <tr className="border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                   <th className="pb-2">Product</th>
@@ -1166,11 +1170,11 @@ export default function DashboardPage() {
             </table>
           </div>
           <Link href="/products">
-          <div className="flex justify-center mt-3 pt-3 border-t border-slate-100">
-            <button className="text-[11px] font-bold text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-1.5 rounded-lg bg-white shadow-2xs transition-colors">
-              View All Products
-            </button>
-          </div>
+            <div className="flex justify-center mt-3 pt-3 border-t border-slate-100">
+              <button className="text-[11px] font-bold text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-1.5 rounded-lg bg-white shadow-2xs transition-colors">
+                View All Products
+              </button>
+            </div>
           </Link>
         </div>
 
@@ -1179,17 +1183,13 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-2">
             <h3 className="font-semibold text-slate-800">Recent Orders</h3>
             <Link href="/orders">
-                <button className="text-[11px] font-bold text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-1.5 rounded-lg bg-white shadow-2xs transition-colors">
-                  View All
-                </button>
+              <button className="text-[11px] font-bold text-slate-500 hover:text-slate-800 border border-slate-200 px-4 py-1.5 rounded-lg bg-white shadow-2xs transition-colors">
+                View All
+              </button>
             </Link>
-
-            {/* <button className="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
-              View All <FiArrowRight className="size-3" />
-            </button> */}
           </div>
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-xs text-slate-600 border-collapse">
+          <div className="overflow-x-auto flex-1 flex flex-col">
+            <table className="w-full text-left text-xs text-slate-600 border-collapse flex-1">
               <tbody className="divide-y divide-slate-50">
                 {queries.recentOrders.isPending ? (
                   Array.from({ length: 5 }).map((_, i) => (

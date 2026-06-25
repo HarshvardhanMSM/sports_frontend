@@ -40,7 +40,7 @@ export const UserService = {
         currentData.avatar = res.data.avatar;
       }
     }
-    const { ...jsonData } = currentData;
+    const { avatarFile, ...jsonData } = currentData;
     return api.patch<UserSingleResponse>(`/admin/users/${id}`, jsonData);
   },
 

@@ -124,6 +124,11 @@ axiosInstance.interceptors.response.use(
     const status = error.response?.status;
     const responseData = error.response?.data;
 
+    // If the refresh token request itself failed, let the refresh flow's catch block handle it
+    if (originalRequest?.url?.includes("/auth/refresh") || originalRequest?.url?.includes("/refresh")) {
+      return Promise.reject(error);
+    }
+
     // ── 401 — Attempt silent token refresh ────────────────────────
     if (status === 401 && !originalRequest._retry) {
       if (

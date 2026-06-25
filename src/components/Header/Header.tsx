@@ -73,7 +73,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
           <FiMenu className="size-5" />
         </button>
 
-        <div className="relative w-full hidden md:block">
+        {/* <div className="relative w-full hidden md:block">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <FiSearch
               className={`size-4 transition-colors ${
@@ -88,7 +88,7 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             onBlur={() => setSearchFocused(false)}
             className="w-full h-9 rounded-full border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right — actions */}

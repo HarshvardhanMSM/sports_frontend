@@ -30,8 +30,8 @@ export default function BrandTable({ brands, onDelete }: BrandTableProps) {
         <tbody className="divide-y divide-slate-100">
           {brands.map((brand) => (
             <tr key={brand.id} className="group hover:bg-slate-50/50 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center justify-center size-10 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+              <td className="px-3 py-3 whitespace-nowrap">
+                <div className="flex items-center justify-center size-14 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
                   {brand.logo ? (
                     <img
                       src={getImageUrl(brand.logo)}

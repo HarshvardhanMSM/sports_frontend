@@ -119,7 +119,7 @@ export default function ProductTable({
                     className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 size-4"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-3 whitespace-nowrap">
                   {(() => {
                     const primaryImg = product.images?.find((img) => img.isPrimary) || product.images?.[0];
                     const imgUrl = primaryImg?.imageUrl || product.image;
@@ -127,10 +127,10 @@ export default function ProductTable({
                       <img
                         src={resolveImageUrl(imgUrl)}
                         alt={product.name}
-                        className="size-10 rounded-lg object-cover border border-slate-100 shadow-sm"
+                        className="size-16 rounded-lg object-fill border border-slate-100 shadow-sm"
                       />
                     ) : (
-                      <div className="size-10 rounded-lg bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold">
+                      <div className="size-14 rounded-lg bg-slate-100 border border-slate-100 flex items-center justify-center text-slate-400 text-xs font-bold">
                         N/A
                       </div>
                     );
