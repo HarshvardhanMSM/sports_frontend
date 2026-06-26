@@ -55,7 +55,7 @@ export default function ReviewFilters({
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 shrink-0">
+        {/* <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Status:</span>
           <Select
             value={statusFilter}
@@ -63,7 +63,7 @@ export default function ReviewFilters({
             options={statusOptions}
             className="min-w-[140px]"
           />
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider shrink-0">Rating:</span>

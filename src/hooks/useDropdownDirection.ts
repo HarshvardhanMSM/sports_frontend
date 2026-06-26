@@ -20,11 +20,11 @@ export function useDropdownDirection() {
   useEffect(() => {
     if (open && ref.current) {
       const buttonRect = ref.current.getBoundingClientRect();
-      
+
       // Find the closest ancestor that can clip/scroll the dropdown
       let parent = ref.current.parentElement;
       let containerBottom = window.innerHeight;
-      
+
       while (parent) {
         const style = window.getComputedStyle(parent);
         const overflow = style.overflow + style.overflowY + style.overflowX;
@@ -40,7 +40,7 @@ export function useDropdownDirection() {
         }
         parent = parent.parentElement;
       }
-      
+
       const spaceBelow = containerBottom - buttonRect.bottom;
       // If there is less than 160px of space below the button inside the clipping container, open upwards
       if (spaceBelow < 160) {

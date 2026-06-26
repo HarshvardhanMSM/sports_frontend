@@ -6,6 +6,7 @@ export interface Collection {
   image?: string;
   description?: string;
   isActive: boolean;
+  productIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -39,6 +40,7 @@ export interface CreateCollectionRequest {
   bannerImage?: string;
   description?: string;
   isActive?: boolean;
+  productIds?: string[];
 }
 
 export type UpdateCollectionRequest = Partial<CreateCollectionRequest>;

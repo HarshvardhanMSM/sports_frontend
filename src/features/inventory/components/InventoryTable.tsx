@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { FiEye, FiEdit2, FiTrash2, FiMinusCircle, FiLock, FiUnlock, FiMoreVertical } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
@@ -45,90 +46,122 @@ function ActionDropdown({ item, onDelete, deletingId, onAdjust, onReserve, onRel
   onRelease?: (item: InventoryItem) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+
+  const handleToggle = () => {
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX - 176, // 176 is w-44 (44 * 4 = 176px)
+      });
+    }
+    setOpen(!open);
+  };
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    if (!open) return;
+    const handleScrollOrResize = () => {
+      setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    window.addEventListener("scroll", handleScrollOrResize, { capture: true });
+    window.addEventListener("resize", handleScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, { capture: true });
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
-        onClick={() => setOpen(!open)}
+        ref={buttonRef}
+        type="button"
+        onClick={handleToggle}
         className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
       >
         <FiMoreVertical className="size-4" />
       </button>
-      {open && (
-        <div className="absolute right-0 top-full mt-1 z-40 w-44 rounded-xl border border-slate-200 bg-white shadow-lg py-1">
-          <Link
-            href={`/inventory/${item.id}`}
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+      {open && coords && typeof window !== "undefined" && createPortal(
+        <>
+          {/* Transparent full-screen overlay to catch clicks outside the menu */}
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          
+          <div
+            style={{
+              position: "absolute",
+              top: `${coords.top + 4}px`,
+              left: `${coords.left}px`,
+            }}
+            className="z-50 w-44 rounded-xl border border-slate-200 bg-white shadow-lg py-1 focus:outline-none"
           >
-            <FiEye className="size-4 text-slate-400" />
-            View Details
-          </Link>
-          <Can permission="inventory.update">
             <Link
-              href={`/inventory/${item.id}/edit`}
+              href={`/inventory/${item.id}`}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2.5 px-4 py-1.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              <FiEdit2 className="size-4 text-slate-400" />
-              Edit
+              <FiEye className="size-4 text-slate-400" />
+              View Details
             </Link>
-          </Can>
-          <div className="border-t border-slate-100 my-1" />
-          <Can permission="inventory.adjust">
+            <Can permission="inventory.update">
+              <Link
+                href={`/inventory/${item.id}/edit`}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-4 py-1.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <FiEdit2 className="size-4 text-slate-400" />
+                Edit
+              </Link>
+            </Can>
+            <div className="border-t border-slate-100 my-1" />
+            <Can permission="inventory.adjust">
+              <button
+                onClick={() => { setOpen(false); onAdjust?.(item); }}
+                className="flex items-center gap-2.5 w-full px-4 py-1.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+              >
+                <FiMinusCircle className="size-4 text-slate-400" />
+                Adjust Stock
+              </button>
+            </Can>
             <button
-              onClick={() => { setOpen(false); onAdjust?.(item); }}
-              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+              onClick={() => { setOpen(false); onReserve?.(item); }}
+              disabled={item.availableQuantity <= 0}
+              className={`flex items-center gap-2.5 w-full px-4 py-1.5 text-sm transition-colors text-left ${
+                item.availableQuantity <= 0
+                  ? "text-slate-300 cursor-not-allowed"
+                  : "text-slate-700 hover:bg-slate-50"
+              }`}
             >
-              <FiMinusCircle className="size-4 text-slate-400" />
-              Adjust Stock
+              <FiLock className="size-4 text-slate-400" />
+              Reserve Stock
             </button>
-          </Can>
-          <button
-            onClick={() => { setOpen(false); onReserve?.(item); }}
-            disabled={item.availableQuantity <= 0}
-            className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition-colors text-left ${
-              item.availableQuantity <= 0
-                ? "text-slate-300 cursor-not-allowed"
-                : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            <FiLock className="size-4 text-slate-400" />
-            Reserve Stock
-          </button>
-          <button
-            onClick={() => { setOpen(false); onRelease?.(item); }}
-            disabled={item.reservedQuantity <= 0}
-            className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition-colors text-left ${
-              item.reservedQuantity <= 0
-                ? "text-slate-300 cursor-not-allowed"
-                : "text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            <FiUnlock className="size-4 text-slate-400" />
-            Release Stock
-          </button>
-          <div className="border-t border-slate-100 my-1" />
-          <Can permission="inventory.delete">
             <button
-              onClick={() => { setOpen(false); onDelete?.(item.id); }}
-              disabled={deletingId === item.id}
-              className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors text-left disabled:opacity-40"
+              onClick={() => { setOpen(false); onRelease?.(item); }}
+              disabled={item.reservedQuantity <= 0}
+              className={`flex items-center gap-2.5 w-full px-4 py-1.5 text-sm transition-colors text-left ${
+                item.reservedQuantity <= 0
+                  ? "text-slate-300 cursor-not-allowed"
+                  : "text-slate-700 hover:bg-slate-50"
+              }`}
             >
-              <FiTrash2 className="size-4" />
-              Delete
+              <FiUnlock className="size-4 text-slate-400" />
+              Release Stock
             </button>
-          </Can>
-        </div>
+            <div className="border-t border-slate-100 my-1" />
+            <Can permission="inventory.delete">
+              <button
+                onClick={() => { setOpen(false); onDelete?.(item.id); }}
+                disabled={deletingId === item.id}
+                className="flex items-center gap-2.5 w-full px-4 py-1.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors text-left disabled:opacity-40"
+              >
+                <FiTrash2 className="size-4" />
+                Delete
+              </button>
+            </Can>
+          </div>
+        </>,
+        document.body
       )}
     </div>
   );

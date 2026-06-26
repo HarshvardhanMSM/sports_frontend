@@ -17,6 +17,7 @@ export default function CreateCollectionPage() {
     description?: string;
     isActive?: boolean;
     bannerImageFile: File | null;
+    productIds: string[];
   }) => {
     const fd = new FormData();
     fd.append("name", data.name);
@@ -25,6 +26,7 @@ export default function CreateCollectionPage() {
     if (data.bannerImageFile) {
       fd.append("image", data.bannerImageFile);
     }
+    fd.append("productIds", JSON.stringify(data.productIds));
     await createCollection(fd as unknown as CreateCollectionRequest);
   };
 
