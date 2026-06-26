@@ -538,7 +538,7 @@ export default function ProductForm({
             )}
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               SKU Prefix (Optional)
             </label>
@@ -548,7 +548,7 @@ export default function ProductForm({
               {...register("skuPrefix")}
               className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
             />
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">

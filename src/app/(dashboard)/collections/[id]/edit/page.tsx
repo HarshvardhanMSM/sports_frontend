@@ -25,12 +25,14 @@ export default function EditCollectionPage({ params }: EditCollectionPageProps) 
     description?: string;
     isActive: boolean;
     bannerImageFile: File | null;
+    productIds: string[];
   }) => {
     const jsonPayload = {
       name: formData.name,
       slug: formData.slug,
       description: formData.description,
       isActive: Boolean(formData.isActive),
+      productIds: formData.productIds,
     };
 
     if (formData.bannerImageFile) {
@@ -39,6 +41,7 @@ export default function EditCollectionPage({ params }: EditCollectionPageProps) 
       if (formData.slug) fd.append("slug", formData.slug);
       if (formData.description) fd.append("description", formData.description);
       fd.append("image", formData.bannerImageFile);
+      fd.append("productIds", JSON.stringify(formData.productIds));
       await CollectionService.updateCollection(id, fd);
     }
 
