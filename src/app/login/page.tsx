@@ -3,13 +3,12 @@
 import LoginForm from "@/components/auth/LoginForm";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { resolveImageUrl } from "@/lib/image";
-import logo from "/assets/logos/Final%20file_Logo%20%2B%20wordmark.png";
 export default function LoginPage() {
   const { data: storeSettings } = useStoreSettings();
   const hasCustomLogo = !!storeSettings?.logoUrl;
   const logoSrc = hasCustomLogo
     ? resolveImageUrl(storeSettings.logoUrl)
-    : "/assets/logos/Final%20file_Logo%20%2B%20wordmark.png";
+    : "/assets/logos/Final%20file_Logo%20.png";
   const storeName = storeSettings?.storeName || "jaebees Sports";
   const storeTagline = storeSettings?.storeTagline || "Manage your sports store with seamless control";
 
@@ -17,25 +16,26 @@ export default function LoginPage() {
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-slate-50">
       {/* Left side — Premium Hero Panel (branding & visuals) */}
       <div className="hidden lg:flex lg:col-span-7 xl:col-span-6 bg-slate-950 flex-col justify-between p-12 relative overflow-hidden">
-        {/* Background Gradients */}
+        {/* Background Gradients
         <div className="absolute inset-0 bg-gradient-to-tr from-indigo-950 via-purple-950 to-slate-950" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(99,102,241,0.15),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(168,85,247,0.12),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(168,85,247,0.12),transparent_50%)]" /> */}
 
         {/* Decorative Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:24px_24px]" />
+        <div className="absolute inset-0  bg-black bg-[size:24px_24px]" />
 
         <div className="relative z-10">
           {/* Brand Logo & Name */}
           <div className="flex items-center gap-3">
-            <div className="size-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 p-2 flex items-center justify-center shadow-lg overflow-hidden">
+            <div className="size-12 w-[200px] rounded-xl  p-2 flex items-center justify-center shadow-lg overflow-hidden">
               <img
                 src={logoSrc}
                 alt={storeName}
-                className={`max-h-full max-w-full object-contain ${!hasCustomLogo ? "brightness-0 invert" : ""}`}
+                className={`max-h-full max-w-full object-contain `}
+                style={{mixBlendMode:"difference"}}
               />
             </div>
-            <span className="text-lg font-bold tracking-wider text-white uppercase">{storeName}</span>
+          
           </div>
         </div>
 

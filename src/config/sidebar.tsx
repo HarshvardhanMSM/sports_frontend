@@ -538,6 +538,7 @@ const Logo = ({ open }: { open: boolean }) => {
       className={`flex items-center justify-center rounded-lg overflow-hidden transition-all duration-200 ${
         open ? "h-10 w-auto max-w-[200px]" : "size-10 bg-slate-50 border border-slate-100"
       }`}
+      style={{mixBlendMode:"exclusion"}}
     >
       <img
         src={logoSrc}
