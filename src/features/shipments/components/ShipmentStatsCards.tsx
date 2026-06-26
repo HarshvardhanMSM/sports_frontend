@@ -21,7 +21,7 @@ const CARDS: {
 
 export default function ShipmentStatsCards(metrics: ShipmentMetrics) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-7">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
           <FiNavigation className="size-6 text-indigo-600" />

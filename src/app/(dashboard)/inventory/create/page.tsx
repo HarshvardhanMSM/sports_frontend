@@ -19,7 +19,9 @@ export default function CreateInventoryPage() {
       variantId: data.variantId,
       quantity: data.quantity,
       reservedQuantity: data.reservedQuantity || undefined,
+      reorderPoint: data.reorderPoint || undefined,
       lowStockThreshold: data.lowStockThreshold || undefined,
+      reorderQuantity: data.reorderQuantity || undefined,
     };
     await createInventory(body);
   };
