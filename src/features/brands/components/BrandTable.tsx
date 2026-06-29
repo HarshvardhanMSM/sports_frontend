@@ -48,13 +48,6 @@ export default function BrandTable({ brands, onDelete }: BrandTableProps) {
       ),
     },
     {
-      key: "productsCount",
-      header: "Products",
-      render: (brand) => (
-        <span className="text-slate-800 font-semibold">{brand.productsCount ?? 0}</span>
-      ),
-    },
-    {
       key: "categories",
       header: "Categories",
       render: (brand) =>
