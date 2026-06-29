@@ -192,6 +192,10 @@ export default function SubCategoryForm({
             rows={3}
             placeholder="High-performance running footwear"
             {...register("description")}
+            onChange={(e) => {
+              e.target.value = e.target.value.replace(/[^a-zA-Z0-9 @\n\r]/g, "");
+              register("description").onChange(e);
+            }}
             className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
           />
         </div>

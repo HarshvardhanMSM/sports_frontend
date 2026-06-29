@@ -687,6 +687,10 @@ export default function ProductForm({
               rows={2}
               placeholder="Brief product summary..."
               {...register("shortDescription")}
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z0-9 @\n\r]/g, "");
+                register("shortDescription").onChange(e);
+              }}
               className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
             />
           </div>
@@ -699,6 +703,10 @@ export default function ProductForm({
               rows={4}
               placeholder="Detailed product description..."
               {...register("description")}
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z0-9 @\n\r]/g, "");
+                register("description").onChange(e);
+              }}
               className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
             />
           </div>

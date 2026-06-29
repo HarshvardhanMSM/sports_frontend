@@ -25,6 +25,7 @@ import type {
   OrderStatus,
 } from "@/types/dashboard.types";
 import Link from "next/link";
+import { useAuthStore, selectUser } from "@/store/auth.store";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -156,6 +157,7 @@ export default function DashboardPage() {
   const { filters, setters, queries } = useDashboard();
   const monthSummaryQuery = useDashboardSummary("this_month");
   const returnReasonsQuery = useReturnReasons();
+  const user = useAuthStore(selectUser);
 
   // Query data is now typed directly (service unwraps the API wrapper)
   const summaryData = queries.summary.data;
@@ -663,7 +665,7 @@ export default function DashboardPage() {
             Dashboard Overview
           </h1>
           <p className="text-sm text-slate-500">
-            Welcome back, Tom. Here is what is happening with your store today.
+            Welcome back, {user?.name || "Admin"}. Here is what is happening with your store today.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -1065,7 +1067,9 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="mt-1.5 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold text-emerald-600">
+                <div className={`mt-1.5 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold ${
+                  getSummaryTrend(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalSales") === "up" ? "text-emerald-600" : "text-rose-600"
+                }`}>
                   {monthSummaryQuery.isPending || !monthSummaryData ? (
                     <SkeletonTrend />
                   ) : (
@@ -1109,7 +1113,9 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="mt-1.5 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold text-emerald-600">
+                <div className={`mt-1.5 flex items-center gap-0.5 flex-wrap text-[10px] font-semibold ${
+                  getSummaryTrend(monthSummaryQuery.data, monthSummaryQuery.isPending, "totalOrders") === "up" ? "text-emerald-600" : "text-rose-600"
+                }`}>
                   {monthSummaryQuery.isPending || !monthSummaryData ? (
                     <SkeletonTrend />
                   ) : (

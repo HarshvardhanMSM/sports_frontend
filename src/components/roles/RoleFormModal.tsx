@@ -204,6 +204,10 @@ export default function RoleFormModal({
             </label>
             <textarea
               {...register("description")}
+              onChange={(e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z0-9 @\n\r]/g, "");
+                register("description").onChange(e);
+              }}
               rows={2}
               placeholder="Describe what this role is allowed to do..."
               className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 placeholder:text-slate-400 resize-none"

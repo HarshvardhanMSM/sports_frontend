@@ -37,7 +37,10 @@ export function DataFilterBar({
           type="text"
           placeholder={searchPlaceholder}
           value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => {
+            const clean = e.target.value.replace(/[^a-zA-Z0-9 @]/g, "");
+            onSearchChange(clean);
+          }}
           className="w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
         />
       </div>

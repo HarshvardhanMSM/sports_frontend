@@ -164,7 +164,16 @@ export default function CollectionForm({
 
         <div className="md:col-span-2">
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Description</label>
-          <textarea rows={3} placeholder="Hot styles for the summer season..." {...register("description")} className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100" />
+          <textarea
+            rows={3}
+            placeholder="Hot styles for the summer season..."
+            {...register("description")}
+            onChange={(e) => {
+              e.target.value = e.target.value.replace(/[^a-zA-Z0-9 @\n\r]/g, "");
+              register("description").onChange(e);
+            }}
+            className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+          />
         </div>
 
         <div className="md:col-span-2">
