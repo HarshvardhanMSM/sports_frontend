@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { FiPlus, FiPackage, FiAlertTriangle, FiXCircle, FiDollarSign, FiAlertCircle } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useInventoryItems, useDeleteInventory, useAdjustInventory, useReserveInventory, useReleaseInventory } from "@/hooks/useInventory";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { InventoryItem, InventoryListParams } from "@/types/inventory.types";
@@ -52,49 +56,34 @@ export default function InventoryPage() {
   const lowStockCount = items.filter((i) => i.availableQuantity > 0 && i.availableQuantity <= i.lowStockThreshold).length;
   const outOfStockCount = items.filter((i) => i.availableQuantity <= 0).length;
 
-  const STAT_CARDS = [
-    { label: "Total SKUs", value: total, sub: "Active product variants", icon: FiPackage, bg: "from-indigo-500 to-indigo-600" },
-    { label: "Low Stock", value: lowStockCount, sub: "Below threshold", icon: FiAlertTriangle, bg: "from-amber-500 to-amber-600" },
-    { label: "Out of Stock", value: outOfStockCount, sub: "Needs restocking", icon: FiXCircle, bg: "from-rose-500 to-rose-600" },
-    { label: "Total Value", value: `$${(items.reduce((s, i) => s + i.quantity, 0) * 25).toLocaleString()}`, sub: "Estimated stock value", icon: FiDollarSign, bg: "from-emerald-500 to-emerald-600" },
-  ];
+  const isFiltered = searchTerm !== "" || statusFilter !== "all";
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Stock Control</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Inventory Management</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Monitor and manage stock levels across all products and SKUs.</p>
-        </div>
-        <Can permission="inventory.create">
-          <Link
-            href="/inventory/create"
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
-            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
-          >
-            <FiPlus className="size-4" />
-            Add Inventory
-          </Link>
-        </Can>
-      </div>
+      <PageHeader
+        badge="Stock Control"
+        title="Inventory Management"
+        description="Monitor and manage stock levels across all products and SKUs."
+        action={
+          <Can permission="inventory.create">
+            <Link
+              href="/inventory/create"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+              style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+            >
+              <FiPlus className="size-4" />
+              Add Inventory
+            </Link>
+          </Can>
+        }
+      />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {STAT_CARDS.map(({ label, value, sub, icon: Icon, bg }) => (
-          <div key={label} className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-            <div className={`absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br ${bg} opacity-5`} />
-            <div className={`inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bg} shadow-sm mb-3`}>
-              <Icon className="size-5 text-white" />
-            </div>
-            <p className="text-2xl font-bold text-slate-900 leading-none">{value}</p>
-            <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">{label}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
-          </div>
-        ))}
-      </div>
+      <StatsGrid className="grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Total SKUs" value={total} icon={FiPackage} color="indigo" sub="Active product variants" />
+        <StatCard label="Low Stock" value={lowStockCount} icon={FiAlertTriangle} color="amber" sub="Below threshold" />
+        <StatCard label="Out of Stock" value={outOfStockCount} icon={FiXCircle} color="rose" sub="Needs restocking" />
+        <StatCard label="Total Value" value={`$${(items.reduce((s, i) => s + i.quantity, 0) * 25).toLocaleString()}`} icon={FiDollarSign} color="emerald" sub="Estimated stock value" />
+      </StatsGrid>
 
       <InventoryFilters
         search={searchTerm}
@@ -145,27 +134,23 @@ export default function InventoryPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-            <FiPackage className="size-6 text-slate-400" />
-          </div>
-          <h3 className="text-base font-bold text-slate-800">No inventory items found</h3>
-          <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
-            {searchTerm || statusFilter !== "all"
-              ? "No items match your current filters. Try refining your search query."
-              : "Start by adding your first inventory item."}
-          </p>
-          {!searchTerm && statusFilter === "all" && (
-            <Link
-              href="/inventory/create"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all"
-              style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
-            >
-              <FiPlus className="size-4" />
-              Add Inventory
-            </Link>
-          )}
-        </div>
+        <EmptyState
+          icon={<FiPackage className="size-6 text-slate-400" />}
+          title="No inventory items found"
+          description={isFiltered ? "No items match your current filters. Try refining your search query." : "Start by adding your first inventory item."}
+          action={
+            !isFiltered ? (
+              <Link
+                href="/inventory/create"
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all"
+                style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+              >
+                <FiPlus className="size-4" />
+                Add Inventory
+              </Link>
+            ) : undefined
+          }
+        />
       )}
 
       {adjustingItem && (

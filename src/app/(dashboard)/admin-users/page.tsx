@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { FiUserPlus, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useAssignRoles, useRemoveRoles } from "@/hooks/useUsers";
 import { useRoles } from "@/hooks/useRoles";
 import { useToast } from "@/components/common/Toast/useToast";
@@ -55,41 +56,34 @@ export default function AdminUsersPage() {
     inactive: allUsers.filter((u) => !u.isActive).length,
   }), [allUsers]);
 
-
-
   return (
     <div className="space-y-6">
-
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">User Management</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Users</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage administrator accounts, roles, and access permissions.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all"
-          >
-            <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
-          <Can permission="admin.create">
+      <PageHeader
+        badge="User Management"
+        title="Admin Users"
+        description="Manage administrator accounts, roles, and access permissions."
+        action={
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all"
             >
-              <FiUserPlus className="size-4" />
-              Create User
+              <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
+              Refresh
             </button>
-          </Can>
-        </div>
-      </div>
+            <Can permission="admin.create">
+              <button
+                onClick={() => setShowCreate(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm"
+              >
+                <FiUserPlus className="size-4" />
+                Create User
+              </button>
+            </Can>
+          </div>
+        }
+      />
 
       {error ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -147,7 +141,6 @@ export default function AdminUsersPage() {
         />
       )}
 
-      {/* Edit Modal */}
       {editTarget && (
         <UserFormModal
           mode="edit"
@@ -164,7 +157,6 @@ export default function AdminUsersPage() {
         />
       )}
 
-      {/* Assign Roles Modal */}
       {assignTarget && (
         <AssignRolesModal
           user={assignTarget}
@@ -186,7 +178,6 @@ export default function AdminUsersPage() {
         />
       )}
 
-      {/* Delete Dialog */}
       {deleteTarget && (
         <DeleteUserDialog
           user={deleteTarget}

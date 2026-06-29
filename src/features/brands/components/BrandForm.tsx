@@ -43,6 +43,7 @@ export default function BrandForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<BrandFormValues>({
     resolver: zodResolver(brandSchema),
@@ -53,6 +54,18 @@ export default function BrandForm({
       isActive: initialData?.isActive ?? true,
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        name: initialData.name || "",
+        slug: initialData.slug || "",
+        description: initialData.description || "",
+        isActive: initialData.isActive ?? true,
+      });
+      setSelectedCategoryIds(initialData.categories?.map((c) => c.id) ?? []);
+    }
+  }, [initialData, reset]);
 
   const nameVal = watch("name");
 

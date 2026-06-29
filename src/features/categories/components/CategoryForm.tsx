@@ -43,6 +43,7 @@ export default function CategoryForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -52,6 +53,18 @@ export default function CategoryForm({
       description: initialData?.description ?? "",
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        name: initialData.name ?? "",
+        slug: initialData.slug ?? "",
+        description: initialData.description ?? "",
+      });
+      setIsActive(initialData.isActive ?? true);
+      setSelectedBrandIds(initialData.brands?.map((b) => b.id) ?? []);
+    }
+  }, [initialData, reset]);
 
   const nameVal = watch("name");
 

@@ -42,6 +42,7 @@ export default function AttributeForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<z.input<typeof attributeSchema>, unknown, AttributeFormValues>({
     resolver: zodResolver(attributeSchema),
@@ -53,6 +54,21 @@ export default function AttributeForm({
       sortOrder: initialData?.sortOrder ?? 0,
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        name: initialData.name ?? "",
+        slug: initialData.slug ?? "",
+        isFilterable: initialData.isFilterable ?? true,
+        isRequired: initialData.isRequired ?? false,
+        sortOrder: initialData.sortOrder ?? 0,
+      });
+      if (initialData.values) {
+        setValues(initialData.values.map((v) => v.value));
+      }
+    }
+  }, [initialData, reset]);
 
   const nameVal = watch("name");
 

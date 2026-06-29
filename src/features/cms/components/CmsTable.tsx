@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { DataTable, type Column } from "@/components/common/table/DataTable";
 import type { CmsPage } from "@/types/cms.types";
 import CmsRowActions from "./CmsRowActions";
 import CmsStatusBadge from "./CmsStatusBadge";
@@ -24,44 +25,14 @@ interface CmsTableProps {
 }
 
 export default function CmsTable({ pages, onDelete }: CmsTableProps) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-w-full overflow-x-auto">
-      <table className="w-full border-collapse text-left text-sm text-slate-600">
-        <thead>
-          <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            <th className="px-6 py-4">Title</th>
-            <th className="px-6 py-4">Slug</th>
-            <th className="px-6 py-4">Page Type</th>
-            <th className="px-6 py-4">Status</th>
-            <th className="px-6 py-4">Last Modified</th>
-            <th className="px-6 py-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {pages.map((page) => (
-            <tr key={page.id} className="group hover:bg-slate-50/50 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
-                {page.title}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400 font-mono">
-                {page.slug}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-xs font-semibold text-slate-600">
-                {formatPageType(page.pageType || "")}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <CmsStatusBadge status={page.status} />
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                {page.updatedAt ? new Date(page.updatedAt).toLocaleDateString() : "-"}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-xs">
-                <CmsRowActions id={page.id} onDelete={onDelete} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const columns: Column<CmsPage>[] = [
+    { key: "title", header: "Title", render: (p) => <span className="font-semibold text-slate-800">{p.title}</span> },
+    { key: "slug", header: "Slug", render: (p) => <span className="text-xs text-slate-400 font-mono">{p.slug}</span> },
+    { key: "pageType", header: "Page Type", render: (p) => <span className="text-xs font-semibold text-slate-600">{formatPageType(p.pageType || "")}</span> },
+    { key: "status", header: "Status", render: (p) => <CmsStatusBadge status={p.status} /> },
+    { key: "updatedAt", header: "Last Modified", render: (p) => <span className="text-slate-500">{p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : "-"}</span> },
+    { key: "actions", header: "Actions", headerClassName: "text-right", cellClassName: "px-6 py-4 whitespace-nowrap text-right text-xs", render: (p) => <CmsRowActions id={p.id} onDelete={onDelete} /> },
+  ];
+
+  return <DataTable columns={columns} data={pages} keyExtractor={(p) => p.id} />;
 }

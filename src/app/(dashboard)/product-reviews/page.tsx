@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from "react";
 import { FiAlertCircle, FiStar } from "react-icons/fi";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useReviews, useDeleteReview, useApproveReview, useRejectReview, useHideReview, useReviewAnalytics } from "@/hooks/useReviews";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { ReviewListParams } from "@/types/review.types";
@@ -115,6 +117,8 @@ export default function ProductReviewsPage() {
     }
   };
 
+  const isFiltered = searchTerm !== "" || statusFilter !== "All" || ratingFilter !== undefined;
+
   return (
     <div className="space-y-6">
       {toast && (
@@ -127,16 +131,11 @@ export default function ProductReviewsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Review Management</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Product Reviews</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Moderate and manage customer reviews across your product catalog.</p>
-        </div>
-      </div>
+      <PageHeader
+        badge="Review Management"
+        title="Product Reviews"
+        description="Moderate and manage customer reviews across your product catalog."
+      />
 
       <ReviewAnalyticsCards analytics={analyticsData?.data} isLoading={isAnalyticsLoading} />
 
@@ -190,25 +189,21 @@ export default function ProductReviewsPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-            {searchTerm || statusFilter !== "All" || ratingFilter !== undefined ? (
+        <EmptyState
+          icon={
+            isFiltered ? (
               <FiAlertCircle className="size-6 text-slate-400" />
             ) : (
               <FiStar className="size-6 text-slate-400" />
-            )}
-          </div>
-          <h3 className="text-base font-bold text-slate-800">
-            {searchTerm || statusFilter !== "All" || ratingFilter !== undefined
-              ? "No matching reviews"
-              : "No reviews found"}
-          </h3>
-          <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
-            {searchTerm || statusFilter !== "All" || ratingFilter !== undefined
+            )
+          }
+          title={isFiltered ? "No matching reviews" : "No reviews found"}
+          description={
+            isFiltered
               ? "No reviews match your current filters. Try refining your search query."
-              : "Customer reviews will appear here once they start submitting feedback on your products."}
-          </p>
-        </div>
+              : "Customer reviews will appear here once they start submitting feedback on your products."
+          }
+        />
       )}
 
       {deleteTarget && (

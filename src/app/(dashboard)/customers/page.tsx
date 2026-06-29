@@ -1,34 +1,20 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
-import {
-  FiUsers,
-  FiUserCheck,
-  FiUserPlus,
-  FiSearch,
-  FiEye,
-  FiHeart,
-  FiAlertCircle,
-} from "react-icons/fi";
+import { FiUsers, FiUserCheck, FiUserPlus, FiEye, FiHeart, FiAlertCircle } from "react-icons/fi";
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { DataFilterBar } from "@/components/common/filters/DataFilterBar";
+import { DataTable, type Column } from "@/components/common/table/DataTable";
+import { EmptyState } from "@/components/common/EmptyState";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import { useCustomers, useCustomerStats } from "@/hooks/useCustomers";
-import type { CustomerListParams } from "@/types/customer.types";
+import type { Customer, CustomerListParams } from "@/types/customer.types";
 import CustomerWishlistDrawer from "@/features/customers/components/CustomerWishlistDrawer";
 import Pagination from "@/components/ui/pagination/Pagination";
-import Select from "@/components/ui/select/Select";
-
-const statusOptions = [
-  { value: "", label: "All Statuses" },
-  { value: "true", label: "Active" },
-  { value: "false", label: "Inactive" },
-];
-
-const verifiedOptions = [
-  { value: "", label: "All Verified" },
-  { value: "true", label: "Verified" },
-  { value: "false", label: "Unverified" },
-];
 
 function getInitials(first: string, last: string) {
   return (first[0] ?? "").toUpperCase() + (last[0] ?? "").toUpperCase();
@@ -56,7 +42,6 @@ export default function CustomersPage() {
 
   const params: CustomerListParams = { page, limit: 10 };
   if (debouncedQuery) params.search = debouncedQuery;
-
   if (isActive) params.isActive = isActive === "true";
   if (isEmailVerified) params.isEmailVerified = isEmailVerified === "true";
 
@@ -70,221 +55,90 @@ export default function CustomersPage() {
   const total = isPaginated ? (raw?.total ?? 0) : allItems.length;
   const totalPages = Math.max(1, Math.ceil(total / 10));
 
-  // Search debouncing handled by useFuzzySearch hook
+  const isFiltered = !!debouncedQuery || isActive !== "" || isEmailVerified !== "";
 
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <FiAlertCircle className="size-10 text-rose-500 mb-4" />
-          <p className="text-sm font-semibold text-slate-800">Failed to load customers</p>
-          <button onClick={() => refetch()} className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Retry</button>
+  const columns: Column<Customer>[] = [
+    { key: "id", header: "Customer ID", render: (c) => <span className="text-xs font-mono text-slate-500">{c.id.slice(0, 8)}...</span> },
+    {
+      key: "firstName", header: "First Name", render: (c) => (
+        <div className="flex items-center gap-3">
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${AVATAR_COLORS[0]} text-xs font-bold text-white shadow-sm`}>
+            {getInitials(c.firstName, c.lastName)}
+          </div>
+          <span className="text-sm font-semibold text-slate-800">{c.firstName}</span>
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    { key: "lastName", header: "Last Name", render: (c) => <span className="text-sm text-slate-700">{c.lastName}</span> },
+    { key: "email", header: "Email", render: (c) => <span className="text-sm text-slate-600">{c.email}</span> },
+    { key: "mobile", header: "Mobile", render: (c) => <span className="text-sm text-slate-600">{c.mobile ?? "-"}</span> },
+    { key: "isEmailVerified", header: "Email Verified", render: (c) => <StatusBadge status={c.isEmailVerified ? "Yes" : "No"} /> },
+    { key: "isActive", header: "Status", render: (c) => <StatusBadge status={c.isActive ? "Active" : "Inactive"} /> },
+    { key: "createdAt", header: "Created Date", render: (c) => <span className="text-sm text-slate-600 whitespace-nowrap">{new Date(c.createdAt).toLocaleDateString()}</span> },
+    {
+      key: "actions", header: "Actions", headerClassName: "text-right", cellClassName: "px-6 py-4 whitespace-nowrap text-right", render: (c) => (
+        <div className="flex gap-1 justify-end">
+          <button onClick={() => router.push(`/customers/${c.id}`)} className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"><FiEye className="size-4" /></button>
+          <button onClick={() => setWishlistTarget({ id: c.id, name: `${c.firstName} ${c.lastName}` })} className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="View Wishlist"><FiHeart className="size-4" /></button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Customer Management</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Customers</h1>
-          <p className="text-sm text-slate-500 mt-0.5">View and manage your customer base, accounts, and purchase history.</p>
-        </div>
-      </div>
+      <PageHeader
+        badge="Customer Management"
+        title="Customers"
+        description="View and manage your customer base, accounts, and purchase history."
+      />
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
-        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-indigo-500 to-indigo-600 opacity-5" />
-          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 shadow-sm mb-3">
-            <FiUsers className="size-5 text-white" />
-          </div>
-          <p className="text-2xl font-bold text-slate-900">
-            {stats?.totalCustomers ?? "-"}
-          </p>
-          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Total Customers</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-emerald-500 to-emerald-600 opacity-5" />
-          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-sm mb-3">
-            <FiUserCheck className="size-5 text-white" />
-          </div>
-          <p className="text-2xl font-bold text-slate-900">
-            {stats?.activeCustomers ?? "-"}
-          </p>
-          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Active Customers</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-blue-500 to-blue-600 opacity-5" />
-          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm mb-3">
-            <FiUsers className="size-5 text-white" />
-          </div>
-          <p className="text-2xl font-bold text-slate-900">
-            {stats?.verifiedCustomers ?? "-"}
-          </p>
-          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Verified Customers</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-violet-500 to-violet-600 opacity-5" />
-          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-sm mb-3">
-            <FiUserPlus className="size-5 text-white" />
-          </div>
-          <p className="text-2xl font-bold text-slate-900">
-            {stats?.newThisMonth ?? "-"}
-          </p>
-          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">New This Month</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-          <div className="absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br from-amber-500 to-amber-600 opacity-5" />
-          <div className="inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-sm mb-3">
-            <FiUserPlus className="size-5 text-white" />
-          </div>
-          <p className="text-2xl font-bold text-slate-900">
-            {stats?.newToday ?? "-"}
-          </p>
-          <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">New Today</p>
-        </div>
-      </div>
+      <StatsGrid className="grid-cols-2 xl:grid-cols-5">
+        <StatCard label="Total Customers" value={stats?.totalCustomers ?? "-"} icon={FiUsers} color="indigo" />
+        <StatCard label="Active Customers" value={stats?.activeCustomers ?? "-"} icon={FiUserCheck} color="emerald" />
+        <StatCard label="Verified Customers" value={stats?.verifiedCustomers ?? "-"} icon={FiUsers} color="blue" />
+        <StatCard label="New This Month" value={stats?.newThisMonth ?? "-"} icon={FiUserPlus} color="violet" />
+        <StatCard label="New Today" value={stats?.newToday ?? "-"} icon={FiUserPlus} color="amber" />
+      </StatsGrid>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="relative flex-1 max-w-sm">
-          <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition-all focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-400"
-          />
-        </div>
-        <Select
-          value={isActive}
-          onChange={(val) => { setIsActive(val); setPage(1); }}
-          options={statusOptions}
-          className="min-w-[140px]"
-        />
-        <Select
-          value={isEmailVerified}
-          onChange={(val) => { setIsEmailVerified(val); setPage(1); }}
-          options={verifiedOptions}
-          className="min-w-[140px]"
-        />
-      </div>
+      <DataFilterBar
+        search={query}
+        onSearchChange={(v) => { setQuery(v); setPage(1); }}
+        searchPlaceholder="Search by name or email..."
+        selectFilters={[
+          { label: "Status", value: isActive, onChange: (v) => { setIsActive(v); setPage(1); }, options: [{ value: "", label: "All Statuses" }, { value: "true", label: "Active" }, { value: "false", label: "Inactive" }] },
+          { label: "Verified", value: isEmailVerified, onChange: (v) => { setIsEmailVerified(v); setPage(1); }, options: [{ value: "", label: "All Verified" }, { value: "true", label: "Verified" }, { value: "false", label: "Unverified" }] },
+        ]}
+      />
 
-      {isLoading ? (
+      {error ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="size-12 rounded-2xl bg-rose-50 flex items-center justify-center mb-4">
+            <FiAlertCircle className="size-6 text-rose-500" />
+          </div>
+          <p className="text-sm font-semibold text-slate-800">Failed to load customers</p>
+          <button onClick={() => refetch()} className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">Retry</button>
+        </div>
+      ) : isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <div className="size-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-indigo-600" />
           <p className="mt-3 text-sm font-medium text-slate-500">Loading customers...</p>
         </div>
       ) : allItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-            <FiUsers className="size-6 text-slate-400" />
-          </div>
-          <p className="mt-3 text-sm font-semibold text-slate-700">No customers found</p>
-          <p className="text-xs text-slate-400 mt-1">Try adjusting your search or filter criteria.</p>
-        </div>
+        <EmptyState
+          icon={<FiUsers className="size-6 text-slate-400" />}
+          title="No customers found"
+          description={isFiltered ? "Try adjusting your search or filter criteria." : undefined}
+        />
       ) : (
-        <>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/80">
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Customer ID</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">First Name</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Last Name</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Mobile</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email Verified</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Created Date</th>
-                    <th className="px-5 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {allItems.map((c) => (
-                    <tr key={c.id} className="group hover:bg-slate-50/60 transition-colors">
-                      <td className="px-5 py-4 text-xs font-mono text-slate-500">{c.id.slice(0, 8)}...</td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${AVATAR_COLORS[0]} text-xs font-bold text-white shadow-sm`}>
-                            {getInitials(c.firstName, c.lastName)}
-                          </div>
-                          <span className="text-sm font-semibold text-slate-800">{c.firstName}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-700">{c.lastName}</td>
-                      <td className="px-5 py-4 text-sm text-slate-600">{c.email}</td>
-                      <td className="px-5 py-4 text-sm text-slate-600">{c.mobile ?? "-"}</td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          c.isEmailVerified
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-500"
-                        }`}>
-                          {c.isEmailVerified ? "Yes" : "No"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ${
-                          c.isActive
-                            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-                            : "bg-slate-100 text-slate-600 ring-slate-200"
-                        }`}>
-                          <span className={`size-1.5 rounded-full ${c.isActive ? "bg-emerald-500" : "bg-slate-400"}`} />
-                          {c.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600 whitespace-nowrap">
-                        {new Date(c.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        <div className="flex gap-1 justify-end">
-                          <button
-                            onClick={() => router.push(`/customers/${c.id}`)}
-                            className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                          >
-                            <FiEye className="size-4" />
-                          </button>
-                          <button
- onClick={() => setWishlistTarget({ id: c.id, name: `${c.firstName} ${c.lastName}` })}
- className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all"
- title="View Wishlist"
-                          >
-                            <FiHeart className="size-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {totalPages > 1 && (
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              total={total}
-              limit={10}
-              onPageChange={setPage}
-            />
-          )}
-        </>
+        <div className="space-y-4">
+          <DataTable columns={columns} data={allItems} keyExtractor={(c) => c.id} />
+          {totalPages > 1 && <Pagination page={page} totalPages={totalPages} total={total} limit={10} onPageChange={setPage} />}
+        </div>
       )}
 
       {wishlistTarget && (
-        <CustomerWishlistDrawer
-          customerId={wishlistTarget.id}
-          customerName={wishlistTarget.name}
-          onClose={() => setWishlistTarget(null)}
-        />
+        <CustomerWishlistDrawer customerId={wishlistTarget.id} customerName={wishlistTarget.name} onClose={() => setWishlistTarget(null)} />
       )}
     </div>
   );

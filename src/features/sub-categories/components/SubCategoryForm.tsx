@@ -43,6 +43,7 @@ export default function SubCategoryForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<z.input<typeof subCategorySchema>, unknown, SubCategoryFormValues>({
     resolver: zodResolver(subCategorySchema),
@@ -56,6 +57,20 @@ export default function SubCategoryForm({
       isActive: initialData?.isActive ?? true,
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        categoryId: initialData.categoryId ?? "",
+        name: initialData.name ?? "",
+        slug: initialData.slug ?? "",
+        image: initialData.image ?? "",
+        description: initialData.description ?? "",
+        sortOrder: initialData.sortOrder ?? 0,
+        isActive: initialData.isActive ?? true,
+      });
+    }
+  }, [initialData, reset]);
 
   const selectedCategoryId = watch("categoryId");
 

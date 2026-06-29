@@ -96,6 +96,7 @@ export default function CollectionForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<z.input<typeof collectionSchema>, unknown, CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
@@ -107,6 +108,18 @@ export default function CollectionForm({
       isActive: initialData?.isActive ?? true,
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        name: initialData.name ?? "",
+        slug: initialData.slug ?? "",
+        bannerImage: (initialData.image || initialData.bannerImage) ?? "",
+        description: initialData.description ?? "",
+        isActive: initialData.isActive ?? true,
+      });
+    }
+  }, [initialData, reset]);
 
   const nameVal = watch("name");
 

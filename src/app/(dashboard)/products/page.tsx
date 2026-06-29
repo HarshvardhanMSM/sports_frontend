@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FiPlus, FiAlertCircle } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useProducts, useDeleteProduct, useBulkDeleteProducts } from "@/hooks/useProducts";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import ProductFilters from "@/features/products/components/ProductFilters";
@@ -79,27 +81,25 @@ function ProductsContent() {
   const products = data?.data?.items ?? [];
   const meta = data?.data?.meta;
 
+  const isFiltered = query !== "" || brandId !== "All" || categoryId !== "All" || status !== "All" || isFeatured !== "All";
+
   return (
     <div className="space-y-6 font-sans">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-            Products Catalog
-          </h1>
-          <p className="text-sm text-slate-500">
-            View, search, filter, and manage products.
-          </p>
-        </div>
-        <Can permission="product.create">
-          <Link
-            href="/products/create"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
-          >
-            <FiPlus className="size-4" />
-            Add Product
-          </Link>
-        </Can>
-      </div>
+      <PageHeader
+        title="Products Catalog"
+        description="View, search, filter, and manage products."
+        action={
+          <Can permission="product.create">
+            <Link
+              href="/products/create"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+              <FiPlus className="size-4" />
+              Add Product
+            </Link>
+          </Can>
+        }
+      />
 
       <ProductFilters
         search={query}
@@ -140,21 +140,19 @@ function ProductsContent() {
           )}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <FiAlertCircle className="size-6 text-slate-400 mb-3" />
-          <h3 className="text-base font-bold text-slate-800">
-            No products found
-          </h3>
-          <p className="mt-1 text-sm text-slate-500 max-w-sm">
-            Try adjusting your filters or create a new product.
-          </p>
-          <button
-            onClick={handleReset}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
-          >
-            Reset Filters
-          </button>
-        </div>
+        <EmptyState
+          icon={<FiAlertCircle className="size-6 text-slate-400" />}
+          title="No products found"
+          description="Try adjusting your filters or create a new product."
+          action={
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+            >
+              Reset Filters
+            </button>
+          }
+        />
       )}
     </div>
   );

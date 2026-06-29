@@ -11,11 +11,15 @@ import {
   FiPackage,
   FiTruck,
 } from "react-icons/fi";
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { DataFilterBar } from "@/components/common/filters/DataFilterBar";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useOrders, useUpdateOrderStatus, useCancelOrder } from "@/hooks/useOrders";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { OrderListParams, OrderListItem, OrderStatus } from "@/types/order.types";
 import OrdersTable from "@/features/orders/components/OrdersTable";
-import OrderFilters from "@/features/orders/components/OrderFilters";
 import UpdateStatusModal from "@/features/orders/components/UpdateStatusModal";
 import CancelOrderModal from "@/features/orders/components/CancelOrderModal";
 import Pagination from "@/components/ui/pagination/Pagination";
@@ -80,14 +84,7 @@ export default function OrdersPage() {
   const deliveredCount = items.filter((o) => o.status === "DELIVERED").length;
   const cancelledCount = items.filter((o) => o.status === "CANCELLED").length;
 
-  const STAT_CARDS = [
-    { label: "Total Orders", value: total, sub: "All time", icon: FiShoppingCart, bg: "from-indigo-500 to-indigo-600" },
-    { label: "Pending", value: pendingCount, sub: "Awaiting processing", icon: FiClock, bg: "from-amber-500 to-amber-600" },
-    { label: "Processing", value: processingCount, sub: "Being fulfilled", icon: FiRefreshCw, bg: "from-blue-500 to-blue-600" },
-    { label: "Shipped", value: shippedCount, sub: "In transit", icon: FiTruck, bg: "from-cyan-500 to-cyan-600" },
-    { label: "Delivered", value: deliveredCount, sub: "Successfully delivered", icon: FiCheckCircle, bg: "from-emerald-500 to-emerald-600" },
-    { label: "Cancelled", value: cancelledCount, sub: "This period", icon: FiXCircle, bg: "from-rose-500 to-rose-600" },
-  ];
+  const isFiltered = searchTerm !== "" || statusFilter !== "All";
 
   return (
     <div className="space-y-6">
@@ -101,38 +98,45 @@ export default function OrdersPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Order Management</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Orders</h1>
-          <p className="text-sm text-slate-500 mt-0.5">View and manage all customer orders, statuses, and fulfillment.</p>
-        </div>
-      </div>
+      <PageHeader
+        badge="Order Management"
+        title="Orders"
+        description="View and manage all customer orders, statuses, and fulfillment."
+      />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
-        {STAT_CARDS.map(({ label, value, sub, icon: Icon, bg }) => (
-          <div key={label} className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-            <div className={`absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br ${bg} opacity-5`} />
-            <div className={`inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bg} shadow-sm mb-3`}>
-              <Icon className="size-5 text-white" />
-            </div>
-            <p className="text-2xl font-bold text-slate-900 leading-none">{isLoading ? "-" : value}</p>
-            <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">{label}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
-          </div>
-        ))}
-      </div>
+      <StatsGrid className="grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
+        <StatCard label="Total Orders" value={isLoading ? 0 : total} icon={FiShoppingCart} color="indigo" sub="All time" />
+        <StatCard label="Pending" value={pendingCount} icon={FiClock} color="amber" sub="Awaiting processing" />
+        <StatCard label="Processing" value={processingCount} icon={FiRefreshCw} color="blue" sub="Being fulfilled" />
+        <StatCard label="Shipped" value={shippedCount} icon={FiTruck} color="cyan" sub="In transit" />
+        <StatCard label="Delivered" value={deliveredCount} icon={FiCheckCircle} color="emerald" sub="Successfully delivered" />
+        <StatCard label="Cancelled" value={cancelledCount} icon={FiXCircle} color="rose" sub="This period" />
+      </StatsGrid>
 
-      <OrderFilters
+      <DataFilterBar
         search={searchTerm}
         onSearchChange={(v) => { setSearchTerm(v); setPage(1); }}
-        statusFilter={statusFilter}
-        onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
+        searchPlaceholder="Search orders by ID, customer, or email..."
+        selectFilters={[
+          {
+            label: "Status",
+            value: statusFilter,
+            onChange: (v) => { setStatusFilter(v); setPage(1); },
+            options: [
+              { value: "All", label: "All Statuses" },
+              { value: "PENDING", label: "Pending" },
+              { value: "CONFIRMED", label: "Confirmed" },
+              { value: "PROCESSING", label: "Processing" },
+              { value: "PACKED", label: "Packed" },
+              { value: "SHIPPED", label: "Shipped" },
+              { value: "OUT_FOR_DELIVERY", label: "Out for Delivery" },
+              { value: "DELIVERED", label: "Delivered" },
+              { value: "CANCELLED", label: "Cancelled" },
+            ],
+          },
+        ]}
         onRefresh={() => refetch()}
-        isRefetching={isRefetching}
+        isRefreshing={isRefetching}
       />
 
       {isLoading ? (
@@ -171,19 +175,13 @@ export default function OrdersPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-            <FiPackage className="size-6 text-slate-400" />
-          </div>
-          <h3 className="text-base font-bold text-slate-800">
-            {searchTerm || statusFilter !== "All" ? "No matching orders" : "No orders found"}
-          </h3>
-          <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
-            {searchTerm || statusFilter !== "All"
-              ? "No orders match your current filters. Try refining your search query."
-              : "Orders will appear here once customers start placing them."}
-          </p>
-        </div>
+        <EmptyState
+          icon={<FiPackage className="size-6 text-slate-400" />}
+          title={isFiltered ? "No matching orders" : "No orders found"}
+          description={isFiltered
+            ? "No orders match your current filters. Try refining your search query."
+            : "Orders will appear here once customers start placing them."}
+        />
       )}
 
       {statusTarget && (

@@ -4,10 +4,14 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiLayers, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { DataFilterBar } from "@/components/common/filters/DataFilterBar";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useCategories, useDeleteCategory } from "@/hooks/useCategories";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import CategoryTable from "@/features/categories/components/CategoryTable";
-import CategoryFilters from "@/features/categories/components/CategoryFilters";
 import DeleteCategoryModal from "@/features/categories/components/DeleteCategoryModal";
 import Pagination from "@/components/ui/pagination/Pagination";
 
@@ -57,12 +61,7 @@ export default function CategoriesPage() {
   const totalPages = data?.data?.totalPages ?? 1;
   const activeCount = categories.filter((c) => c.isActive).length;
   const inactiveCount = categories.filter((c) => !c.isActive).length;
-
-  const STAT_CARDS = [
-    { icon: FiLayers, label: "Total Categories", value: total, bg: "from-indigo-500 to-indigo-600", sub: "All categories" },
-    { icon: FiCheckCircle, label: "Active", value: activeCount, bg: "from-emerald-500 to-emerald-600", sub: "Currently live" },
-    { icon: FiXCircle, label: "Inactive", value: inactiveCount, bg: "from-rose-500 to-rose-600", sub: "Paused categories" },
-  ];
+  const isFiltered = search !== "" || isActive !== "";
 
   if (isPending) {
     return (
@@ -105,48 +104,46 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Catalog Management</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Categories</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage your sportswear product catalog categories.</p>
-        </div>
-        <Can permission="category.create">
-          <Link
-            href="/categories/create"
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
-            style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
-          >
-            <FiPlus className="size-4" />
-            Add Category
-          </Link>
-        </Can>
-      </div>
+      <PageHeader
+        badge="Catalog Management"
+        title="Categories"
+        description="Manage your sportswear product catalog categories."
+        action={
+          <Can permission="category.create">
+            <Link
+              href="/categories/create"
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+              style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+            >
+              <FiPlus className="size-4" />
+              Add Category
+            </Link>
+          </Can>
+        }
+      />
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {STAT_CARDS.map(({ icon: Icon, label, value, bg, sub }) => (
-          <div key={label} className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
-            <div className={`absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br ${bg} opacity-5`} />
-            <div className={`inline-flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${bg} shadow-sm mb-3`}>
-              <Icon className="size-5 text-white" />
-            </div>
-            <p className="text-2xl font-bold text-slate-900 leading-none">{value}</p>
-            <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">{label}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
-          </div>
-        ))}
-      </div>
+      <StatsGrid columns={3}>
+        <StatCard label="Total Categories" value={total} icon={FiLayers} color="indigo" sub="All categories" />
+        <StatCard label="Active" value={activeCount} icon={FiCheckCircle} color="emerald" sub="Currently live" />
+        <StatCard label="Inactive" value={inactiveCount} icon={FiXCircle} color="rose" sub="Paused categories" />
+      </StatsGrid>
 
-      <CategoryFilters
+      <DataFilterBar
         search={search}
         onSearchChange={handleSearch}
-        isActive={isActive}
-        onIsActiveChange={handleIsActive}
+        searchPlaceholder="Search categories by name, slug or description..."
+        selectFilters={[
+          {
+            label: "Status",
+            value: isActive,
+            onChange: handleIsActive,
+            options: [
+              { value: "", label: "All Categories" },
+              { value: "true", label: "Active Only" },
+              { value: "false", label: "Inactive Only" },
+            ],
+          },
+        ]}
         onRefresh={() => refetch()}
         isRefreshing={isRefetching}
       />
@@ -164,33 +161,21 @@ export default function CategoriesPage() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-            {search || isActive ? (
-              <FiAlertCircle className="size-6 text-slate-400" />
-            ) : (
-              <FiLayers className="size-6 text-slate-400" />
-            )}
-          </div>
-          <h3 className="text-base font-bold text-slate-800">
-            {search || isActive ? "No matching categories" : "No categories found"}
-          </h3>
-          <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
-            {search || isActive
-              ? "Try refining your search or filter."
-              : "Start organizing your products by adding your first sportswear category today."}
-          </p>
-          {!search && !isActive && (
+        <EmptyState
+          icon={isFiltered ? <FiAlertCircle className="size-6 text-slate-400" /> : <FiLayers className="size-6 text-slate-400" />}
+          title={isFiltered ? "No matching categories" : "No categories found"}
+          description={isFiltered ? "Try refining your search or filter." : "Start organizing your products by adding your first sportswear category today."}
+          action={!isFiltered ? (
             <Link
               href="/categories/create"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all"
               style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
             >
               <FiPlus className="size-4" />
               Add Category
             </Link>
-          )}
-        </div>
+          ) : undefined}
+        />
       )}
 
       {deleteId && (

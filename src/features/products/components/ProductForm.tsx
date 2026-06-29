@@ -58,6 +58,7 @@ export default function ProductForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<z.input<typeof productSchema>, unknown, ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -80,6 +81,29 @@ export default function ProductForm({
       tagIds: initialData?.tagIds ?? [],
     },
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        brandId: initialData.brandId ?? "",
+        categoryId: initialData.categoryId ?? "",
+        subCategoryId: initialData.subCategoryId ?? "",
+        name: initialData.name ?? "",
+        slug: initialData.slug ?? "",
+        skuPrefix: initialData.skuPrefix ?? "",
+        shortDescription: initialData.shortDescription ?? "",
+        description: initialData.description ?? "",
+        status: ((initialData.status?.toUpperCase() ?? "DRAFT") as ProductFormValues["status"]),
+        metaTitle: initialData.metaTitle ?? "",
+        metaDescription: initialData.metaDescription ?? "",
+        metaKeywords: initialData.metaKeywords ?? "",
+        isFeatured: initialData.isFeatured ?? false,
+        isActive: initialData.isActive ?? true,
+        collectionIds: initialData.collectionIds ?? [],
+        tagIds: initialData.tagIds ?? [],
+      });
+    }
+  }, [initialData, reset]);
 
   const [imagesList, setImagesList] = useState<{
     id: string;

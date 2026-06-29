@@ -48,6 +48,7 @@ export default function InventoryForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<InventoryFormValues>({
     resolver: zodResolver(inventorySchema),
@@ -61,6 +62,26 @@ export default function InventoryForm({
       ...externalDefaults,
     },
   });
+
+  useEffect(() => {
+    if (externalDefaults) {
+      reset({
+        variantSku: externalDefaults.variantSku ?? "",
+        quantity: externalDefaults.quantity ?? 0,
+        reservedQuantity: externalDefaults.reservedQuantity ?? 0,
+        reorderPoint: externalDefaults.reorderPoint ?? 10,
+        lowStockThreshold: externalDefaults.lowStockThreshold ?? 5,
+        reorderQuantity: externalDefaults.reorderQuantity ?? 50,
+      });
+      setSearchTerm(externalDefaults.variantSku ?? "");
+    }
+  }, [externalDefaults, reset]);
+
+  useEffect(() => {
+    if (initialVariant) {
+      setSelectedVariant({ productId: initialVariant.variantId, sku: initialVariant.variantSku });
+    }
+  }, [initialVariant]);
 
   const skuValue = watch("variantSku");
 

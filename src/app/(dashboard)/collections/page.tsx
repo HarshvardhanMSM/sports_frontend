@@ -5,10 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiPlus, FiGrid, FiAlertCircle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { DataFilterBar } from "@/components/common/filters/DataFilterBar";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useCollections, useDeleteCollection } from "@/hooks/useCollections";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import CollectionTable from "@/features/collections/components/CollectionTable";
-import CollectionFilters from "@/features/collections/components/CollectionFilters";
 import DeleteCollectionModal from "@/features/collections/components/DeleteCollectionModal";
 import Pagination from "@/components/ui/pagination/Pagination";
 
@@ -52,6 +56,7 @@ export default function CollectionsPage() {
   const totalPages = data?.data?.totalPages ?? 1;
   const activeCount = collections.filter((c) => c.isActive).length;
   const inactiveCount = collections.filter((c) => !c.isActive).length;
+  const isFiltered = search !== "" || isActive !== "";
 
   if (isPending) {
     return (
@@ -76,30 +81,41 @@ export default function CollectionsPage() {
 
   return (
     <div className="space-y-6 font-sans">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Collections</h1>
-          <p className="text-sm text-slate-500">Group products into curated collections and featured sets.</p>
-        </div>
-        <Can permission="collection.create">
-          <Link href="/collections/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
-            <FiPlus className="size-4" /> Add Collection
-          </Link>
-        </Can>
-      </div>
+      <PageHeader
+        title="Collections"
+        description="Group products into curated collections and featured sets."
+        action={
+          <Can permission="collection.create">
+            <Link href="/collections/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+              <FiPlus className="size-4" /> Add Collection
+            </Link>
+          </Can>
+        }
+      />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <StatCard icon={<FiGrid className="size-5" />} label="Total Collections" value={total} color="indigo" />
-        <StatCard icon={<FiCheckCircle className="size-5" />} label="Active" value={activeCount} color="emerald" />
-        <StatCard icon={<FiXCircle className="size-5" />} label="Inactive" value={inactiveCount} color="red" />
-        <StatCard icon={<FiGrid className="size-5" />} label="Total Pages" value={totalPages} color="sky" />
-      </div>
+      <StatsGrid columns={4}>
+        <StatCard label="Total Collections" value={total} icon={FiGrid} color="indigo" variant="simple" />
+        <StatCard label="Active" value={activeCount} icon={FiCheckCircle} color="emerald" variant="simple" />
+        <StatCard label="Inactive" value={inactiveCount} icon={FiXCircle} color="red" variant="simple" />
+        <StatCard label="Total Pages" value={totalPages} icon={FiGrid} color="sky" variant="simple" />
+      </StatsGrid>
 
-      <CollectionFilters
+      <DataFilterBar
         search={search}
         onSearchChange={handleSearch}
-        isActive={isActive}
-        onIsActiveChange={handleIsActive}
+        searchPlaceholder="Search collections by name, slug..."
+        selectFilters={[
+          {
+            label: "Status",
+            value: isActive,
+            onChange: handleIsActive,
+            options: [
+              { value: "", label: "All" },
+              { value: "true", label: "Active Only" },
+              { value: "false", label: "Inactive Only" },
+            ],
+          },
+        ]}
         onRefresh={() => refetch()}
         isRefreshing={isRefetching}
       />
@@ -115,18 +131,16 @@ export default function CollectionsPage() {
           <Pagination page={page} totalPages={totalPages} total={total} limit={limit} onPageChange={setPage} isLoading={isPending} />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <div className="flex items-center justify-center size-12 bg-slate-100 rounded-full mb-4">
-            {search || isActive ? <FiAlertCircle className="size-6 text-slate-400" /> : <FiGrid className="size-6 text-slate-400" />}
-          </div>
-          <h3 className="text-base font-bold text-slate-800">{search || isActive ? "No matching collections" : "No collections found"}</h3>
-          <p className="mt-1 text-sm text-slate-500 max-w-sm">{search || isActive ? "Try refining your search or filter." : "Start by adding your first collection."}</p>
-          {!search && !isActive && (
-            <Link href="/collections/create" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+        <EmptyState
+          icon={isFiltered ? <FiAlertCircle className="size-6 text-slate-400" /> : <FiGrid className="size-6 text-slate-400" />}
+          title={isFiltered ? "No matching collections" : "No collections found"}
+          description={isFiltered ? "Try refining your search or filter." : "Start by adding your first collection."}
+          action={!isFiltered ? (
+            <Link href="/collections/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
               <FiPlus className="size-4" /> Add Collection
             </Link>
-          )}
-        </div>
+          ) : undefined}
+        />
       )}
 
       {deleteId && (
@@ -138,24 +152,6 @@ export default function CollectionsPage() {
           error={deleteError ?? undefined}
         />
       )}
-    </div>
-  );
-}
-
-function StatCard({ icon, label, value, color: c }: { icon: React.ReactNode; label: string; value: number; color: string }) {
-  const colors: Record<string, string> = {
-    indigo: "bg-indigo-50 text-indigo-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    red: "bg-red-50 text-red-600",
-    sky: "bg-sky-50 text-sky-600",
-  };
-  return (
-    <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${colors[c] ?? colors.indigo}`}>{icon}</div>
-      <div>
-        <p className="text-2xl font-bold text-slate-800 leading-none mb-1">{value}</p>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      </div>
     </div>
   );
 }

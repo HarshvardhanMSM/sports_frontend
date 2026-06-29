@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,6 +34,7 @@ export default function CmsFormModal({ page, onClose, onSubmit, isPending }: Cms
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,6 +46,18 @@ export default function CmsFormModal({ page, onClose, onSubmit, isPending }: Cms
       pageType: page?.pageType ?? "TERMS_AND_CONDITIONS",
     },
   });
+
+  useEffect(() => {
+    if (page) {
+      reset({
+        title: page.title ?? "",
+        slug: page.slug ?? "",
+        content: page.content ?? "",
+        status: page.status ?? "DRAFT",
+        pageType: page.pageType ?? "TERMS_AND_CONDITIONS",
+      });
+    }
+  }, [page, reset]);
 
   const watchTitle = watch("title");
   const watchStatus = watch("status");

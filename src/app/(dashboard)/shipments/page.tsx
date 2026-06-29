@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiTruck, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
+import { FiTruck, FiAlertCircle } from "react-icons/fi";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useShipments, useUpdateShipmentStatus } from "@/hooks/useShipments";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { ShipmentListItem, ShipmentListParams, ShipmentStatus } from "@/types/shipment.types";
@@ -56,6 +58,8 @@ export default function ShipmentsPage() {
     } catch { showToast("error", "Failed to update shipment status."); }
   };
 
+  const isFiltered = search !== "" || statusFilter !== "All";
+
   return (
     <div className="space-y-6">
       {toast && (
@@ -66,25 +70,11 @@ export default function ShipmentsPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Fulfillment</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Shipments</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Track shipments, manage fulfillment status, and monitor delivery performance.</p>
-        </div>
-        <button
-          onClick={() => refetch()}
-          disabled={isLoading}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all"
-        >
-          <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        badge="Fulfillment"
+        title="Shipments"
+        description="Track shipments, manage fulfillment status, and monitor delivery performance."
+      />
 
       {error ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -126,19 +116,11 @@ export default function ShipmentsPage() {
               onUpdateStatus={setUpdateTarget}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-              <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <FiTruck className="size-6 text-slate-400" />
-              </div>
-              <h3 className="text-base font-bold text-slate-800">
-                {search || statusFilter !== "All" ? "No matching shipments" : "No shipments found"}
-              </h3>
-              <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
-                {search || statusFilter !== "All"
-                  ? "No shipments match your current filters."
-                  : "Shipments will appear here once orders are created and processed."}
-              </p>
-            </div>
+            <EmptyState
+              icon={<FiTruck className="size-6 text-slate-400" />}
+              title={isFiltered ? "No matching shipments" : "No shipments found"}
+              description={isFiltered ? "No shipments match your current filters." : "Shipments will appear here once orders are created and processed."}
+            />
           )}
 
           {totalPages > 1 && (

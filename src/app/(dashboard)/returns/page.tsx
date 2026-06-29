@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { FiRotateCcw, FiRefreshCw, FiAlertCircle } from "react-icons/fi";
+import { FiRotateCcw, FiAlertCircle } from "react-icons/fi";
+import { PageHeader } from "@/components/common/PageHeader";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useReturns, useApproveReturn, useRejectReturn, useSchedulePickup, useMarkInTransit, useMarkReceived, useProcessRefund, useCompleteReturn } from "@/hooks/useReturns";
 import type { ReturnListItem, ReturnStatus } from "@/types/return.types";
 import ReturnsTable from "@/features/returns/components/ReturnsTable";
@@ -127,6 +129,8 @@ export default function ReturnsPage() {
 
   const handleRefresh = () => { refetch(); };
 
+  const isFiltered = searchTerm !== "" || statusFilter !== "All";
+
   return (
     <div className="space-y-6">
       {toast && (
@@ -137,25 +141,11 @@ export default function ReturnsPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-5 w-1 rounded-full bg-indigo-600" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Returns & Refunds</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Returns & Refunds</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Process customer returns, review refund requests, and manage resolutions.</p>
-        </div>
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all"
-        >
-          <FiRefreshCw className={`size-4 ${isRefetching ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
-      </div>
+      <PageHeader
+        badge="Returns & Refunds"
+        title="Returns & Refunds"
+        description="Process customer returns, review refund requests, and manage resolutions."
+      />
 
       {error ? (
         <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -201,19 +191,11 @@ export default function ReturnsPage() {
               onComplete={setCompleteTarget}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-              <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
-                <FiRotateCcw className="size-6 text-slate-400" />
-              </div>
-              <h3 className="text-base font-bold text-slate-800">
-                {searchTerm || statusFilter !== "All" ? "No matching returns" : "No returns found"}
-              </h3>
-              <p className="mt-1.5 text-sm text-slate-500 max-w-xs">
-                {searchTerm || statusFilter !== "All"
-                  ? "No returns match your current filters."
-                  : "Returns will appear here once customers submit return requests."}
-              </p>
-            </div>
+            <EmptyState
+              icon={<FiRotateCcw className="size-6 text-slate-400" />}
+              title={isFiltered ? "No matching returns" : "No returns found"}
+              description={isFiltered ? "No returns match your current filters." : "Returns will appear here once customers submit return requests."}
+            />
           )}
 
           {totalPages > 1 && (

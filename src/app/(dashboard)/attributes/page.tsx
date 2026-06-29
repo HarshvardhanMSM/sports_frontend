@@ -4,10 +4,14 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { FiPlus, FiSliders, FiCheckCircle, FiAlertCircle, FiXCircle } from "react-icons/fi";
 import { Can } from "@/components/common/Can";
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { DataFilterBar } from "@/components/common/filters/DataFilterBar";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useAttributes, useDeleteAttribute } from "@/hooks/useAttributes";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import AttributeTable from "@/features/attributes/components/AttributeTable";
-import AttributeFilters from "@/features/attributes/components/AttributeFilters";
 import DeleteAttributeModal from "@/features/attributes/components/DeleteAttributeModal";
 import Pagination from "@/components/ui/pagination/Pagination";
 
@@ -50,6 +54,7 @@ export default function AttributesPage() {
   const totalPages = data?.data?.totalPages ?? 1;
   const filterableCount = attributes.filter((a) => a.isFilterable).length;
   const requiredCount = attributes.filter((a) => a.isRequired).length;
+  const isFiltered = search !== "" || isFilterable !== "";
 
   if (isPending) {
     return (
@@ -74,30 +79,42 @@ export default function AttributesPage() {
 
   return (
     <div className="space-y-6 font-sans">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Product Attributes</h1>
-          <p className="text-sm text-slate-500">Define configurable attributes like size, color, and material for products.</p>
-        </div>
-        <Can permission="attribute.create">
-          <Link href="/attributes/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
-            <FiPlus className="size-4" /> Add Attribute
-          </Link>
-        </Can>
-      </div>
+      <PageHeader
+        title="Product Attributes"
+        description="Define configurable attributes like size, color, and material for products."
+        action={
+          <Can permission="attribute.create">
+            <Link href="/attributes/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+              <FiPlus className="size-4" /> Add Attribute
+            </Link>
+          </Can>
+        }
+      />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <StatCard icon={<FiSliders className="size-5" />} label="Total Attributes" value={total} color="indigo" />
-        <StatCard icon={<FiCheckCircle className="size-5" />} label="Filterable" value={filterableCount} color="emerald" />
-        <StatCard icon={<FiCheckCircle className="size-5" />} label="Required" value={requiredCount} color="blue" />
-        <StatCard icon={<FiXCircle className="size-5" />} label="Non-Filterable" value={total - filterableCount} color="slate" />
-      </div>
+      <StatsGrid columns={4}>
+        <StatCard label="Total Attributes" value={total} icon={FiSliders} color="indigo" variant="simple" />
+        <StatCard label="Filterable" value={filterableCount} icon={FiCheckCircle} color="emerald" variant="simple" />
+        <StatCard label="Required" value={requiredCount} icon={FiCheckCircle} color="blue" variant="simple" />
+        <StatCard label="Non-Filterable" value={total - filterableCount} icon={FiXCircle} color="slate" variant="simple" />
+      </StatsGrid>
 
-      <AttributeFilters
+      <DataFilterBar
         search={search}
         onSearchChange={handleSearch}
-        isFilterable={isFilterable}
-        onFilterableChange={handleFilterable}
+        searchPlaceholder="Search attributes by name or slug..."
+        selectFilters={[
+          {
+            label: "Filterable",
+            value: isFilterable,
+            onChange: handleFilterable,
+            selectClassName: "min-w-[150px]",
+            options: [
+              { value: "", label: "All" },
+              { value: "true", label: "Filterable Only" },
+              { value: "false", label: "Non-Filterable" },
+            ],
+          },
+        ]}
         onRefresh={() => refetch()}
         isRefreshing={isRefetching}
       />
@@ -108,22 +125,16 @@ export default function AttributesPage() {
           <Pagination page={page} totalPages={totalPages} total={total} limit={limit} onPageChange={setPage} isLoading={isPending} />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm text-center px-4">
-          <div className="flex items-center justify-center size-12 bg-slate-100 rounded-full mb-4">
-            {search || isFilterable ? <FiAlertCircle className="size-6 text-slate-400" /> : <FiSliders className="size-6 text-slate-400" />}
-          </div>
-          <h3 className="text-base font-bold text-slate-800">
-            {search || isFilterable ? "No matching attributes" : "No attributes found"}
-          </h3>
-          <p className="mt-1 text-sm text-slate-500 max-w-sm">
-            {search || isFilterable ? "Try refining your search or filter." : "Start by adding your first product attribute."}
-          </p>
-          {!search && !isFilterable && (
-            <Link href="/attributes/create" className="mt-5 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+        <EmptyState
+          icon={isFiltered ? <FiAlertCircle className="size-6 text-slate-400" /> : <FiSliders className="size-6 text-slate-400" />}
+          title={isFiltered ? "No matching attributes" : "No attributes found"}
+          description={isFiltered ? "Try refining your search or filter." : "Start by adding your first product attribute."}
+          action={!isFiltered ? (
+            <Link href="/attributes/create" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
               <FiPlus className="size-4" /> Add Attribute
             </Link>
-          )}
-        </div>
+          ) : undefined}
+        />
       )}
 
       {deleteId && (
@@ -135,27 +146,6 @@ export default function AttributesPage() {
           error={deleteError ?? undefined}
         />
       )}
-    </div>
-  );
-}
-
-function StatCard({ icon, label, value, color: c }: { icon: React.ReactNode; label: string; value: number; color: string }) {
-  const colors: Record<string, string> = {
-    indigo: "bg-indigo-50 text-indigo-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    red: "bg-red-50 text-red-600",
-    blue: "bg-blue-50 text-blue-600",
-    slate: "bg-slate-100 text-slate-600",
-  };
-  return (
-    <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${colors[c] ?? colors.indigo}`}>
-        {icon}
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-slate-800 leading-none mb-1">{value}</p>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      </div>
     </div>
   );
 }
