@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 import { useInventoryItem, useInventoryMovements } from "@/hooks/useInventory";
 import Badge from "@/components/ui/badge/Badge";
+import { resolveImageUrl } from "@/lib/image";
 
 export default function InventoryDetailPage() {
   const params = useParams();
@@ -115,6 +116,102 @@ export default function InventoryDetailPage() {
           </div>
         ))}
       </div>
+
+      {/* Product Info */}
+      {item.variant?.product && (
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200">
+            <h2 className="text-base font-bold text-slate-900">Product Information</h2>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row gap-6">
+              {item.variant.product.images && item.variant.product.images.length > 0 && (
+                <div className="shrink-0">
+                  <div className="size-28 rounded-xl border border-slate-200 overflow-hidden bg-slate-50">
+                    <img
+                      src={resolveImageUrl(
+                        item.variant.product.images.find((img) => img.isPrimary)?.imageUrl
+                        ?? item.variant.product.images[0].imageUrl
+                      )}
+                      alt={item.variant.product.name}
+                      className="size-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Product Name</span>
+                  <span className="text-sm font-bold text-slate-800">{item.variant.product.name}</span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">SKU</span>
+                  <span className="text-sm font-semibold text-slate-800">{item.variant.sku}</span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</span>
+                  <Badge color={item.variant.product.isActive ? "success" : "error"}>
+                    {item.variant.product.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</span>
+                  <span className="text-sm font-bold text-slate-800">
+                    ${parseFloat(item.variant.price).toFixed(2)}
+                  </span>
+                </div>
+                {item.variant.compareAtPrice && (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Compare At</span>
+                    <span className="text-sm font-semibold text-slate-500 line-through">
+                      ${parseFloat(item.variant.compareAtPrice).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                {item.variant.costPrice && (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Cost Price</span>
+                    <span className="text-sm font-semibold text-slate-800">
+                      ${parseFloat(item.variant.costPrice).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Barcode</span>
+                  <span className="text-sm font-semibold text-slate-800">{item.variant.barcode ?? "-"}</span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Featured</span>
+                  <span className="text-sm font-semibold text-slate-800">{item.variant.product.isFeatured ? "Yes" : "No"}</span>
+                </div>
+                {item.variant.product.shortDescription && (
+                  <div className="flex flex-col gap-0.5 sm:col-span-2 lg:col-span-3">
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Short Description</span>
+                    <span className="text-sm text-slate-700">{item.variant.product.shortDescription}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            {item.variant.product.images && item.variant.product.images.length > 1 && (
+              <div className="mt-4 flex gap-2">
+                {item.variant.product.images
+                  .sort((a, b) => a.sortOrder - b.sortOrder)
+                  .map((img) => (
+                    <div key={img.id} className="size-12 rounded-lg border border-slate-200 overflow-hidden bg-slate-50 shrink-0">
+                      <img
+                        src={resolveImageUrl(img.imageUrl)}
+                        alt={img.altText ?? ""}
+                        className="size-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Inventory Info */}

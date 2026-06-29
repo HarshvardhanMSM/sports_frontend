@@ -479,7 +479,7 @@ const Option = React.memo(
 
           {/* Text: always mounted, fades with CSS — no JS animation overhead */}
           <span
-            className="text-xs font-semibold tracking-wide whitespace-nowrap overflow-hidden"
+            className="text-sm font-semibold tracking-wide whitespace-nowrap overflow-hidden"
             style={{
               opacity: open ? 1 : 0,
               transition: "opacity 0.2s ease-in-out",
@@ -538,6 +538,7 @@ const Logo = ({ open }: { open: boolean }) => {
       className={`flex items-center justify-center rounded-lg overflow-hidden transition-all duration-200 ${
         open ? "h-10 w-auto max-w-[200px]" : "size-10 bg-slate-50 border border-slate-100"
       }`}
+      style={{mixBlendMode:"exclusion"}}
     >
       <img
         src={logoSrc}
@@ -570,7 +571,7 @@ const ToggleClose = ({ open, setOpen }: ToggleCloseProps) => (
         />
       </div>
       <span
-        className="text-xs font-medium whitespace-nowrap overflow-hidden"
+        className="text-sm font-medium whitespace-nowrap overflow-hidden"
         style={{
           opacity: open ? 1 : 0,
           transition: "opacity 0.2s ease-in-out",

@@ -2,10 +2,47 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { FiArrowLeft, FiEdit2 } from "react-icons/fi";
+import Link from "next/link";
+import { FiArrowLeft, FiEdit2, FiPackage, FiStar } from "react-icons/fi";
 import { useCollection } from "@/hooks/useCollections";
 import Badge from "@/components/ui/badge/Badge";
 import { getImageUrl } from "@/lib/utils";
+import type { CollectionProduct } from "@/types/collection.types";
+
+function ProductCard({ product }: { product: CollectionProduct }) {
+  const primaryImage = product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
+
+  return (
+    <Link
+      href={`/products/${product.id}`}
+      className="group bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all overflow-hidden flex"
+    >
+      <div className="w-24 h-24 shrink-0 bg-slate-50 flex items-center justify-center overflow-hidden">
+        {primaryImage ? (
+          <img src={getImageUrl(primaryImage.imageUrl)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+        ) : (
+          <FiPackage className="size-6 text-slate-300" />
+        )}
+      </div>
+      <div className="flex-1 p-3 flex flex-col justify-center min-w-0">
+        <p className="text-sm font-semibold text-slate-800 truncate">{product.name}</p>
+        {product.shortDescription && (
+          <p className="text-xs text-slate-500 truncate mt-0.5">{product.shortDescription}</p>
+        )}
+        <div className="flex items-center gap-3 mt-1.5">
+          <Badge color={product.isActive ? "success" : "error"}>{product.isActive ? "Active" : "Inactive"}</Badge>
+          <span className="text-xs text-slate-400">{product.status}</span>
+          {Number(product.averageRating) > 0 && (
+            <span className="flex items-center gap-1 text-xs text-amber-500">
+              <FiStar className="size-3 fill-current" />
+              {Number(product.averageRating).toFixed(1)}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 interface ViewCollectionPageProps {
   params: Promise<{ id: string }>;
@@ -37,6 +74,7 @@ export default function ViewCollectionPage({ params }: ViewCollectionPageProps) 
   }
 
   const collection = data.data;
+  const products = collection.products ?? [];
 
   return (
     <div className="space-y-6 font-sans">
@@ -77,6 +115,34 @@ export default function ViewCollectionPage({ params }: ViewCollectionPageProps) 
               <p className="text-sm text-slate-800">{new Date(collection.updatedAt).toLocaleString()}</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-6 pb-0">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-5 w-1 rounded-full bg-indigo-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600">Products</span>
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">Collection Products</h2>
+          <p className="text-xs text-slate-500 mt-0.5">{collection.productCount ?? products.length} product{(collection.productCount ?? products.length) !== 1 ? "s" : ""} in this collection.</p>
+        </div>
+        <div className="p-6 pt-4">
+          {products.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="size-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+                <FiPackage className="size-6 text-slate-400" />
+              </div>
+              <p className="text-sm font-semibold text-slate-700">No products in this collection</p>
+              <p className="text-xs text-slate-500 mt-1">Assign products from the edit page.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -12,6 +12,55 @@ export interface InventoryItem {
   reorderQuantity?: number;
   createdAt: string;
   updatedAt: string;
+  variant?: InventoryVariant;
+}
+
+export interface InventoryVariant {
+  id: string;
+  productId: string;
+  sku: string;
+  price: string;
+  compareAtPrice?: string;
+  costPrice?: string;
+  barcode?: string | null;
+  weight?: number | null;
+  status: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+  product?: InventoryProduct;
+}
+
+export interface InventoryProduct {
+  id: string;
+  name: string;
+  slug: string;
+  skuPrefix?: string;
+  shortDescription?: string;
+  description?: string;
+  status: string;
+  isFeatured: boolean;
+  isActive: boolean;
+  brandId?: string;
+  categoryId?: string;
+  subCategoryId?: string;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  averageRating: string;
+  totalRatings: number;
+  totalReviews: number;
+  createdAt: string;
+  updatedAt: string;
+  images?: InventoryProductImage[];
+}
+
+export interface InventoryProductImage {
+  id: string;
+  imageUrl: string;
+  altText?: string | null;
+  sortOrder: number;
+  isPrimary: boolean;
 }
 
 export interface VariantSearchResult {

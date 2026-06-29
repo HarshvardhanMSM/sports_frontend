@@ -70,7 +70,7 @@ export default function InventoryReportsPage() {
 
   const statsCards = [
     { label: "Total Inventory Value", value: `$${(summary?.totalStockValue ?? report?.totalStockValue ?? 0).toLocaleString()}`, sub: "current stock valuation", icon: FiDollarSign, bg: "from-indigo-500 to-indigo-600" },
-    { label: "Stock Turnover", value: "3.2x", sub: "average annual rate", icon: FiRefreshCw, bg: "from-emerald-500 to-emerald-600" },
+    // { label: "Stock Turnover", value:`$${(summary?.activeSuppliers ?? report?.totalInventoryItems ?? 0).toLocaleString()}`, sub: "average annual rate", icon: FiRefreshCw, bg: "from-emerald-500 to-emerald-600" },
     { label: "Items at Risk", value: (summary?.lowStockCount ?? report?.lowStockItems ?? 0) + (summary?.outOfStockCount ?? report?.outOfStockItems ?? 0), sub: "low / out of stock", icon: FiAlertTriangle, bg: "from-amber-500 to-amber-600" },
     { label: "Total Stock Units", value: (summary?.totalStockUnits ?? report?.totalInventoryItems ?? 0).toLocaleString(), sub: "total inventory items", icon: FiArchive, bg: "from-rose-500 to-rose-600" },
   ];
