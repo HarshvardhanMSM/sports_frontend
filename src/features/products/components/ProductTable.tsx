@@ -83,7 +83,7 @@ export default function ProductTable({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-w-full overflow-x-auto">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm max-w-full overflow-x-auto min-h-[200px]">
         <table className="w-full border-collapse text-left text-sm text-slate-600">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/70 text-xs font-semibold uppercase tracking-wider text-slate-500">
