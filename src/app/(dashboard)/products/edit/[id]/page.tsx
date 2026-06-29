@@ -31,7 +31,9 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     const fd = new FormData();
     fd.append("brandId", data.brandId as string);
     fd.append("categoryId", data.categoryId as string);
-    fd.append("subCategoryId", (data.subCategoryId as string) || "");
+    if (data.subCategoryId) {
+      fd.append("subCategoryId", data.subCategoryId as string);
+    }
     fd.append("name", data.name as string);
     fd.append("slug", data.slug as string);
     fd.append("skuPrefix", (data.skuPrefix as string) || "");
@@ -82,6 +84,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         isFeatured: data.isFeatured as boolean,
         isActive: data.isActive as boolean,
         variants: data.variants as CreateProductVariantRequest[],
+        subCategoryId: (data.subCategoryId as string) || null,
       });
 
       router.push("/products");

@@ -438,6 +438,17 @@ export default function ProductForm({
     }
   }, [initialData, subCategories, setValue]);
 
+  useEffect(() => {
+    const currentSubCategoryId = watch("subCategoryId");
+    if (subCatsData && currentSubCategoryId) {
+      const list = subCatsData.data?.items ?? [];
+      const isValid = list.some((sc) => sc.id === currentSubCategoryId);
+      if (!isValid) {
+        setValue("subCategoryId", "");
+      }
+    }
+  }, [subCatsData, watch, setValue]);
+
   const nameVal = watch("name");
 
   useEffect(() => {

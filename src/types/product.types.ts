@@ -121,7 +121,7 @@ export interface CreateProductVariantRequest {
 export interface CreateProductRequest {
   brandId: string;
   categoryId: string;
-  subCategoryId?: string;
+  subCategoryId?: string | null;
   name: string;
   slug: string;
   skuPrefix?: string;
