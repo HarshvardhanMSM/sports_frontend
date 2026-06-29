@@ -8,7 +8,7 @@ import type { ShipmentMetrics } from "@/types/shipment.types";
 
 export default function ShipmentStatsCards(metrics: ShipmentMetrics) {
   return (
-    <StatsGrid className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-7">
+    <StatsGrid className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
       <StatCard label="Total Shipments" value={metrics.totalShipments} icon={FiNavigation} color="indigo" variant="simple" />
       <StatCard label="Pending" value={metrics.failedDelivery} icon={FiClock} color="amber" variant="simple" />
       <StatCard label="Packed" value={metrics.packed} icon={FiBox} color="blue" variant="simple" />

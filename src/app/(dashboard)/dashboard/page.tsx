@@ -682,7 +682,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 1: Six Stats Cards with Sparklines */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         <SparklineCard
           title="Total Sales"
           value={getSummaryValue(queries.summary.data, queries.summary.isPending, "totalSales")}
