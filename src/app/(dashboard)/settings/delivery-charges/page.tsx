@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Select from "@/components/ui/select/Select";
 import * as z from "zod";
 import {
   FiPlus,
@@ -454,9 +455,14 @@ function FormModal({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Charge Type</label>
-              <select {...register("chargeType")} className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100">
-                {CHARGE_TYPES.map((t) => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
-              </select>
+              <Select
+                value={watch("chargeType") ?? "FIXED_DELIVERY"}
+                onChange={(val) => setValue("chargeType", val as any, { shouldValidate: true })}
+                options={CHARGE_TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))}
+                placeholder="Select Charge Type"
+                size="md"
+              />
+              <input type="hidden" {...register("chargeType")} />
             </div>
           </div>
 

@@ -15,6 +15,8 @@ interface SelectProps {
   placeholder?: string;
   className?: string;
   Icon?: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
+  size?: "sm" | "md";
 }
 
 export default function Select({
@@ -24,6 +26,8 @@ export default function Select({
   placeholder = "Select...",
   className = "w-full",
   Icon,
+  disabled = false,
+  size = "sm",
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,6 +72,10 @@ export default function Select({
     setIsOpen(false);
   };
 
+  const sizeClasses = size === "md"
+    ? "px-3.5 py-2.5 text-sm font-medium"
+    : "px-3 py-2 text-xs font-semibold";
+
   return (
     <div
       ref={containerRef}
@@ -75,8 +83,11 @@ export default function Select({
     >
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none hover:bg-slate-50 transition-all cursor-pointer text-left focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
+        disabled={disabled}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        className={`flex items-center justify-between w-full rounded-lg border border-slate-200 bg-white outline-none hover:bg-slate-50 transition-all cursor-pointer text-left focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 ${sizeClasses} ${
+          disabled ? "opacity-50 cursor-not-allowed bg-slate-50 text-slate-400 hover:bg-slate-50" : ""
+        }`}
       >
         <div className="flex items-center truncate">
           {Icon && <Icon className="mr-1.5 size-3.5 text-slate-400 shrink-0" />}

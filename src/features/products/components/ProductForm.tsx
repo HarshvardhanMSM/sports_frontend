@@ -11,6 +11,7 @@ import { useSubCategories } from "@/hooks/useSubCategories";
 import { useAttributes } from "@/hooks/useAttributes";
 import type { Product, CreateProductVariantRequest } from "@/types/product.types";
 import { useToast } from "@/components/common/Toast/useToast";
+import Select from "@/components/ui/select/Select";
 
 const productSchema = z.object({
   brandId: z.string().min(1, "Please select a brand"),
@@ -414,7 +415,7 @@ export default function ProductForm({
   const { data: brandCatsData, isLoading: catsLoading } = useBrandCategories(selectedBrandId || undefined);
   const brandCategories = useMemo(() => brandCatsData?.data ?? [], [brandCatsData]);
 
-  const { data: subCatsData } = useSubCategories(
+  const { data: subCatsData, isLoading: subCatsLoading } = useSubCategories(
     { limit: 100, categoryId: selectedCategoryId || undefined },
     { enabled: !!selectedCategoryId },
   );
@@ -607,15 +608,14 @@ export default function ProductForm({
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Brand *
             </label>
-            <select
-              {...register("brandId")}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
-            >
-              <option value="">{brandsLoading ? "Loading..." : "Select Brand"}</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
+            <Select
+              value={watch("brandId") ?? ""}
+              onChange={(val) => setValue("brandId", val, { shouldValidate: true })}
+              options={brands.map((b) => ({ value: b.id, label: b.name }))}
+              placeholder={brandsLoading ? "Loading..." : "Select Brand"}
+              size="md"
+            />
+            <input type="hidden" {...register("brandId")} />
             {errors.brandId && (
               <p className="text-xs font-semibold text-rose-600 mt-1">{errors.brandId.message}</p>
             )}
@@ -625,23 +625,23 @@ export default function ProductForm({
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Category *
             </label>
-            <select
-              {...register("categoryId")}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
-            >
-              <option value="">
-                {!selectedBrandId
+            <Select
+              value={watch("categoryId") ?? ""}
+              onChange={(val) => setValue("categoryId", val, { shouldValidate: true })}
+              options={brandCategories.map((c) => ({ value: c.id, label: c.name }))}
+              placeholder={
+                !selectedBrandId
                   ? "Select Brand first"
                   : catsLoading
                     ? "Loading..."
                     : brandCategories.length === 0
                       ? "No categories linked"
-                      : "Select Category"}
-              </option>
-              {brandCategories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+                      : "Select Category"
+              }
+              disabled={!selectedBrandId || catsLoading || brandCategories.length === 0}
+              size="md"
+            />
+            <input type="hidden" {...register("categoryId")} />
             {errors.categoryId && (
               <p className="text-xs font-semibold text-rose-600 mt-1">{errors.categoryId.message}</p>
             )}
@@ -651,15 +651,18 @@ export default function ProductForm({
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Sub Category (Optional)
             </label>
-            <select
-              {...register("subCategoryId")}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
-            >
-              <option value="">No Sub Category</option>
-              {subCategories.map((sc) => (
-                <option key={sc.id} value={sc.id}>{sc.name}</option>
-              ))}
-            </select>
+            <Select
+              value={watch("subCategoryId") ?? ""}
+              onChange={(val) => setValue("subCategoryId", val, { shouldValidate: true })}
+              options={[
+                { value: "", label: "No Sub Category" },
+                ...subCategories.map((sc) => ({ value: sc.id, label: sc.name })),
+              ]}
+              placeholder={subCatsLoading ? "Loading..." : "No Sub Category"}
+              disabled={subCategories.length === 0 && !subCatsLoading}
+              size="md"
+            />
+            <input type="hidden" {...register("subCategoryId")} />
           </div>
         </div>
       </section>

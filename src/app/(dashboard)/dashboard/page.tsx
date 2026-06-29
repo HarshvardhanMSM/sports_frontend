@@ -145,6 +145,13 @@ const SkeletonTrend = () => (
   <span className="inline-block w-16 h-4 rounded-md bg-slate-100 animate-pulse" />
 );
 
+const EmptyChartState = ({ message, height = "h-[180px]" }: { message: string; height?: string }) => (
+  <div className={`flex flex-col items-center justify-center ${height} w-full bg-slate-50/50 rounded-xl border border-dashed border-slate-200/60 p-4 text-center`}>
+    <span className="text-xs font-bold text-slate-400">{message}</span>
+    <span className="text-[10px] text-slate-400/80 mt-1">No data available for the selected period</span>
+  </div>
+);
+
 export default function DashboardPage() {
   const { filters, setters, queries } = useDashboard();
   const monthSummaryQuery = useDashboardSummary("this_month");
@@ -790,6 +797,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center h-[180px] w-full bg-slate-50/50 rounded-xl animate-pulse text-xs text-slate-400 font-medium">
                 Loading Sales Overview...
               </div>
+            ) : !salesOverviewData || !salesOverviewData.categories || salesOverviewData.categories.length === 0 ? (
+              <EmptyChartState message="No Sales Data" />
             ) : (
               <ReactApexChart
                 options={salesOverviewOptions}
@@ -820,6 +829,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center w-full h-[120px] bg-slate-50/50 rounded-xl animate-pulse text-[10px] text-slate-400 font-medium">
                 Loading Category Sales...
               </div>
+            ) : byCategoryData.length === 0 ? (
+              <EmptyChartState message="No Category Sales" height="h-[120px]" />
             ) : (
               <>
                 <div className="w-[120px] flex-shrink-0 flex items-center justify-center">
@@ -868,6 +879,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center w-full h-[120px] bg-slate-50/50 rounded-xl animate-pulse text-[10px] text-slate-400 font-medium">
                 Loading Payments...
               </div>
+            ) : byPaymentData.length === 0 ? (
+              <EmptyChartState message="No Payment Data" height="h-[120px]" />
             ) : (
               <>
                 <div className="w-[120px] flex-shrink-0 flex items-center justify-center">
@@ -938,6 +951,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center h-[180px] w-full bg-slate-50/50 rounded-xl animate-pulse text-xs text-slate-400 font-medium">
                 Loading Users Overview...
               </div>
+            ) : !usersOverviewData || !usersOverviewData.categories || usersOverviewData.categories.length === 0 ? (
+              <EmptyChartState message="No Users Data" />
             ) : (
               <ReactApexChart
                 options={usersOverviewOptions}
@@ -959,6 +974,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center w-full h-[120px] bg-slate-50/50 rounded-xl animate-pulse text-[10px] text-slate-400 font-medium">
                 Loading Reasons...
               </div>
+            ) : returnReasonsData.length === 0 ? (
+              <EmptyChartState message="No Returns Logged" height="h-[120px]" />
             ) : (
               <>
                 <div className="w-[120px] flex-shrink-0 flex items-center justify-center">
@@ -1007,6 +1024,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center h-[180px] w-full bg-slate-50/50 rounded-xl animate-pulse text-xs text-slate-400 font-medium">
                 Loading Signups...
               </div>
+            ) : !signupsData || !signupsData.categories || signupsData.categories.length === 0 ? (
+              <EmptyChartState message="No Signup Data" />
             ) : (
               <ReactApexChart
                 options={signupsOptions}
@@ -1152,6 +1171,12 @@ export default function DashboardPage() {
                       <td className="py-2.5 text-right"><div className="h-3 w-12 bg-slate-100 rounded-sm ml-auto" /></td>
                     </tr>
                   ))
+                ) : !topProductsList || topProductsList.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="py-12 text-center text-xs font-semibold text-slate-400">
+                      No products sold in this timeframe.
+                    </td>
+                  </tr>
                 ) : (
                   topProductsList?.map((product) => {
                     return (
@@ -1201,6 +1226,12 @@ export default function DashboardPage() {
                       <td className="py-3 text-right"><div className="h-3 w-16 bg-slate-100 rounded-sm ml-auto" /></td>
                     </tr>
                   ))
+                ) : !recentOrdersList || recentOrdersList.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-xs font-semibold text-slate-400">
+                      No orders received in this timeframe.
+                    </td>
+                  </tr>
                 ) : (
                   recentOrdersList?.map((order) => {
                     return (

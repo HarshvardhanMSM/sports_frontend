@@ -7,6 +7,8 @@ import * as z from "zod";
 import type { SubCategory } from "@/types/sub-category.types";
 import { useCategories } from "@/hooks/useCategories";
 import { useSubCategories } from "@/hooks/useSubCategories";
+import CategoryCategoryImageUpload from "../../categories/components/CategoryImageUpload";
+import Select from "@/components/ui/select/Select";
 import CategoryImageUpload from "../../categories/components/CategoryImageUpload";
 
 const subCategorySchema = z.object({
@@ -35,7 +37,7 @@ export default function SubCategoryForm({
   isPending,
 }: SubCategoryFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const { data: catsData } = useCategories({ limit: 100 });
+  const { data: catsData, isLoading: catsLoading } = useCategories({ limit: 100 });
   const categories = useMemo(() => catsData?.data?.items ?? [], [catsData]);
 
   const {
@@ -116,15 +118,14 @@ export default function SubCategoryForm({
       <div className="grid gap-5 md:grid-cols-2">
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Parent Category *</label>
-          <select
-            {...register("categoryId")}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition-all focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100"
-          >
-            <option value="">Select Category</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          <Select
+            value={watch("categoryId") ?? ""}
+            onChange={(val) => setValue("categoryId", val, { shouldValidate: true })}
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            placeholder={catsLoading ? "Loading..." : "Select Category"}
+            size="md"
+          />
+          <input type="hidden" {...register("categoryId")} />
           {errors.categoryId && <p className="text-xs font-semibold text-rose-600 mt-1">{errors.categoryId.message}</p>}
         </div>
 

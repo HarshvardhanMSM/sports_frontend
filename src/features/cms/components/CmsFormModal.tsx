@@ -7,6 +7,7 @@ import * as z from "zod";
 import { FiArrowLeft, FiClock, FiFileText, FiType } from "react-icons/fi";
 import type { CmsPage } from "@/types/cms.types";
 import Badge from "@/components/ui/badge/Badge";
+import Select from "@/components/ui/select/Select";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -155,18 +156,21 @@ export default function CmsFormModal({ page, onClose, onSubmit, isPending }: Cms
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
                   Page Type
                 </label>
-                <select
-                  {...register("pageType")}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer"
-                >
-                  <option value="ABOUT_US">About Us</option>
-                  <option value="PRIVACY_POLICY">Privacy Policy</option>
-                  <option value="TERMS_AND_CONDITIONS">Terms & Conditions</option>
-                  <option value="SHIPPING_POLICY">Shipping Policy</option>
-                  <option value="RETURN_POLICY">Return Policy</option>
-                  <option value="CONTACT_US">Contact Us</option>
-                  {/* <option value="CUSTOM_PAGE">Custom Page</option> */}
-                </select>
+                <Select
+                  value={watch("pageType") ?? ""}
+                  onChange={(val) => setValue("pageType", val, { shouldValidate: true })}
+                  options={[
+                    { value: "ABOUT_US", label: "About Us" },
+                    { value: "PRIVACY_POLICY", label: "Privacy Policy" },
+                    { value: "TERMS_AND_CONDITIONS", label: "Terms & Conditions" },
+                    { value: "SHIPPING_POLICY", label: "Shipping Policy" },
+                    { value: "RETURN_POLICY", label: "Return Policy" },
+                    { value: "CONTACT_US", label: "Contact Us" },
+                  ]}
+                  placeholder="Select Page Type"
+                  size="md"
+                />
+                <input type="hidden" {...register("pageType")} />
                 {errors.pageType && <p className="text-xs text-red-500 mt-1">{errors.pageType.message}</p>}
               </div>
             </div>

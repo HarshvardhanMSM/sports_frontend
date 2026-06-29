@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { FiX, FiCopy } from "react-icons/fi";
+import Select from "@/components/ui/select/Select";
 import type { ModuleGroup, Role, PermissionSlug } from "@/types/role.types";
 import { groupPermissionsByModule, permissionsToSlugs } from "@/types/role.types";
 import PermissionModuleCard from "./PermissionModuleCard";
@@ -174,26 +175,26 @@ export default function RoleFormModal({
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                 Clone Permissions From
               </label>
-              <div className="relative">
-                <FiCopy className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                <select
-                  value={cloneFromId}
-                  onChange={(e) => {
-                    setCloneFromId(e.target.value);
-                    if (e.target.value) handleClone(e.target.value);
-                  }}
-                  className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-600 appearance-none"
-                >
-                  <option value="">Start from scratch</option>
-                  {allRoles
+              <Select
+                value={cloneFromId}
+                onChange={(val) => {
+                  setCloneFromId(val);
+                  if (val) handleClone(val);
+                }}
+                options={[
+                  { value: "", label: "Start from scratch" },
+                  ...allRoles
                     .filter((r) => r.id !== role?.id)
-                    .map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name} ({r.permissions.reduce((s, p) => s + p.actions.length, 0)} perms)
-                      </option>
-                    ))}
-                </select>
-              </div>
+                    .map((r) => ({
+                      value: r.id,
+                      label: `${r.name} (${r.permissions.reduce((s, p) => s + p.actions.length, 0)} perms)`,
+                    })),
+                ]}
+                placeholder="Start from scratch"
+                size="md"
+                Icon={FiCopy}
+                className="w-full"
+              />
             </div>
           </div>
 
