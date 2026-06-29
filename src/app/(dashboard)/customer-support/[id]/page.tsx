@@ -216,12 +216,12 @@ export default function CustomerSupportDetailPage() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-wrap gap-2">
             {ticket.status !== "RESOLVED" && ticket.status !== "CLOSED" && (
               <>
-                <button
+                {/* <button
                   onClick={() => setShowAssign(true)}
                   className={actionBtn}
                 >
                   <FiUser className="size-3.5" /> Assign
-                </button>
+                </button> */}
                 <button
                   onClick={() => setShowResolve(true)}
                   className={actionBtn}
