@@ -48,6 +48,7 @@ export default function RoleFormModal({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -59,6 +60,15 @@ export default function RoleFormModal({
     if (role) return new Set(permissionsToSlugs(role.permissions));
     return new Set<string>();
   });
+
+  useEffect(() => {
+    reset({
+      name: role?.name ?? "",
+      description: role?.description ?? "",
+    });
+    setSelectedSlugs(new Set(role ? permissionsToSlugs(role.permissions) : []));
+    setCloneFromId("");
+  }, [role, reset]);
 
   // Clone from dropdown
   const [cloneFromId, setCloneFromId] = useState<string>("");

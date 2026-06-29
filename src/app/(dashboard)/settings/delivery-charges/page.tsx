@@ -410,7 +410,7 @@ function FormModal({
 }) {
   const { register, handleSubmit, watch, setValue, getValues, formState: { errors } } = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    values: {
       name: editing?.name ?? "",
       description: editing?.description ?? "",
       chargeAmount: editing ? Number(editing.chargeAmount) : 0,

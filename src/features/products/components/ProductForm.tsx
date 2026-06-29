@@ -420,6 +420,24 @@ export default function ProductForm({
   );
   const subCategories = useMemo(() => subCatsData?.data?.items ?? [], [subCatsData]);
 
+  useEffect(() => {
+    if (initialData?.brandId && brands.length > 0) {
+      setValue("brandId", initialData.brandId);
+    }
+  }, [initialData, brands, setValue]);
+
+  useEffect(() => {
+    if (initialData?.categoryId && brandCategories.length > 0) {
+      setValue("categoryId", initialData.categoryId);
+    }
+  }, [initialData, brandCategories, setValue]);
+
+  useEffect(() => {
+    if (initialData?.subCategoryId && subCategories.length > 0) {
+      setValue("subCategoryId", initialData.subCategoryId);
+    }
+  }, [initialData, subCategories, setValue]);
+
   const nameVal = watch("name");
 
   useEffect(() => {

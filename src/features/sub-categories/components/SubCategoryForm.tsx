@@ -72,6 +72,12 @@ export default function SubCategoryForm({
     }
   }, [initialData, reset]);
 
+  useEffect(() => {
+    if (initialData?.categoryId && categories.length > 0) {
+      setValue("categoryId", initialData.categoryId);
+    }
+  }, [initialData, categories, setValue]);
+
   const selectedCategoryId = watch("categoryId");
 
   const { data: existingSubCatsData, isLoading: existingLoading } = useSubCategories(
