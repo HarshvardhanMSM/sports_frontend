@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { FiRotateCcw, FiAlertCircle } from "react-icons/fi";
 import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useReturns, useApproveReturn, useRejectReturn, useSchedulePickup, useMarkInTransit, useMarkReceived, useProcessRefund, useCompleteReturn } from "@/hooks/useReturns";
-import type { ReturnListItem, ReturnStatus } from "@/types/return.types";
+import type { ReturnListItem, ReturnStatus, ReturnListParams } from "@/types/return.types";
 import ReturnsTable from "@/features/returns/components/ReturnsTable";
 import ReturnFilters from "@/features/returns/components/ReturnFilters";
 import ApproveReturnModal from "@/features/returns/components/ApproveReturnModal";
@@ -30,7 +30,11 @@ export default function ReturnsPage() {
   const [refundTarget, setRefundTarget] = useState<ReturnListItem | null>(null);
   const [completeTarget, setCompleteTarget] = useState<ReturnListItem | null>(null);
 
-  const { data, isLoading, error, isRefetching, refetch } = useReturns();
+  const params: ReturnListParams = { page, limit: PAGE_SIZE };
+  if (searchTerm) params.search = searchTerm;
+  if (statusFilter !== "All") params.status = statusFilter as ReturnStatus;
+
+  const { data, isLoading, error, isRefetching, refetch } = useReturns(params);
   const { mutateAsync: approveReturn, isPending: isApproving } = useApproveReturn();
   const { mutateAsync: rejectReturn, isPending: isRejecting } = useRejectReturn();
   const { mutateAsync: schedulePickup, isPending: isScheduling } = useSchedulePickup();
@@ -39,25 +43,11 @@ export default function ReturnsPage() {
   const { mutateAsync: processRefund, isPending: isRefunding } = useProcessRefund();
   const { mutateAsync: completeReturn, isPending: isCompleting } = useCompleteReturn();
 
-  const allReturns = data?.data ?? [];
-
-  const filtered = useMemo(() => {
-    return allReturns.filter((r) => {
-      const customerName = `${r.customer?.firstName ?? ""} ${r.customer?.lastName ?? ""}`.toLowerCase();
-      const q = searchTerm.toLowerCase();
-      const matchesSearch = !searchTerm
-        || r.returnNumber.toLowerCase().includes(q)
-        || r.order.orderNumber.toLowerCase().includes(q)
-        || customerName.includes(q);
-      const matchesFilter = statusFilter === "All" || r.status === statusFilter;
-      return matchesSearch && matchesFilter;
-    });
-  }, [allReturns, searchTerm, statusFilter]);
-
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const d = data?.data;
+  const allReturns = d?.items ?? [];
+  const total = d?.total ?? 0;
+  const totalPages = d?.totalPages ?? 1;
+  const safePage = d?.page ?? page;
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -179,9 +169,9 @@ export default function ReturnsPage() {
                 <div key={i} className="h-12 bg-slate-100 rounded-xl" />
               ))}
             </div>
-          ) : paginated.length > 0 ? (
+          ) : allReturns.length > 0 ? (
             <ReturnsTable
-              returns={paginated}
+              returns={allReturns}
               onApprove={setApproveTarget}
               onReject={setRejectTarget}
               onSchedulePickup={setPickupTarget}

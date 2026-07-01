@@ -357,7 +357,9 @@ export interface SlowMovingItem {
 export interface SlowMovingItemsResponse {
   statusCode: number;
   message: string;
-  data: SlowMovingItem[];
+  data: {
+    items: SlowMovingItem[];
+  };
 }
 
 export interface StockValueData {

@@ -19,6 +19,12 @@ export interface EmailTemplateListResponse {
     totalTemplates: number;
     activeTemplates: number;
     inactiveTemplates: number;
+    meta?: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
   };
   timestamp?: string;
 }

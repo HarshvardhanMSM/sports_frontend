@@ -37,6 +37,10 @@ export interface ReviewListResponse {
     reviews: Review[];
     totalReviews: number;
     averageRating: number;
+    total?: number;
+    page?: number;
+    limit?: number;
+    totalPages?: number;
   };
   timestamp?: string;
 }

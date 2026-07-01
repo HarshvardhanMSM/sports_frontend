@@ -502,7 +502,7 @@ export function useSlowMovingItems() {
   return useQuery({
     queryKey: inventoryAnalyticsKeys.slowMoving(),
     queryFn: () => InventoryAnalyticsService.getSlowMoving(),
-    select: (res) => res.data,
+    select: (res) => res.data.items,
   });
 }
 

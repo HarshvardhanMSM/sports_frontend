@@ -85,7 +85,13 @@ export interface ReturnDetail extends ReturnListItem {
 export interface ReturnListResponse {
   statusCode: number;
   message: string;
-  data: ReturnListItem[];
+  data: {
+    items: ReturnListItem[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
   timestamp?: string;
 }
 

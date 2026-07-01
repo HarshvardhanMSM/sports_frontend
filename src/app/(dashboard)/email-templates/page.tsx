@@ -36,9 +36,10 @@ export default function EmailTemplatesPage() {
   const { mutateAsync: deleteTemplate, isPending: isDeleting } = useDeleteEmailTemplate();
 
   const items = data?.data?.templates ?? [];
-  const total = items.length;
-  const totalPages = 1;
-  const limit = total || 10;
+  const meta = data?.data?.meta;
+  const total = meta?.total ?? items.length;
+  const totalPages = meta?.totalPages ?? 1;
+  const limit = meta?.limit ?? 10;
   const activeCount = data?.data?.activeTemplates ?? 0;
   const inactiveCount = data?.data?.inactiveTemplates ?? 0;
   const systemCount = items.filter((t) => t.isSystem).length || 0;

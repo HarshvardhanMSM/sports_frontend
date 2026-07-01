@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { FiRefreshCw, FiAlertCircle, FiDownload } from "react-icons/fi";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
-import type { AuditEntry } from "@/types/audit.types";
 import AuditStatsCards from "@/features/audit/components/AuditStatsCards";
 import AuditFilters from "@/features/audit/components/AuditFilters";
 import AuditTable from "@/features/audit/components/AuditTable";
@@ -17,28 +16,18 @@ export default function AuditLogsPage() {
   const [actionFilter, setActionFilter] = useState("All Actions");
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, error, isRefetching, refetch } = useAuditLogs();
+  const params: Record<string, string> = { page: String(page), limit: String(PAGE_SIZE) };
+  if (search) params.search = search;
+  if (moduleFilter !== "All Modules") params.module = moduleFilter;
+  if (actionFilter !== "All Actions") params.action = actionFilter;
+
+  const { data, isLoading, error, isRefetching, refetch } = useAuditLogs(params);
 
   const responseData = data?.data;
-  const allLogs: AuditEntry[] = responseData?.logs ?? [];
-
-  const filtered = useMemo(() => {
-    return allLogs.filter((log) => {
-      const q = search.toLowerCase();
-      const matchesSearch = !search
-        || (log.user?.name ?? "").toLowerCase().includes(q)
-        || log.action.toLowerCase().includes(q)
-        || log.module.toLowerCase().includes(q);
-      const matchesModule = moduleFilter === "All Modules" || log.module === moduleFilter;
-      const matchesAction = actionFilter === "All Actions" || (log.action ?? "").toUpperCase() === actionFilter;
-      return matchesSearch && matchesModule && matchesAction;
-    });
-  }, [allLogs, search, moduleFilter, actionFilter]);
-
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const allLogs = responseData?.logs ?? [];
+  const total = responseData?.total ?? 0;
+  const totalPages = responseData?.limit ? Math.max(1, Math.ceil(total / responseData.limit)) : 1;
+  const safePage = responseData?.page ?? page;
 
   const stats = {
     totalLogs: responseData?.totalLogs ?? allLogs.length,
@@ -98,7 +87,7 @@ export default function AuditLogsPage() {
             actionFilter={actionFilter}
             onActionFilterChange={(v) => { setActionFilter(v); setPage(1); }}
             total={responseData?.totalLogs ?? allLogs.length}
-            filtered={filtered.length}
+            filtered={allLogs.length}
           />
 
           {isLoading ? (
@@ -108,14 +97,14 @@ export default function AuditLogsPage() {
               ))}
             </div>
           ) : (
-            <AuditTable logs={paginated} />
+            <AuditTable logs={allLogs} />
           )}
 
           {totalPages > 1 && (
             <Pagination
               page={safePage}
               totalPages={totalPages}
-              total={total}
+              total={responseData?.total ?? 0}
               limit={PAGE_SIZE}
               onPageChange={setPage}
             />
