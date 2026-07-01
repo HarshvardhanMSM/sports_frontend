@@ -15,8 +15,6 @@ import {
 } from "react-icons/fi";
 import { useReportProducts, useReportInventory } from "@/hooks/useReports";
 import { resolveImageUrl } from "@/lib/image";
-import { safeArray } from "@/lib/utils";
-import type { ProductReportItem } from "@/types/report.types";
 import Select from "@/components/ui/select/Select";
 
 const PRESETS = [
@@ -64,12 +62,12 @@ export default function ProductPerformancePage() {
     refetchInv();
   }, [refetchProd, refetchInv]);
 
-  const allProducts = safeArray<ProductReportItem>(products);
+  const allProducts = products?.products ?? [];
   const filtered = allProducts.filter((p) =>
     p.productName.toLowerCase().includes(search.toLowerCase())
   );
 
-  const topEarner = allProducts.reduce((best, p) => (p.totalRevenue > (best?.totalRevenue ?? 0) ? p : best), allProducts[0]);
+  const topEarner = products?.topEarner ?? null;
 
   return (
     <div className="space-y-6 font-sans">
@@ -122,8 +120,8 @@ export default function ProductPerformancePage() {
           ))
         ) : (
           <>
-            <StatCard icon={<FiShoppingBag className="size-6 text-indigo-600" />} bg="bg-indigo-50" label="Total Products" value={inventory?.totalInventoryItems?.toLocaleString() ?? "30"} sub="Active in catalog" />
-            <StatCard icon={<FiBox className="size-6 text-emerald-600" />} bg="bg-emerald-50" label="Products Sold" value={allProducts.length.toString()} sub="With orders this period" />
+            <StatCard icon={<FiShoppingBag className="size-6 text-indigo-600" />} bg="bg-indigo-50" label="Total Products" value={(products?.totalProduct ?? 0).toLocaleString()} sub="Active in catalog" />
+            <StatCard icon={<FiBox className="size-6 text-emerald-600" />} bg="bg-emerald-50" label="Products Sold" value={(products?.productSold ?? 0).toLocaleString()} sub="With orders this period" />
             <StatCard icon={<FiTrendingUp className="size-6 text-amber-600" />} bg="bg-amber-50" label="Top Earner" value={topEarner ? `$${topEarner.totalRevenue.toLocaleString()}` : "$0"} sub={topEarner?.productName ?? "—"} />
             <StatCard icon={<FiDollarSign className="size-6 text-blue-600" />} bg="bg-blue-50" label="Stock Value" value={`$${(inventory?.totalStockValue ?? 0).toLocaleString()}`} sub="Total inventory value" />
           </>

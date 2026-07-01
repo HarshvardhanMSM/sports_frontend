@@ -3,17 +3,22 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { FiDollarSign } from "react-icons/fi";
-import type { RefundAnalytics } from "@/types/return-analytics.types";
+import type { RefundAnalytics, ReturnSummary } from "@/types/return-analytics.types";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 interface Props {
   data: RefundAnalytics | undefined;
+  summary: ReturnSummary | undefined;
   isLoading: boolean;
 }
 
-export default function RefundAnalyticsChart({ data, isLoading }: Props) {
+export default function RefundAnalyticsChart({ data, summary, isLoading }: Props) {
   const trend = data?.monthlyRefunds ?? [];
+  const totalMonths = trend.length;
+
+  const totalRefunds = summary?.totalReturns ?? (totalMonths > 0 ? trend.reduce((s, m) => s + Number(m.count ?? 0), 0) : 0);
+  const refundedAmount = summary?.totalRefundAmount ?? (totalMonths > 0 ? trend.reduce((s, m) => s + Number(m.total ?? 0), 0) : 0);
 
   return (
     <div className="space-y-6">
@@ -28,10 +33,10 @@ export default function RefundAnalyticsChart({ data, isLoading }: Props) {
               </div>
             ))
           : [
-              { label: "Total Refunds", value: trend.reduce((s, m) => s + Number(m.count ?? 0), 0).toLocaleString(), bg: "from-indigo-500 to-indigo-600" },
-              { label: "Refunded Amount", value: `$${trend.reduce((s, m) => s + Number(m.total ?? 0), 0).toLocaleString()}`, bg: "from-rose-500 to-rose-600" },
-              { label: "Months Active", value: `${trend.length}`, bg: "from-emerald-500 to-emerald-600" },
-              { label: "Avg Monthly Refunds", value: trend.length > 0 ? (trend.reduce((s, m) => s + Number(m.count ?? 0), 0) / trend.length).toFixed(1) : "0", bg: "from-cyan-500 to-cyan-600" },
+              { label: "Total Refunds", value: totalRefunds.toLocaleString(), bg: "from-indigo-500 to-indigo-600" },
+              { label: "Refunded Amount", value: `$${refundedAmount.toLocaleString()}`, bg: "from-rose-500 to-rose-600" },
+              { label: "Months Active", value: `${totalMonths}`, bg: "from-emerald-500 to-emerald-600" },
+              { label: "Avg Monthly Refunds", value: totalMonths > 0 ? (totalRefunds / totalMonths).toFixed(1) : "0", bg: "from-cyan-500 to-cyan-600" },
             ].map(({ label, value, bg }) => (
               <div key={label} className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm p-5">
                 <div className={`absolute top-0 right-0 size-20 rounded-bl-full bg-gradient-to-br ${bg} opacity-5`} />

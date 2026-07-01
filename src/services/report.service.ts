@@ -4,7 +4,7 @@ import type {
   DailySaleItem,
   SalesReport,
   RevenueReport,
-  ProductReportItem,
+  ProductReportResponse,
   CategoryReportItem,
   BrandReportItem,
   CustomerReport,
@@ -38,7 +38,7 @@ export const ReportService = {
       .then((res) => res.data);
   },
   getProducts(params?: Record<string, string>) {
-    return api.get<ApiListResponse<ProductReportItem[]>>("/admin/reports/products", params)
+    return api.get<ApiListResponse<ProductReportResponse>>("/admin/reports/products", params)
       .then((res) => res.data);
   },
   getCategories(params?: Record<string, string>) {
