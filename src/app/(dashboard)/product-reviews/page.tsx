@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { FiAlertCircle, FiStar } from "react-icons/fi";
 import { PageHeader } from "@/components/common/PageHeader";
 import { EmptyState } from "@/components/common/EmptyState";
-import { useReviews, useDeleteReview, useApproveReview, useRejectReview, useHideReview, useReviewAnalytics } from "@/hooks/useReviews";
+import { useReviews, useDeleteReview, useApproveReview, useRejectReview, useHideReview } from "@/hooks/useReviews";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { ReviewListParams } from "@/types/review.types";
 import ReviewTable from "@/features/reviews/components/ReviewTable";
@@ -34,13 +34,21 @@ export default function ProductReviewsPage() {
   };
 
   const { data, isLoading, error, isRefetching, refetch } = useReviews(params);
-  const { data: analyticsData, isLoading: isAnalyticsLoading } = useReviewAnalytics();
   const { mutateAsync: deleteReview, isPending: isDeleting } = useDeleteReview();
   const { mutateAsync: approveReview } = useApproveReview();
   const { mutateAsync: rejectReview } = useRejectReview();
   const { mutateAsync: hideReview } = useHideReview();
 
-  const allReviews = useMemo(() => data?.data ?? [], [data]);
+  const allReviews = useMemo(() => data?.data?.reviews ?? [], [data]);
+  const reviewMeta = useMemo(() => data?.data ? {
+    totalReviews: data.data.totalReviews,
+    averageRating: data.data.averageRating,
+    pendingReviews: 0,
+    approvedReviews: 0,
+    rejectedReviews: 0,
+    hiddenReviews: 0,
+    ratingDistribution: [],
+  } : undefined, [data]);
 
   const filtered = useMemo(() => {
     let result = allReviews;
@@ -137,7 +145,7 @@ export default function ProductReviewsPage() {
         description="Moderate and manage customer reviews across your product catalog."
       />
 
-      <ReviewAnalyticsCards analytics={analyticsData?.data} isLoading={isAnalyticsLoading} />
+      <ReviewAnalyticsCards analytics={reviewMeta} isLoading={isLoading} />
 
       <ReviewFilters
         search={searchTerm}

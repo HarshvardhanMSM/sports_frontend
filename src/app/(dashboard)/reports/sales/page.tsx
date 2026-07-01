@@ -68,10 +68,10 @@ export default function SalesReportsPage() {
     refetchRet();
   }, [refetchSales, refetchRet]);
 
-  const dailySales = sales ?? [];
-  const totalRevenue = dailySales.reduce((s, r) => s + (r.totalRevenue ?? 0), 0);
-  const totalOrders = dailySales.reduce((s, r) => s + (r.totalOrders ?? 0), 0);
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  const dailySales = sales?.dailySales ?? [];
+  const totalRevenue = sales?.totalRevenue ?? 0;
+  const totalOrders = sales?.totalOrders ?? 0;
+  const avgOrderValue = sales?.averageOrderValue ?? 0;
 
   const returnsData = returns;
   const returnRate = returnsData?.returnRate ?? 0;

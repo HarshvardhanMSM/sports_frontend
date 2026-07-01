@@ -5,6 +5,7 @@ import type {
   CustomerActionResponse,
   CustomerStatsResponse,
   WishlistResponse,
+  CartResponse,
   CustomerListParams,
 } from "@/types/customer.types";
 
@@ -23,6 +24,10 @@ export const CustomerService = {
 
   getWishlist(userId: string) {
     return api.get<WishlistResponse>(`/admin/wishlist/${userId}`);
+  },
+
+  getCustomerCart(userId: string) {
+    return api.get<CartResponse>(`/admin/customers/${userId}/cart`);
   },
 
   toggleActive(id: string) {

@@ -52,6 +52,7 @@ import {
   // FiCreditCard,
   // FiTool,
   FiKey,
+  FiMail,
   // FiLink,
 } from "react-icons/fi";
 
@@ -93,6 +94,10 @@ export const Sidebar = () => {
 
         {/* ── CATALOG ───────────────────────────────── */}
         {(hasAccess("/categories") || hasAccess("/sub-categories") || hasAccess("/products") || hasAccess("/brands") || hasAccess("/collections") || hasAccess("/attributes") || hasAccess("/product-reviews")) && <SectionLabel label="CATALOG" open={open} />}
+        {hasAccess("/brands") && (
+          <Option Icon={FiTag} title="Brands" href="/brands" open={open} />
+        )}
+        
         {hasAccess("/categories") && (
           <Option
             Icon={FiLayers}
@@ -117,9 +122,7 @@ export const Sidebar = () => {
             open={open}
           />
         )}
-        {hasAccess("/brands") && (
-          <Option Icon={FiTag} title="Brands" href="/brands" open={open} />
-        )}
+        
         {hasAccess("/collections") && (
           <Option
             Icon={FiGrid}
@@ -268,6 +271,9 @@ export const Sidebar = () => {
         )}
         {hasAccess("/cms") && (
           <Option Icon={FiFile} title="CMS Pages" href="/cms" open={open} />
+        )}
+        {hasAccess("/email-templates") && (
+          <Option Icon={FiMail} title="Email Templates" href="/email-templates" open={open} />
         )}
         {/* {hasAccess("/pages") && (
             <Option Icon={FiFile} title="Pages" href="/pages" open={open} />

@@ -24,17 +24,30 @@ export default function PermissionsPage() {
   const [deleteTarget, setDeleteTarget] = useState<PermissionSlug | null>(null);
   const [viewMode, setViewMode] = useState<"grouped" | "table">("grouped");
 
+  
+  const permissionsList = useMemo(() => {
+    return Array.isArray(permissions)
+      ? permissions
+      : (permissions as any)?.permissions && Array.isArray((permissions as any).permissions)
+      ? (permissions as any).permissions
+      : (permissions as any)?.data && Array.isArray((permissions as any).data)
+      ? (permissions as any).data
+      : (permissions as any)?.items && Array.isArray((permissions as any).items)
+      ? (permissions as any).items
+      : [];
+  }, [permissions]);
+
   const filtered = useMemo(
-    () => (permissions ?? []).filter(
-      (p) =>
+    () => permissionsList.filter(
+      (p: any) =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         p.slug.toLowerCase().includes(search.toLowerCase()) ||
         p.module?.toLowerCase().includes(search.toLowerCase()),
     ),
-    [permissions, search],
+    [permissionsList, search],
   );
 
-  const moduleGroups = useMemo(() => groupPermissionsByModule(permissions ?? []), [permissions]);
+  const moduleGroups = useMemo(() => groupPermissionsByModule(permissionsList), [permissionsList]);
 
   const filteredGroups = useMemo(() => {
     if (!search.trim()) return moduleGroups;
@@ -51,7 +64,7 @@ export default function PermissionsPage() {
   }, [moduleGroups, search]);
 
   const totalModules = moduleGroups.length;
-  const totalPermissions = permissions?.length ?? 0;
+  const totalPermissions = (permissions as any)?.totalPermissions ?? permissionsList.length;
 
   const handleCreateSubmit = async (data: { name: string; slug: string; module: string }) => {
     await createPermission(data as CreatePermissionPayload);

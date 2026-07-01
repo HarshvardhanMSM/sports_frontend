@@ -18,7 +18,12 @@ export interface UserRole {
 export interface UserListResponse {
   statusCode: number;
   message: string;
-  data: User[];
+  data: {
+    users: User[];
+    activeUsers: number;
+    inactiveUsers: number;
+    totalUsers: number;
+  };
 }
 
 export interface UserSingleResponse {

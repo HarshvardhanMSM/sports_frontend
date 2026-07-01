@@ -19,8 +19,8 @@ export default function AuditLogsPage() {
 
   const { data, isLoading, error, isRefetching, refetch } = useAuditLogs();
 
-  const raw = (data as unknown as Record<string, unknown>)?.data ?? data;
-  const allLogs: AuditEntry[] = Array.isArray(raw) ? raw : [];
+  const responseData = data?.data;
+  const allLogs: AuditEntry[] = responseData?.logs ?? [];
 
   const filtered = useMemo(() => {
     return allLogs.filter((log) => {
@@ -40,18 +40,12 @@ export default function AuditLogsPage() {
   const safePage = Math.min(page, totalPages);
   const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  const stats = useMemo(() => {
-    const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekStart = new Date(todayStart);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    return {
-      totalLogs: allLogs.length,
-      todayCount: allLogs.filter((l) => l.timestamp && new Date(l.timestamp) >= todayStart).length,
-      weekCount: allLogs.filter((l) => l.timestamp && new Date(l.timestamp) >= weekStart).length,
-      criticalCount: allLogs.filter((l) => (l.action ?? "").toUpperCase() === "DELETE" || (l.action ?? "").toUpperCase() === "REJECT").length,
-    };
-  }, [allLogs]);
+  const stats = {
+    totalLogs: responseData?.totalLogs ?? allLogs.length,
+    todayCount: responseData?.todayLogs ?? 0,
+    weekCount: responseData?.thisWeekLogs ?? 0,
+    criticalCount: responseData?.criticalEvents ?? 0,
+  };
 
   return (
     <div className="space-y-6">
@@ -103,7 +97,7 @@ export default function AuditLogsPage() {
             onModuleFilterChange={(v) => { setModuleFilter(v); setPage(1); }}
             actionFilter={actionFilter}
             onActionFilterChange={(v) => { setActionFilter(v); setPage(1); }}
-            total={allLogs.length}
+            total={responseData?.totalLogs ?? allLogs.length}
             filtered={filtered.length}
           />
 

@@ -3,13 +3,12 @@
 import { FiDollarSign, FiTrendingUp, FiTrendingDown, FiPercent, FiCreditCard, FiRotateCcw } from "react-icons/fi";
 
 interface KPIProps {
-  grossRevenue: number;
+  totalRevenue: number;
   totalExpenses: number;
   netProfit: number;
   totalRefunds: number;
-  totalSettlements: number;
-  profitMargin: number;
-  revenueGrowth: number;
+  pendingSettlements: number;
+  totalTaxCollected: number;
 }
 
 interface Props {
@@ -26,12 +25,12 @@ const CARDS: {
   icon: React.ReactNode;
   isPercentage?: boolean;
 }[] = [
-  { label: "Gross Revenue",      key: "grossRevenue",    prefix: "$", color: "from-emerald-500 to-emerald-600", icon: <FiDollarSign className="size-5" /> },
-  { label: "Total Expenses",     key: "totalExpenses",   prefix: "$", color: "from-rose-500 to-rose-600",       icon: <FiTrendingDown className="size-5" /> },
-  { label: "Net Profit",         key: "netProfit",       prefix: "$", color: "from-indigo-500 to-indigo-600",    icon: <FiTrendingUp className="size-5" /> },
-  { label: "Total Refunds",      key: "totalRefunds",    prefix: "$", color: "from-orange-500 to-orange-600",    icon: <FiRotateCcw className="size-5" /> },
-  { label: "Total Settlements",  key: "totalSettlements",prefix: "$", color: "from-cyan-500 to-cyan-600",        icon: <FiCreditCard className="size-5" /> },
-  { label: "Profit Margin",      key: "profitMargin",               suffix: "%", color: "from-violet-500 to-violet-600", icon: <FiPercent className="size-5" />, isPercentage: true },
+  { label: "Gross Revenue",      key: "totalRevenue",       prefix: "$", color: "from-emerald-500 to-emerald-600", icon: <FiDollarSign className="size-5" /> },
+  { label: "Total Expenses",     key: "totalExpenses",      prefix: "$", color: "from-rose-500 to-rose-600",       icon: <FiTrendingDown className="size-5" /> },
+  { label: "Net Profit",         key: "netProfit",          prefix: "$", color: "from-indigo-500 to-indigo-600",    icon: <FiTrendingUp className="size-5" /> },
+  { label: "Total Refunds",      key: "totalRefunds",       prefix: "$", color: "from-orange-500 to-orange-600",    icon: <FiRotateCcw className="size-5" /> },
+  { label: "Pending Settlements",key: "pendingSettlements",  prefix: "$", color: "from-cyan-500 to-cyan-600",        icon: <FiCreditCard className="size-5" /> },
+  { label: "Total Tax",          key: "totalTaxCollected",  prefix: "$", color: "from-violet-500 to-violet-600",   icon: <FiPercent className="size-5" /> },
 ];
 
 function formatValue(val: number, prefix = "", suffix = "", isPercentage?: boolean): string {

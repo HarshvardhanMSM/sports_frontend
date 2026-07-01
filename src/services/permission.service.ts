@@ -8,10 +8,15 @@ export const permissionKeys = {
   detail:    (id: string) => ["permissions", "detail", id] as const,
 };
 
+export interface PermissionsListPayload {
+  permissions: PermissionSlug[];
+  totalPermissions?: number;
+}
+
 interface PermissionsResponse {
   statusCode: number;
   message: string;
-  data: PermissionSlug[];
+  data: PermissionsListPayload;
 }
 
 interface SinglePermissionResponse {

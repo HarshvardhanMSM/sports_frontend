@@ -14,6 +14,7 @@ import type {
   UpdateAdminUserRequest,
   AuditLog,
   AuditSeverity,
+  RolesListResponse,
 } from "@/types/role.types";
 import type { ListParams, PaginatedResponse } from "@/types/common.types";
 
@@ -42,7 +43,7 @@ interface ApiListResponse<T> {
 export const RoleService = {
   /** GET /admin/roles */
   getRoles() {
-    return api.get<ApiListResponse<Role[]>>("/admin/roles").then((res) => res.data);
+    return api.get<RolesListResponse>("/admin/roles").then((res) => res.data);
   },
 
   /** GET /admin/roles/:id */
@@ -69,7 +70,7 @@ export const RoleService = {
 
   /** GET /admin/roles */
   getAdminRoles() {
-    return api.get<ApiListResponse<Role[]>>("/admin/roles").then((r) => r.data);
+    return api.get<RolesListResponse>("/admin/roles").then((r) => r.data);
   },
 
   /** GET /api/admin-users/:id */

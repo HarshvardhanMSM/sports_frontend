@@ -22,10 +22,15 @@ export interface AttributeListResponse {
   message: string;
   data: {
     items: Attribute[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+    totalAttributes: number;
+    required: number;
+    nonFilterable: number;
   };
 }
 

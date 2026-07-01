@@ -39,10 +39,15 @@ export interface CollectionListResponse {
   message: string;
   data: {
     items: Collection[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+    totalCollections: number;
+    activeCollections: number;
+    inactiveCollections: number;
   };
 }
 

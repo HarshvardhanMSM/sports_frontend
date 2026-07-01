@@ -32,14 +32,14 @@ export default function FinancialReportsPage() {
   const { data: settlements, isLoading: stlLoading, error: stlError, refetch: refetchStl } = useSettlementReport(dateParams);
 
   const kpiData = useMemo(() => {
-    const grossRevenue = dashboard?.grossRevenue ?? 0;
+    const totalRevenue = dashboard?.totalRevenue ?? 0;
     const totalExpenses = dashboard?.totalExpenses ?? 0;
     const netProfit = dashboard?.netProfit ?? 0;
     const totalRefunds = dashboard?.totalRefunds ?? 0;
-    const totalSettlements = settlements?.reduce((sum, i) => sum + (i.total ?? 0), 0) ?? 0;
-    const profitMargin = grossRevenue > 0 ? (netProfit / grossRevenue) * 100 : 0;
-    return { grossRevenue, totalExpenses, netProfit, totalRefunds, totalSettlements, profitMargin, revenueGrowth: 0 };
-  }, [dashboard, settlements]);
+    const pendingSettlements = dashboard?.pendingSettlements ?? 0;
+    const totalTaxCollected = dashboard?.totalTaxCollected ?? 0;
+    return { totalRevenue, totalExpenses, netProfit, totalRefunds, pendingSettlements, totalTaxCollected };
+  }, [dashboard]);
 
   const isLoading = dashLoading || revLoading || expLoading || stlLoading;
   const hasError = dashError || revError || expError || stlError;

@@ -46,10 +46,11 @@ export default function OrdersPage() {
   const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateOrderStatus();
   const { mutateAsync: cancelOrder, isPending: isCancelling } = useCancelOrder();
 
-  const items = data?.data?.items ?? [];
-  const total = data?.data?.meta?.total ?? 0;
-  const totalPages = data?.data?.meta?.totalPages ?? 1;
-  const limit = data?.data?.meta?.limit ?? 10;
+  const d = data?.data;
+  const items = d?.items ?? [];
+  const total = d?.meta?.total ?? 0;
+  const totalPages = d?.meta?.totalPages ?? 1;
+  const limit = d?.meta?.limit ?? 10;
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -78,11 +79,11 @@ export default function OrdersPage() {
     }
   };
 
-  const pendingCount = items.filter((o) => o.status === "PENDING").length;
-  const processingCount = items.filter((o) => o.status === "PROCESSING" || o.status === "CONFIRMED" || o.status === "PACKED").length;
-  const shippedCount = items.filter((o) => o.status === "SHIPPED" || o.status === "OUT_FOR_DELIVERY").length;
-  const deliveredCount = items.filter((o) => o.status === "DELIVERED").length;
-  const cancelledCount = items.filter((o) => o.status === "CANCELLED").length;
+  const pendingCount = d?.pending ?? 0;
+  const processingCount = d?.processing ?? 0;
+  const shippedCount = d?.shipped ?? 0;
+  const deliveredCount = d?.delivered ?? 0;
+  const cancelledCount = d?.cancelled ?? 0;
 
   const isFiltered = searchTerm !== "" || statusFilter !== "All";
 
@@ -105,7 +106,7 @@ export default function OrdersPage() {
       />
 
       <StatsGrid className="grid-cols-2 sm:grid-cols-3 xl:grid-cols-6">
-        <StatCard label="Total Orders" value={isLoading ? 0 : total} icon={FiShoppingCart} color="indigo" sub="All time" />
+        <StatCard label="Total Orders" value={isLoading ? 0 : (d?.totalOrders ?? 0)} icon={FiShoppingCart} color="indigo" sub="All time" />
         <StatCard label="Pending" value={pendingCount} icon={FiClock} color="amber" sub="Awaiting processing" />
         <StatCard label="Processing" value={processingCount} icon={FiRefreshCw} color="blue" sub="Being fulfilled" />
         <StatCard label="Shipped" value={shippedCount} icon={FiTruck} color="cyan" sub="In transit" />

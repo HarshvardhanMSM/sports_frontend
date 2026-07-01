@@ -22,10 +22,15 @@ export interface CategoryListResponse {
   message: string;
   data: {
     items: Category[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+    totalCategories: number;
+    activeCategories: number;
+    inactiveCategories: number;
   };
 }
 

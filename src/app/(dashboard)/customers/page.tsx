@@ -11,7 +11,7 @@ import { DataFilterBar } from "@/components/common/filters/DataFilterBar";
 import { DataTable, type Column } from "@/components/common/table/DataTable";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { useCustomers, useCustomerStats } from "@/hooks/useCustomers";
+import { useCustomers } from "@/hooks/useCustomers";
 import type { Customer, CustomerListParams } from "@/types/customer.types";
 import CustomerWishlistDrawer from "@/features/customers/components/CustomerWishlistDrawer";
 import Pagination from "@/components/ui/pagination/Pagination";
@@ -38,7 +38,7 @@ export default function CustomersPage() {
   const [isActive, setIsActive] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useState("");
   const [page, setPage] = useState(1);
-  const [wishlistTarget, setWishlistTarget] = useState<{ id: string; name: string } | null>(null);
+  const [wishlistTarget, setWishlistTarget] = useState<{ id: string; name: string; initialTab: "wishlist" | "cart" } | null>(null);
 
   const params: CustomerListParams = { page, limit: 10 };
   if (debouncedQuery) params.search = debouncedQuery;
@@ -46,14 +46,10 @@ export default function CustomersPage() {
   if (isEmailVerified) params.isEmailVerified = isEmailVerified === "true";
 
   const { data, isLoading, error, refetch } = useCustomers(params);
-  const { data: statsData } = useCustomerStats();
 
-  const stats = statsData?.data;
-  const raw = data?.data;
-  const isPaginated = raw != null && !Array.isArray(raw);
-  const allItems = Array.isArray(raw) ? raw : (raw?.items ?? []);
-  const total = isPaginated ? (raw?.total ?? 0) : allItems.length;
-  const totalPages = Math.max(1, Math.ceil(total / 10));
+  const allItems = data?.data?.customers ?? [];
+  const total = data?.data?.total ?? 0;
+  const totalPages = data?.data?.totalPages ?? 1;
 
   const isFiltered = !!debouncedQuery || isActive !== "" || isEmailVerified !== "";
 
@@ -65,7 +61,12 @@ export default function CustomersPage() {
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${AVATAR_COLORS[0]} text-xs font-bold text-white shadow-sm`}>
             {getInitials(c.firstName, c.lastName)}
           </div>
-          <span className="text-sm font-semibold text-slate-800">{c.firstName}</span>
+          <button
+            onClick={() => router.push(`/customers/${c.id}`)}
+            className="text-sm font-semibold text-slate-800 hover:text-indigo-600 hover:underline transition-colors text-left cursor-pointer"
+          >
+            {c.firstName}
+          </button>
         </div>
       ),
     },
@@ -79,7 +80,7 @@ export default function CustomersPage() {
       key: "actions", header: "Actions", headerClassName: "text-right", cellClassName: "px-6 py-4 whitespace-nowrap text-right", render: (c) => (
         <div className="flex gap-1 justify-end">
           <button onClick={() => router.push(`/customers/${c.id}`)} className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"><FiEye className="size-4" /></button>
-          <button onClick={() => setWishlistTarget({ id: c.id, name: `${c.firstName} ${c.lastName}` })} className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="View Wishlist"><FiHeart className="size-4" /></button>
+          <button onClick={() => setWishlistTarget({ id: c.id, name: `${c.firstName} ${c.lastName}`, initialTab: "wishlist" })} className="size-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all" title="View Wishlist"><FiHeart className="size-4" /></button>
         </div>
       ),
     },
@@ -94,11 +95,11 @@ export default function CustomersPage() {
       />
 
       <StatsGrid className="grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Total Customers" value={stats?.totalCustomers ?? "-"} icon={FiUsers} color="indigo" />
-        <StatCard label="Active Customers" value={stats?.activeCustomers ?? "-"} icon={FiUserCheck} color="emerald" />
-        <StatCard label="Verified Customers" value={stats?.verifiedCustomers ?? "-"} icon={FiUsers} color="blue" />
-        <StatCard label="New This Month" value={stats?.newThisMonth ?? "-"} icon={FiUserPlus} color="violet" />
-        <StatCard label="New Today" value={stats?.newToday ?? "-"} icon={FiUserPlus} color="amber" />
+        <StatCard label="Total Customers" value={data?.data?.totalCustomers ?? "-"} icon={FiUsers} color="indigo" />
+        <StatCard label="Active Customers" value={data?.data?.activeCustomers ?? "-"} icon={FiUserCheck} color="emerald" />
+        <StatCard label="Verified Customers" value={data?.data?.verifiedCustomers ?? "-"} icon={FiUsers} color="blue" />
+        <StatCard label="New This Month" value={data?.data?.newThisMonth ?? "-"} icon={FiUserPlus} color="violet" />
+        <StatCard label="New Today" value={data?.data?.newToday ?? "-"} icon={FiUserPlus} color="amber" />
       </StatsGrid>
 
       <DataFilterBar
@@ -138,8 +139,14 @@ export default function CustomersPage() {
       )}
 
       {wishlistTarget && (
-        <CustomerWishlistDrawer customerId={wishlistTarget.id} customerName={wishlistTarget.name} onClose={() => setWishlistTarget(null)} />
+        <CustomerWishlistDrawer
+          customerId={wishlistTarget.id}
+          customerName={wishlistTarget.name}
+          initialTab={wishlistTarget.initialTab}
+          onClose={() => setWishlistTarget(null)}
+        />
       )}
     </div>
   );
 }
+

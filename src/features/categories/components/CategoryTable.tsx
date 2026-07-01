@@ -45,11 +45,7 @@ export default function CategoryTable({ categories, onDelete }: CategoryTablePro
       cellClassName: "px-6 py-4 max-w-[200px] truncate text-slate-500",
       render: (cat) => <>{cat.description}</>,
     },
-    {
-      key: "productsCount",
-      header: "Products",
-      render: (cat) => <span className="font-semibold text-slate-800">{cat.productsCount ?? 0}</span>,
-    },
+  
     {
       key: "brands",
       header: "Brands",

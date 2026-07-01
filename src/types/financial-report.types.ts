@@ -1,8 +1,11 @@
 export interface FinancialDashboard {
-  grossRevenue: number;
+  totalRevenue: number;
   totalRefunds: number;
   totalExpenses: number;
   netProfit: number;
+  pendingSettlements?: number;
+  totalTaxCollected?: number;
+  totalTransactions?: number;
 }
 
 export interface RevenueItem {

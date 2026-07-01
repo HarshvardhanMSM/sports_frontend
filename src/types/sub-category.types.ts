@@ -17,10 +17,15 @@ export interface SubCategoryListResponse {
   message: string;
   data: {
     items: SubCategory[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    meta: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+    totalSubCategories: number;
+    activeSubCategories: number;
+    inactiveSubCategories: number;
   };
 }
 

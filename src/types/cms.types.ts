@@ -20,6 +20,9 @@ export interface CmsPageListResponse {
       limit: number;
       totalPages: number;
     };
+    totalPages: number;
+    published: number;
+    draft: number;
   };
   timestamp?: string;
 }

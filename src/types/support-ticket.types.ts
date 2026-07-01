@@ -8,17 +8,20 @@ export interface SupportTicket {
   category: string;
   priority: SupportTicketPriority;
   status: SupportTicketStatus;
-  customerId?: string;
-  customerName?: string;
-  customerEmail?: string;
+  orderId?: string | null;
   customer?: {
     id: string;
     firstName: string;
     lastName: string;
     email: string;
   };
-  assignedAdminId?: string;
-  assignedAdminName?: string;
+  assignedAdmin?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  firstResponseAt?: string | null;
+  resolvedAt?: string | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -95,9 +98,15 @@ export interface SupportTicketListResponse {
   statusCode: number;
   message: string;
   data: {
-    items: SupportTicket[];
+    tickets: SupportTicket[];
     total: number;
+    page: number;
+    limit: number;
+    openTickets: number;
+    inProgress: number;
+    resolvedClosed: number;
   };
+  timestamp?: string;
 }
 
 export interface SupportTicketDetailResponse {

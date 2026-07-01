@@ -53,6 +53,18 @@ export interface Role {
   createdDate: string;
 }
 
+export interface RolesListResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    roles: Role[];
+    activeRoles: number;
+    customRoles: number;
+    systemRoles: number;
+    totalRoles: number;
+  };
+}
+
 export interface CreateRoleRequest {
   name: string;
   slug: string;

@@ -37,12 +37,12 @@ function getColor(idx: number) {
 export default function PermissionStatsCards({
   totalPermissions,
   totalModules,
-  moduleGroups,
+  // moduleGroups,
 }: PermissionStatsCardsProps) {
-  const topModules = moduleGroups.slice(0, 4);
+  // const topModules = moduleGroups.slice(0, 4);
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex items-center gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
           <FiKey className="size-6 text-indigo-600" />
@@ -63,7 +63,7 @@ export default function PermissionStatsCards({
         </div>
       </div>
 
-      {topModules.map((mod, idx) => {
+      {/* {topModules.map((mod, idx) => {
         const color = MODULE_COLORS[mod.module] ?? getColor(idx);
         return (
           <div
@@ -79,7 +79,7 @@ export default function PermissionStatsCards({
             </div>
           </div>
         );
-      })}
+      })} */}
     </div>
   );
 }

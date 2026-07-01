@@ -48,16 +48,14 @@ export default function CustomerSupportPage() {
   const { data, isLoading, error, refetch } = useSupportTickets(params);
 
   const raw = data?.data;
-  const isPaginated = raw != null && !Array.isArray(raw);
-  const allItems = Array.isArray(raw) ? raw : (raw?.items ?? []);
-  const total = isPaginated ? (raw?.total ?? 0) : allItems.length;
-  const totalPages = Math.max(1, Math.ceil(total / 10));
+  const allItems = raw?.tickets ?? [];
+  const totalPages = Math.max(1, Math.ceil((raw?.total ?? 0) / (raw?.limit ?? 10)));
 
   const isFiltered = search !== "" || statusFilter !== "" || priorityFilter !== "";
 
-  const openCount = allItems.filter((t) => t.status === "OPEN").length;
-  const inProgressCount = allItems.filter((t) => t.status === "IN_PROGRESS").length;
-  const resolvedCount = allItems.filter((t) => t.status === "RESOLVED" || t.status === "CLOSED").length;
+  const openCount = raw?.openTickets ?? 0;
+  const inProgressCount = raw?.inProgress ?? 0;
+  const resolvedClosedCount = raw?.resolvedClosed ?? 0;
 
   const columns: Column<SupportTicket>[] = [
     { key: "ticketNumber", header: "Ticket #", render: (t) => <span className="text-sm font-mono font-semibold text-indigo-600">{t.ticketNumber}</span> },
@@ -86,12 +84,12 @@ export default function CustomerSupportPage() {
     {
       key: "customer", header: "Customer", render: (t) => (
         <div>
-          <p className="text-sm font-semibold text-slate-800">{t.customer ? `${t.customer.firstName} ${t.customer.lastName}` : t.customerName}</p>
-          <p className="text-xs text-slate-400">{t.customer?.email ?? t.customerEmail}</p>
+          <p className="text-sm font-semibold text-slate-800">{t.customer ? `${t.customer.firstName} ${t.customer.lastName}` : "-"}</p>
+          <p className="text-xs text-slate-400">{t.customer?.email ?? "-"}</p>
         </div>
       ),
     },
-    { key: "assignedAdmin", header: "Assigned Admin", render: (t) => <span className="text-sm text-slate-700">{t.assignedAdminName ?? "Unassigned"}</span> },
+    { key: "assignedAdmin", header: "Assigned Admin", render: (t) => <span className="text-sm text-slate-700">{t.assignedAdmin?.name ?? "Unassigned"}</span> },
     { key: "createdAt", header: "Created", render: (t) => <span className="text-sm text-slate-700 whitespace-nowrap">{new Date(t.createdAt).toLocaleDateString()}</span> },
     {
       key: "actions", header: "Actions", headerClassName: "text-right", cellClassName: "px-6 py-4 whitespace-nowrap text-right", render: (t) => (
@@ -109,8 +107,8 @@ export default function CustomerSupportPage() {
       <StatsGrid className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Open Tickets" value={openCount} icon={FiMessageCircle} color="indigo" sub="Awaiting response" variant="simple" />
         <StatCard label="In Progress" value={inProgressCount} icon={FiCheckCircle} color="emerald" sub="Being worked on" variant="simple" />
-        <StatCard label="Total Tickets" value={total} icon={FiClock} color="blue" sub="All tickets" variant="simple" />
-        <StatCard label="Resolved / Closed" value={resolvedCount} icon={FiThumbsUp} color="violet" sub="Completed tickets" variant="simple" />
+        <StatCard label="Total Tickets" value={raw?.total ?? 0} icon={FiClock} color="blue" sub="All tickets" variant="simple" />
+        <StatCard label="Resolved / Closed" value={resolvedClosedCount} icon={FiThumbsUp} color="violet" sub="Completed tickets" variant="simple" />
       </StatsGrid>
 
       <DataFilterBar
@@ -145,7 +143,7 @@ export default function CustomerSupportPage() {
       ) : (
         <div className="space-y-4">
           <DataTable columns={columns} data={allItems} keyExtractor={(t) => t.id} />
-          {totalPages > 1 && <Pagination page={page} totalPages={totalPages} total={total} limit={10} onPageChange={setPage} />}
+          {totalPages > 1 && <Pagination page={page} totalPages={totalPages} total={raw?.total ?? 0} limit={10} onPageChange={setPage} />}
         </div>
       )}
     </div>

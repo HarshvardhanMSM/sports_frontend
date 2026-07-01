@@ -42,9 +42,18 @@ export interface CustomerListResponse {
   statusCode: number;
   message: string;
   data: {
-    items: Customer[];
+    customers: Customer[];
+    page: number;
+    limit: number;
     total: number;
+    totalPages: number;
+    totalCustomers: number;
+    activeCustomers: number;
+    verifiedCustomers: number;
+    newThisMonth: number;
+    newToday: number;
   };
+  timestamp?: string;
 }
 
 export interface CustomerSingleResponse {
@@ -69,4 +78,24 @@ export interface WishlistResponse {
   statusCode: number;
   message: string;
   data: WishlistItem[] | { items: WishlistItem[]; total: number };
+}
+
+export interface CartItem {
+  id: string;
+  variantId: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface CustomerCart {
+  id: string;
+  subtotal: number;
+  totalItems: number;
+  items: CartItem[];
+}
+
+export interface CartResponse {
+  message: string;
+  data: CustomerCart;
 }

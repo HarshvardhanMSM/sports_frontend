@@ -14,6 +14,7 @@ export const customerKeys = {
   detail:         (id: string)             => ["customers", "detail", id]  as const,
   stats:          ()                       => ["customers", "stats"]     as const,
   wishlist:       (id: string)             => ["customers", "wishlist", id] as const,
+  cart:           (id: string)             => ["customers", "cart", id]    as const,
 };
 
 export function useCustomers(params?: CustomerListParams) {
@@ -47,6 +48,15 @@ export function useCustomerWishlist(userId: string | null) {
     queryKey: customerKeys.wishlist(userId ?? ""),
     queryFn: () => CustomerService.getWishlist(userId!),
     enabled: !!userId,
+  });
+}
+
+export function useCustomerCart(userId: string | null) {
+  return useQuery({
+    queryKey: customerKeys.cart(userId ?? ""),
+    queryFn: () => CustomerService.getCustomerCart(userId!),
+    enabled: !!userId,
+    staleTime: 30_000,
   });
 }
 

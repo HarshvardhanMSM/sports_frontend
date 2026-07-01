@@ -97,13 +97,13 @@ export default function RoleSidebar({ roles, selectedId, onSelect }: RoleSidebar
               >
                 {role.isSystemRole ? "System" : "Custom"}
               </span>
-              <span className="text-[10px] text-slate-400">
+              {/* <span className="text-[10px] text-slate-400">
                 {new Date(role.createdDate).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
                   year: "numeric",
                 })}
-              </span>
+              </span> */}
             </div>
           </button>
         );

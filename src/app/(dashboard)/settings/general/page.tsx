@@ -17,6 +17,9 @@ import {
   FiBriefcase,
   FiCreditCard,
   FiRotateCcw,
+  FiEye,
+  FiEyeOff,
+  FiSend,
 } from "react-icons/fi";
 import {
   useStoreSettings,
@@ -25,9 +28,10 @@ import {
   useUploadFavicon,
 } from "@/hooks/useStoreSettings";
 import { useSocialLinks, useUpdateSocialLinks } from "@/hooks/useSocialLinks";
-import { useEmailSettings, useUpdateEmailSettings } from "@/hooks/useEmailSettings";
+import { useEmailSettings, useUpdateEmailSettings, useSmtpSettings, useUpdateSmtpSettings, useTestSmtpConnection } from "@/hooks/useEmailSettings";
 import { useBusinessSettings, useUpdateBusinessSettings } from "@/hooks/useBusinessSettings";
 import { getImageUrl } from "@/lib/utils";
+import { Can } from "@/components/common/Can";
 
 // ── SHARED FORM FIELD UTILS ───────────────────────────────────────
 
@@ -248,6 +252,23 @@ const emailFormSchema = z.object({
 });
 type EmailFormValues = z.infer<typeof emailFormSchema>;
 
+const smtpFormSchema = z.object({
+  emailProvider: z.string().min(1, "Provider name is required"),
+  smtpHost: z.string().min(1, "SMTP host is required"),
+  smtpPort: z.number().int("Port must be an integer").min(1, "Port must be 1-65535").max(65535, "Port must be 1-65535"),
+  smtpUser: z.string().optional(),
+  smtpPass: z.string().optional(),
+  smtpSecure: z.boolean(),
+  fromName: z.string().min(1, "Sender name is required"),
+  fromEmail: z.string().email("Invalid email address"),
+});
+type SmtpFormValues = z.infer<typeof smtpFormSchema>;
+
+const testEmailSchema = z.object({
+  to: z.string().email("Invalid email address"),
+});
+type TestEmailFormValues = z.infer<typeof testEmailSchema>;
+
 const socialFormSchema = z.object({
   facebook: z.string().url("Invalid URL").optional().or(z.literal("")),
   instagram: z.string().url("Invalid URL").optional().or(z.literal("")),
@@ -339,6 +360,12 @@ export default function GeneralSettingsPage() {
   const emailQuery = useEmailSettings();
   const updateEmail = useUpdateEmailSettings();
 
+  // SMTP queries & mutations
+  const smtpQuery = useSmtpSettings();
+  const updateSmtp = useUpdateSmtpSettings();
+  const testSmtp = useTestSmtpConnection();
+  const [showPassword, setShowPassword] = useState(false);
+
   // Business settings queries & mutations
   const businessQuery = useBusinessSettings();
   const updateBusiness = useUpdateBusinessSettings();
@@ -384,6 +411,25 @@ export default function GeneralSettingsPage() {
     },
   });
 
+  const smtpForm = useForm<SmtpFormValues>({
+    resolver: zodResolver(smtpFormSchema),
+    values: {
+      emailProvider: smtpQuery.data?.emailProvider ?? "",
+      smtpHost: smtpQuery.data?.smtpHost ?? "",
+      smtpPort: smtpQuery.data?.smtpPort ?? 587,
+      smtpUser: smtpQuery.data?.smtpUser ?? "",
+      smtpPass: "",
+      smtpSecure: smtpQuery.data?.smtpSecure ?? false,
+      fromName: smtpQuery.data?.fromName ?? "",
+      fromEmail: smtpQuery.data?.fromEmail ?? "",
+    },
+  });
+
+  const testEmailForm = useForm<TestEmailFormValues>({
+    resolver: zodResolver(testEmailSchema),
+    defaultValues: { to: "" },
+  });
+
   const socialForm = useForm<SocialFormValues>({
     resolver: zodResolver(socialFormSchema),
     values: {
@@ -425,6 +471,26 @@ export default function GeneralSettingsPage() {
     }
   };
 
+  const onSmtpSubmit = async (formData: SmtpFormValues) => {
+    try {
+      const { smtpPass, ...rest } = formData;
+      const payload = smtpPass ? formData : rest;
+      await updateSmtp.mutateAsync(payload);
+      showToast("success", "SMTP settings saved successfully");
+    } catch {
+      showToast("error", "Failed to save SMTP settings");
+    }
+  };
+
+  const onTestEmailSubmit = async (formData: TestEmailFormValues) => {
+    try {
+      await testSmtp.mutateAsync({ to: formData.to });
+      showToast("success", "Test email sent successfully");
+    } catch {
+      showToast("error", "Failed to send test email");
+    }
+  };
+
   const onSocialSubmit = async (formData: SocialFormValues) => {
     try {
       await updateSocial.mutateAsync(formData);
@@ -439,6 +505,7 @@ export default function GeneralSettingsPage() {
     businessQuery.refetch();
     emailQuery.refetch();
     socialQuery.refetch();
+    smtpQuery.refetch();
   };
 
   // Loading state
@@ -446,14 +513,16 @@ export default function GeneralSettingsPage() {
     storeQuery.isLoading ||
     businessQuery.isLoading ||
     emailQuery.isLoading ||
-    socialQuery.isLoading;
+    socialQuery.isLoading ||
+    smtpQuery.isLoading;
 
   // Error state
   const isError =
     storeQuery.isError ||
     businessQuery.isError ||
     emailQuery.isError ||
-    socialQuery.isError;
+    socialQuery.isError ||
+    smtpQuery.isError;
 
   if (isLoading) {
     return (
@@ -773,68 +842,221 @@ export default function GeneralSettingsPage() {
 
         {/* Tab 3: Email Configuration */}
         {activeTab === "email" && (
-          <SectionCard
-            title="Email Settings"
-            description="Sender configuration for notifications and transactional emails."
-            icon={FiMail}
-            iconBg="bg-indigo-500"
-          >
-            <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-5">
-              <div>
-                <FormLabel>Sender Name</FormLabel>
-                <FormInput {...emailForm.register("fromName")} placeholder="My Store" />
-                {emailForm.formState.errors.fromName && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {emailForm.formState.errors.fromName.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <FormLabel>Sender Email</FormLabel>
-                <FormInput
-                  {...emailForm.register("fromEmail")}
-                  type="email"
-                  placeholder="noreply@mystore.com"
-                />
-                {emailForm.formState.errors.fromEmail && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {emailForm.formState.errors.fromEmail.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <FormLabel>Reply-To Email</FormLabel>
-                <FormInput
-                  {...emailForm.register("replyToEmail")}
-                  type="email"
-                  placeholder="support@mystore.com"
-                />
-                {emailForm.formState.errors.replyToEmail && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {emailForm.formState.errors.replyToEmail.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => emailForm.reset()}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  disabled={!emailForm.formState.isDirty || updateEmail.isPending}
-                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 cursor-pointer"
-                  style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
-                >
-                  <FiSave className="size-3.5" />
-                  {updateEmail.isPending ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </SectionCard>
+          <div className="space-y-6">
+            <SectionCard
+              title="Email Settings"
+              description="Sender configuration for notifications and transactional emails."
+              icon={FiMail}
+              iconBg="bg-indigo-500"
+            >
+              <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-5">
+                <div>
+                  <FormLabel>Sender Name</FormLabel>
+                  <FormInput {...emailForm.register("fromName")} placeholder="My Store" />
+                  {emailForm.formState.errors.fromName && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {emailForm.formState.errors.fromName.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <FormLabel>Sender Email</FormLabel>
+                  <FormInput
+                    {...emailForm.register("fromEmail")}
+                    type="email"
+                    placeholder="noreply@mystore.com"
+                  />
+                  {emailForm.formState.errors.fromEmail && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {emailForm.formState.errors.fromEmail.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <FormLabel>Reply-To Email</FormLabel>
+                  <FormInput
+                    {...emailForm.register("replyToEmail")}
+                    type="email"
+                    placeholder="support@mystore.com"
+                  />
+                  {emailForm.formState.errors.replyToEmail && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {emailForm.formState.errors.replyToEmail.message}
+                    </p>
+                  )}
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => emailForm.reset()}
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!emailForm.formState.isDirty || updateEmail.isPending}
+                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                    style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+                  >
+                    <FiSave className="size-3.5" />
+                    {updateEmail.isPending ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </SectionCard>
+
+            <Can permission="settings.view">
+              <SectionCard
+                title="SMTP Configuration"
+                description="Configure your SMTP provider for sending transactional emails."
+                icon={FiMail}
+                iconBg="bg-emerald-500"
+              >
+                {!smtpQuery.data ? (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <div className="size-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                      <FiMail className="size-7 text-slate-400" />
+                    </div>
+                    <h3 className="text-base font-bold text-slate-800">SMTP Configuration Not Set</h3>
+                    <p className="mt-1 text-sm text-slate-500">Please configure your email provider.</p>
+                  </div>
+                ) : null}
+                <form onSubmit={smtpForm.handleSubmit(onSmtpSubmit)} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <FormLabel>Email Provider</FormLabel>
+                      <FormInput {...smtpForm.register("emailProvider")} placeholder="SendGrid, SMTP2GO, etc." />
+                      {smtpForm.formState.errors.emailProvider && (
+                        <p className="text-xs text-red-500 mt-1">{smtpForm.formState.errors.emailProvider.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <FormLabel>SMTP Host</FormLabel>
+                      <FormInput {...smtpForm.register("smtpHost")} placeholder="smtp.sendgrid.net" />
+                      {smtpForm.formState.errors.smtpHost && (
+                        <p className="text-xs text-red-500 mt-1">{smtpForm.formState.errors.smtpHost.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <FormLabel>SMTP Port</FormLabel>
+                      <FormInput {...smtpForm.register("smtpPort", { valueAsNumber: true })} type="number" placeholder="587" />
+                      {smtpForm.formState.errors.smtpPort && (
+                        <p className="text-xs text-red-500 mt-1">{smtpForm.formState.errors.smtpPort.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <FormLabel>SMTP Username</FormLabel>
+                      <FormInput {...smtpForm.register("smtpUser")} placeholder="apikey@sendgrid.com" />
+                      {smtpForm.formState.errors.smtpUser && (
+                        <p className="text-xs text-red-500 mt-1">{smtpForm.formState.errors.smtpUser.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <FormLabel>SMTP Password</FormLabel>
+                      <div className="relative">
+                        <FormInput
+                          {...smtpForm.register("smtpPass")}
+                          type={showPassword ? "text" : "password"}
+                          placeholder={smtpQuery.data?.smtpPass ? "••••••••" : "Enter password"}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          {showPassword ? <FiEyeOff className="size-4" /> : <FiEye className="size-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <FormLabel>SMTP Secure</FormLabel>
+                      <label className="flex items-center gap-3 mt-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          {...smtpForm.register("smtpSecure")}
+                          className="size-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="text-sm text-slate-600">Use SSL/TLS</span>
+                      </label>
+                    </div>
+                    <div>
+                      <FormLabel>From Name</FormLabel>
+                      <FormInput {...smtpForm.register("fromName")} placeholder="My Store" />
+                      {smtpForm.formState.errors.fromName && (
+                        <p className="text-xs text-red-500 mt-1">{smtpForm.formState.errors.fromName.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <FormLabel>From Email</FormLabel>
+                      <FormInput {...smtpForm.register("fromEmail")} type="email" placeholder="noreply@mystore.com" />
+                      {smtpForm.formState.errors.fromEmail && (
+                        <p className="text-xs text-red-500 mt-1">{smtpForm.formState.errors.fromEmail.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => smtpForm.reset()}
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                    <Can permission="settings.manage">
+                      <button
+                        type="submit"
+                        disabled={!smtpForm.formState.isDirty || updateSmtp.isPending}
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                        style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+                      >
+                        <FiSave className="size-3.5" />
+                        {updateSmtp.isPending ? "Saving..." : "Save Changes"}
+                      </button>
+                    </Can>
+                  </div>
+                </form>
+              </SectionCard>
+            </Can>
+
+            <Can permission="settings.view">
+              <SectionCard
+                title="Send Test Email"
+                description="Send a test email to verify your SMTP configuration."
+                icon={FiSend}
+                iconBg="bg-sky-500"
+              >
+                <form onSubmit={testEmailForm.handleSubmit(onTestEmailSubmit)} className="space-y-5">
+                  <div>
+                    <FormLabel>Test Email Address</FormLabel>
+                    <FormInput
+                      {...testEmailForm.register("to")}
+                      type="email"
+                      placeholder="you@example.com"
+                    />
+                    {testEmailForm.formState.errors.to && (
+                      <p className="text-xs text-red-500 mt-1">
+                        {testEmailForm.formState.errors.to.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex justify-end pt-2">
+                    <Can permission="settings.manage">
+                      <button
+                        type="submit"
+                        disabled={testSmtp.isPending}
+                        className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                        style={{ background: "linear-gradient(135deg, #4338ca, #6d28d9)" }}
+                      >
+                        <FiSend className="size-3.5" />
+                        {testSmtp.isPending ? "Sending..." : "Send Test Email"}
+                      </button>
+                    </Can>
+                  </div>
+                </form>
+              </SectionCard>
+            </Can>
+          </div>
         )}
 
         {/* Tab 4: Social Links */}

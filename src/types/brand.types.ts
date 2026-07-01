@@ -22,6 +22,9 @@ export interface BrandListResponse {
       limit: number;
       totalPages: number;
     };
+    totalBrands?: number;
+    activeBrands?: number;
+    inactiveBrands?: number;
   };
   timestamp?: string;
 }

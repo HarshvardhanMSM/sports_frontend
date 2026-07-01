@@ -107,14 +107,30 @@ export default function RolesPage() {
   });
 
   // ── Derived Data ──────────────────────────────────────────────────
-  const rolesRaw: Role[] = rolesData ?? [];
+  const rolesRaw: Role[] = Array.isArray(rolesData)
+    ? rolesData
+    : (rolesData as any)?.roles && Array.isArray((rolesData as any).roles)
+    ? (rolesData as any).roles
+    : (rolesData as any)?.data && Array.isArray((rolesData as any).data)
+    ? (rolesData as any).data
+    : (rolesData as any)?.items && Array.isArray((rolesData as any).items)
+    ? (rolesData as any).items
+    : [];
   const roles = useMemo(
     () => rolesRaw
       .filter((r) => r.name !== SUPER_ADMIN_ROLE)
       .map((r) => ({ ...r, permissions: normalizePermissions(r.permissions) })),
     [rolesRaw],
   );
-  const permissionSlugs: PermissionSlug[] = permissionSlugsRaw ?? [];
+  const permissionSlugs: PermissionSlug[] = Array.isArray(permissionSlugsRaw)
+    ? permissionSlugsRaw
+    : (permissionSlugsRaw as any)?.permissions && Array.isArray((permissionSlugsRaw as any).permissions)
+    ? (permissionSlugsRaw as any).permissions
+    : (permissionSlugsRaw as any)?.data && Array.isArray((permissionSlugsRaw as any).data)
+    ? (permissionSlugsRaw as any).data
+    : (permissionSlugsRaw as any)?.items && Array.isArray((permissionSlugsRaw as any).items)
+    ? (permissionSlugsRaw as any).items
+    : [];
 
   // ── Local State ───────────────────────────────────────────────────
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);

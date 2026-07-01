@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useLogout } from "@/hooks/useAuth";
 import { useCurrentUser } from "@/hooks/useUsers";
 import { resolveImageUrl } from "@/lib/image";
+import Link from "next/link";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -94,10 +95,11 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
       {/* Right — actions */}
       <div className="flex items-center gap-4">
         {/* Messages */}
+        <Link href="/customer-support">
         <button className="relative p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors hover:scale-105 active:scale-95">
           <FiMessageSquare className="size-5" />
-          <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-indigo-500 ring-2 ring-white" />
-        </button>
+          {/* <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-indigo-500 ring-2 ring-white" /> */}
+        </button></Link>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
@@ -135,6 +137,17 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
                   time="3 hours ago"
                   desc="A customer left a 5-star review on Nike Pegasus 40."
                 />
+              </div>
+              <div className="mt-3 border-t border-slate-100 pt-2 text-center">
+                <button
+                  onClick={() => {
+                    setShowNotifications(false);
+                    router.push("/notifications");
+                  }}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline w-full"
+                >
+                  View all notifications
+                </button>
               </div>
             </div>
           )}

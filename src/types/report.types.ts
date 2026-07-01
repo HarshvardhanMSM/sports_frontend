@@ -22,6 +22,13 @@ export interface DailySaleItem {
   averageOrderValue: number;
 }
 
+export interface SalesReport {
+  dailySales: DailySaleItem[];
+  totalRevenue: number;
+  totalOrders: number;
+  averageOrderValue: number;
+}
+
 // ── /admin/reports/revenue ───────────────────────────────────
 export interface RevenueReport {
   daily: RevenueDataPoint[];

@@ -2,6 +2,7 @@ import { api } from "./api";
 import type {
   ApiListResponse,
   DailySaleItem,
+  SalesReport,
   RevenueReport,
   ProductReportItem,
   CategoryReportItem,
@@ -29,7 +30,7 @@ export const reportKeys = {
 
 export const ReportService = {
   getSales(params?: Record<string, string>) {
-    return api.get<ApiListResponse<DailySaleItem[]>>("/admin/reports/sales", params)
+    return api.get<ApiListResponse<SalesReport>>("/admin/reports/sales", params)
       .then((res) => res.data);
   },
   getRevenue(params?: Record<string, string>) {

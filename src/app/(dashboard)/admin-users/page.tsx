@@ -33,9 +33,20 @@ export default function AdminUsersPage() {
   const { mutateAsync: assignRoles, isPending: isAssigning } = useAssignRoles();
   const { mutateAsync: removeRoles, isPending: isRemoving } = useRemoveRoles();
 
-  const raw = (data as unknown as Record<string, unknown>)?.data ?? data;
-  const allUsers: User[] = Array.isArray(raw) ? raw : [];
-  const allRoles = (rolesData ?? []).filter((r) => r.name !== SUPER_ADMIN_ROLE);
+  const allUsers: User[] = data?.data?.users ?? [];
+  const totalUsers = data?.data?.totalUsers ?? 0;
+  const activeCount = data?.data?.activeUsers ?? 0;
+  const inactiveCount = data?.data?.inactiveUsers ?? 0;
+  const rolesRaw: any[] = Array.isArray(rolesData)
+    ? rolesData
+    : (rolesData as any)?.roles && Array.isArray((rolesData as any).roles)
+    ? (rolesData as any).roles
+    : (rolesData as any)?.data && Array.isArray((rolesData as any).data)
+    ? (rolesData as any).data
+    : (rolesData as any)?.items && Array.isArray((rolesData as any).items)
+    ? (rolesData as any).items
+    : [];
+  const allRoles = rolesRaw.filter((r) => r.name !== SUPER_ADMIN_ROLE);
 
   const filtered = useMemo(() => {
     return allUsers.filter((u) => {
@@ -51,10 +62,10 @@ export default function AdminUsersPage() {
   }, [allUsers, search, statusFilter]);
 
   const stats = useMemo(() => ({
-    total: allUsers.length,
-    active: allUsers.filter((u) => u.isActive).length,
-    inactive: allUsers.filter((u) => !u.isActive).length,
-  }), [allUsers]);
+    total: totalUsers,
+    active: activeCount,
+    inactive: inactiveCount,
+  }), [totalUsers, activeCount, inactiveCount]);
 
   return (
     <div className="space-y-6">
@@ -105,7 +116,7 @@ export default function AdminUsersPage() {
             onSearchChange={(v) => setSearch(v)}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
-            total={allUsers.length}
+            total={totalUsers}
             filtered={filtered.length}
           />
 

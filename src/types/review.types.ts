@@ -33,7 +33,11 @@ export interface Review {
 export interface ReviewListResponse {
   statusCode: number;
   message: string;
-  data: Review[];
+  data: {
+    reviews: Review[];
+    totalReviews: number;
+    averageRating: number;
+  };
   timestamp?: string;
 }
 

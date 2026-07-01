@@ -59,8 +59,8 @@ export default function CustomerSupportDetailPage() {
   const { data: tagsRes } = useSupportTicketTags(id);
   const { data: auditRes } = useSupportTicketAudit(id);
 
-  const { data: roles } = useAdminRoles();
-  const adminRoles = (roles ?? []).filter(
+  const { data: rolesData } = useAdminRoles();
+  const adminRoles = (rolesData?.roles ?? []).filter(
     (r: Role) => r.name !== SUPER_ADMIN_ROLE,
   );
 
@@ -375,16 +375,16 @@ export default function CustomerSupportDetailPage() {
               <div>
                 <p className="text-xs font-semibold text-slate-400">Customer</p>
                 <p className="text-slate-800 font-medium">
-                  {ticket.customer ? `${ticket.customer.firstName} ${ticket.customer.lastName}` : ticket.customerName}
+                  {ticket.customer ? `${ticket.customer.firstName} ${ticket.customer.lastName}` : "-"}
                 </p>
-                <p className="text-slate-500 text-xs">{ticket.customer?.email ?? ticket.customerEmail}</p>
+                <p className="text-slate-500 text-xs">{ticket.customer?.email ?? "-"}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400">
                   Assigned Admin
                 </p>
                 <p className="text-slate-800">
-                  {ticket.assignedAdminName ?? "Unassigned"}
+                  {ticket.assignedAdmin?.name ?? "Unassigned"}
                 </p>
               </div>
               <div>

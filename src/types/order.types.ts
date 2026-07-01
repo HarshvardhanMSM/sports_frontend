@@ -84,7 +84,14 @@ export interface OrderListResponse {
       limit: number;
       totalPages: number;
     };
+    totalOrders: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
   };
+  timestamp?: string;
 }
 
 export interface OrderSingleResponse {

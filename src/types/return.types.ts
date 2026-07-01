@@ -86,6 +86,7 @@ export interface ReturnListResponse {
   statusCode: number;
   message: string;
   data: ReturnListItem[];
+  timestamp?: string;
 }
 
 export interface ReturnSingleResponse {

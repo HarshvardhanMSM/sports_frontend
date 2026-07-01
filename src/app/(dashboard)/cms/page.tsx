@@ -40,8 +40,8 @@ export default function CmsPagesPage() {
   const total = data?.data?.meta?.total ?? 0;
   const totalPages = data?.data?.meta?.totalPages ?? 1;
   const limit = data?.data?.meta?.limit ?? 10;
-  const publishedCount = items.filter((p) => p.status === "PUBLISHED").length;
-  const draftCount = items.filter((p) => p.status === "DRAFT").length;
+  const publishedCount = data?.data?.published ?? 0;
+  const draftCount = data?.data?.draft ?? 0;
 
   const handleDelete = (id: string) => {
     const page = items.find((p) => p.id === id);

@@ -10,12 +10,20 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiHeart,
+  FiShoppingCart,
   FiCalendar,
   FiAlertCircle,
+  FiPackage,
+  FiDollarSign,
+  FiClock,
 } from "react-icons/fi";
-import { useCustomer, useCustomerWishlist, useToggleCustomerActive, useDeleteCustomer } from "@/hooks/useCustomers";
-import type { WishlistItem } from "@/types/customer.types";
+import { useCustomer, useCustomerWishlist, useCustomerCart, useToggleCustomerActive, useDeleteCustomer } from "@/hooks/useCustomers";
+import type { WishlistItem, CartItem } from "@/types/customer.types";
 import { resolveImageUrl } from "@/lib/image";
+import { StatsGrid } from "@/components/common/stats/StatsGrid";
+import { StatCard } from "@/components/common/stats/StatCard";
+import { DataTable, type Column } from "@/components/common/table/DataTable";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export default function CustomerDetailPage() {
   const params = useParams();
@@ -37,6 +45,9 @@ export default function CustomerDetailPage() {
   })();
 
   const [showWishlist, setShowWishlist] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+
+  const { data: cartRes, isLoading: cartLoading, error: cartError } = useCustomerCart(showCart ? (id ?? null) : null);
 
   const toggleMutation = useToggleCustomerActive();
   const deleteMutation = useDeleteCustomer();
@@ -182,6 +193,13 @@ export default function CustomerDetailPage() {
               View Wishlist ({wishlistItems.length})
             </button>
             <button
+              onClick={() => setShowCart(true)}
+              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <FiShoppingCart className="size-4" />
+              View Cart
+            </button>
+            <button
               onClick={handleToggleActive}
               disabled={toggleMutation.isPending}
               className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
@@ -200,6 +218,123 @@ export default function CustomerDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Cart Drawer */}
+      {showCart && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setShowCart(false)} />
+          <div className="relative w-full max-w-2xl bg-white shadow-2xl overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <div>
+                <h2 className="text-base font-bold text-slate-800">Customer Cart</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{customer.firstName} {customer.lastName}</p>
+              </div>
+              <button onClick={() => setShowCart(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+                <FiXCircle className="size-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              {cartLoading ? (
+                <div className="space-y-4 animate-pulse">
+                  <div className="grid grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-24 bg-slate-100 rounded-xl" />
+                    ))}
+                  </div>
+                  <div className="h-8 w-48 bg-slate-200 rounded-lg" />
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-16 bg-slate-100 rounded-xl" />
+                    ))}
+                  </div>
+                </div>
+              ) : cartError ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <FiAlertCircle className="size-8 text-rose-500 mb-3" />
+                  <p className="text-sm font-semibold text-slate-700">Failed to load cart</p>
+                  <button onClick={() => setShowCart(false)} className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">
+                    Close
+                  </button>
+                </div>
+              ) : (() => {
+                const cart = cartRes?.data;
+                if (!cart || cart.items.length === 0) {
+                  return (
+                    <EmptyState
+                      icon={<FiShoppingCart className="size-6 text-slate-400" />}
+                      title="No items found in customer cart."
+                    />
+                  );
+                }
+
+                const cartColumns: Column<CartItem>[] = [
+                  {
+                    key: "variant",
+                    header: "Variant",
+                    render: (item) => (
+                      <span className="text-xs font-mono text-slate-600">{item.variantId}</span>
+                    ),
+                  },
+                  {
+                    key: "quantity",
+                    header: "Qty",
+                    render: (item) => (
+                      <span className="text-sm font-semibold text-slate-800">{item.quantity}</span>
+                    ),
+                  },
+                  {
+                    key: "unitPrice",
+                    header: "Unit Price",
+                    render: (item) => (
+                      <span className="text-sm text-slate-700">${item.unitPrice.toFixed(2)}</span>
+                    ),
+                  },
+                  {
+                    key: "lineTotal",
+                    header: "Total",
+                    render: (item) => (
+                      <span className="text-sm font-bold text-slate-800">${item.lineTotal.toFixed(2)}</span>
+                    ),
+                  },
+                ];
+
+                return (
+                  <>
+                    <StatsGrid columns={3}>
+                      <StatCard
+                        label="Total Items"
+                        value={cart.totalItems}
+                        icon={FiPackage}
+                        color="indigo"
+                        variant="simple"
+                      />
+                      <StatCard
+                        label="Cart Subtotal"
+                        value={`$${cart.subtotal.toFixed(2)}`}
+                        icon={FiDollarSign}
+                        color="emerald"
+                        variant="simple"
+                      />
+                      <StatCard
+                        label="Last Updated"
+                        value={new Date().toLocaleDateString()}
+                        icon={FiClock}
+                        color="blue"
+                        variant="simple"
+                      />
+                    </StatsGrid>
+                    <DataTable
+                      columns={cartColumns}
+                      data={cart.items}
+                      keyExtractor={(item) => item.id}
+                    />
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Wishlist Drawer */}
       {showWishlist && (

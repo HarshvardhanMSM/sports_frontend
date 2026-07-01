@@ -21,12 +21,15 @@ export interface AuditUser {
 export interface AuditListResponse {
   statusCode: number;
   message: string;
-  data: AuditEntry[];
-  meta?: {
+  data: {
+    logs: AuditEntry[];
     total: number;
+    totalLogs: number;
     page: number;
     limit: number;
-    totalPages: number;
+    todayLogs: number;
+    thisWeekLogs: number;
+    criticalEvents: number;
   };
 }
 
