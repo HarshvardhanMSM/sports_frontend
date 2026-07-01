@@ -102,7 +102,7 @@ export default function ShipmentDetailsCard({ data }: Props) {
       </div>
 
       {/* Warehouse Information */}
-      <div className="border-t border-slate-100">
+      {/* <div className="border-t border-slate-100">
         <div className="px-6 py-5">
           <h3 className="text-sm font-bold text-slate-800 mb-4">Warehouse Information</h3>
           {data.warehouse ? (
@@ -119,7 +119,7 @@ export default function ShipmentDetailsCard({ data }: Props) {
             <p className="text-sm text-slate-400">No warehouse information available.</p>
           )}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

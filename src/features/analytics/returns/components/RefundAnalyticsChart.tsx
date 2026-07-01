@@ -14,6 +14,7 @@ interface Props {
 }
 
 export default function RefundAnalyticsChart({ data, summary, isLoading }: Props) {
+  console.log("this is the data of RefundAnalyticsChart   ",data);
   const trend = data?.monthlyRefunds ?? [];
   const totalMonths = trend.length;
 

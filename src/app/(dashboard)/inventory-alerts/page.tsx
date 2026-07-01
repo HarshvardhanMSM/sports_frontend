@@ -13,7 +13,7 @@ import {
   FiCheck,
   FiCheckCircle,
 } from "react-icons/fi";
-import { useStockAlerts, useCheckAlerts, useResolveAllAlerts, useResolveAlert } from "@/hooks/useInventory";
+import { useStockAlerts, useCheckAlerts, useResolveAllAlerts, useResolveAlert, useInventoryAnalyticsAlerts } from "@/hooks/useInventory";
 import type { InventoryListParams } from "@/types/inventory.types";
 import InventoryAlertTable from "@/features/inventory/components/InventoryAlertTable";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -39,6 +39,7 @@ function InventoryAlertsContent() {
   if (status) params.status = status;
 
   const { data, isLoading, error, refetch } = useStockAlerts(params);
+  const { data: alertStats } = useInventoryAnalyticsAlerts();
   const { mutate: checkAlerts, isPending: isChecking } = useCheckAlerts();
   const { mutate: resolveAll, isPending: isResolvingAll } = useResolveAllAlerts();
   const { mutate: resolveAlert, isPending: isResolving } = useResolveAlert();
@@ -48,8 +49,8 @@ function InventoryAlertsContent() {
   const total = data?.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  const criticalCount = allItems.filter((a) => a.alertType === "OUT_OF_STOCK").length;
-  const warningCount = allItems.filter((a) => a.alertType === "LOW_STOCK").length;
+  const criticalCount = alertStats?.data?.outOfStockAlerts ?? allItems.filter((a) => a.alertType === "OUT_OF_STOCK").length;
+  const warningCount = alertStats?.data?.lowStockAlerts ?? allItems.filter((a) => a.alertType === "LOW_STOCK").length;
 
   const updateParams = useCallback((updates: Record<string, string>) => {
     const next = new URLSearchParams(searchParams.toString());

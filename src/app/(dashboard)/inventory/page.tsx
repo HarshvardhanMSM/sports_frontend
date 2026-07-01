@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { StatsGrid } from "@/components/common/stats/StatsGrid";
 import { StatCard } from "@/components/common/stats/StatCard";
 import { EmptyState } from "@/components/common/EmptyState";
-import { useInventoryItems, useDeleteInventory, useAdjustInventory, useReserveInventory, useReleaseInventory } from "@/hooks/useInventory";
+import { useInventoryItems, useDeleteInventory, useAdjustInventory, useReserveInventory, useReleaseInventory, useInventoryAnalyticsSummary } from "@/hooks/useInventory";
 import { useFuzzySearch } from "@/hooks/useFuzzySearch";
 import type { InventoryItem, InventoryListParams } from "@/types/inventory.types";
 import InventoryTable from "@/features/inventory/components/InventoryTable";
@@ -34,6 +34,7 @@ export default function InventoryPage() {
   };
 
   const { data, isLoading, error, isRefetching, refetch } = useInventoryItems(params);
+  const { data: analyticsSummary } = useInventoryAnalyticsSummary();
   const { mutate: deleteItem } = useDeleteInventory();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -53,8 +54,8 @@ export default function InventoryPage() {
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const pageItems = isPaginated ? items : items.slice((page - 1) * limit, page * limit);
 
-  const lowStockCount = items.filter((i) => i.availableQuantity > 0 && i.availableQuantity <= i.lowStockThreshold).length;
-  const outOfStockCount = items.filter((i) => i.availableQuantity <= 0).length;
+  const lowStockCount = analyticsSummary?.data?.lowStockCount ?? items.filter((i) => i.availableQuantity > 0 && i.availableQuantity <= i.lowStockThreshold).length;
+  const outOfStockCount = analyticsSummary?.data?.outOfStockCount ?? items.filter((i) => i.availableQuantity <= 0).length;
 
   const isFiltered = searchTerm !== "" || statusFilter !== "all";
 
@@ -82,7 +83,7 @@ export default function InventoryPage() {
         <StatCard label="Total SKUs" value={total} icon={FiPackage} color="indigo" sub="Active product variants" />
         <StatCard label="Low Stock" value={lowStockCount} icon={FiAlertTriangle} color="amber" sub="Below threshold" />
         <StatCard label="Out of Stock" value={outOfStockCount} icon={FiXCircle} color="rose" sub="Needs restocking" />
-        <StatCard label="Total Value" value={`$${(items.reduce((s, i) => s + i.quantity, 0) * 25).toLocaleString()}`} icon={FiDollarSign} color="emerald" sub="Estimated stock value" />
+        <StatCard label="Total Value" value={`$${(analyticsSummary?.data?.totalStockValue ?? 0).toLocaleString()}`} icon={FiDollarSign} color="emerald" sub="Estimated stock value" />
       </StatsGrid>
 
       <InventoryFilters

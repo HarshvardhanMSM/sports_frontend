@@ -102,6 +102,7 @@ export default function RolesPage() {
     mutationFn: ({ id, data }: { id: string; data: UpdateRoleRequest }) =>
       RoleService.updateRole(id, data),
     onSuccess: (_result, { id }) => {
+  
       qc.invalidateQueries({ queryKey: roleKeys.list() });
       qc.invalidateQueries({ queryKey: roleKeys.detail(id) });
     },
@@ -258,7 +259,7 @@ export default function RolesPage() {
       </div>
 
       {/* ═══ Stats Grid ══════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard
           icon={<FiShield className="size-5" />}
           label="Total Roles"
@@ -273,13 +274,13 @@ export default function RolesPage() {
           sub="In use by admins"
           color="emerald"
         />
-        <StatCard
+        {/* <StatCard
           icon={<FiAlertCircle className="size-5" />}
           label="System Roles"
           value={totalSystemRoles}
           sub="Protected roles"
           color="amber"
-        />
+        /> */}
         <StatCard
           icon={<FiUsers className="size-5" />}
           label="Custom Roles"
