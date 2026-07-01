@@ -10,6 +10,7 @@ import PermissionStatsCards from "@/components/permissions/PermissionStatsCards"
 import PermissionTable from "@/components/permissions/PermissionTable";
 import type { PermissionSlug } from "@/types/role.types";
 import { groupPermissionsByModule } from "@/types/role.types";
+import { safeArray } from "@/lib/utils";
 import type { CreatePermissionPayload } from "@/services/permission.service";
 
 export default function PermissionsPage() {
@@ -25,21 +26,11 @@ export default function PermissionsPage() {
   const [viewMode, setViewMode] = useState<"grouped" | "table">("grouped");
 
   
-  const permissionsList = useMemo(() => {
-    return Array.isArray(permissions)
-      ? permissions
-      : (permissions as any)?.permissions && Array.isArray((permissions as any).permissions)
-      ? (permissions as any).permissions
-      : (permissions as any)?.data && Array.isArray((permissions as any).data)
-      ? (permissions as any).data
-      : (permissions as any)?.items && Array.isArray((permissions as any).items)
-      ? (permissions as any).items
-      : [];
-  }, [permissions]);
+  const permissionsList = useMemo(() => safeArray<PermissionSlug>(permissions), [permissions]);
 
   const filtered = useMemo(
     () => permissionsList.filter(
-      (p: any) =>
+      (p) =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
         p.slug.toLowerCase().includes(search.toLowerCase()) ||
         p.module?.toLowerCase().includes(search.toLowerCase()),
@@ -64,7 +55,7 @@ export default function PermissionsPage() {
   }, [moduleGroups, search]);
 
   const totalModules = moduleGroups.length;
-  const totalPermissions = (permissions as any)?.totalPermissions ?? permissionsList.length;
+  const totalPermissions = (permissions as { totalPermissions?: number })?.totalPermissions ?? permissionsList.length;
 
   const handleCreateSubmit = async (data: { name: string; slug: string; module: string }) => {
     await createPermission(data as CreatePermissionPayload);

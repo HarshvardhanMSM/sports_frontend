@@ -7,7 +7,8 @@ import * as z from "zod";
 import type { Collection } from "@/types/collection.types";
 import CategoryImageUpload from "../../categories/components/CategoryImageUpload";
 import { useProducts } from "@/hooks/useProducts";
-import { getImageUrl } from "@/lib/utils";
+import { getImageUrl, safeArray } from "@/lib/utils";
+import type { Product } from "@/types/product.types";
 import { FiSearch } from "react-icons/fi";
 
 const collectionSchema = z.object({
@@ -39,13 +40,14 @@ export default function CollectionForm({
 
   // Fetch all products
   const { data: productsData, isLoading: isProductsLoading } = useProducts({ limit: 1000 });
-  const allProducts = productsData?.data?.items ?? [];
+  const allProducts = safeArray<Product>(productsData);
 
   // Populate selected product IDs when editing or when products are loaded
   useEffect(() => {
     if (initialData) {
+      const initialDataWithProducts = initialData as unknown as { products?: { id: string }[] };
       const collectionProductIds = initialData.productIds || 
-                                   (initialData as any).products?.map((p: any) => p.id) || 
+                                   initialDataWithProducts.products?.map((p) => p.id) || 
                                    [];
       if (collectionProductIds.length > 0) {
         setSelectedProductIds(collectionProductIds);

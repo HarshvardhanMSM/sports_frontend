@@ -260,17 +260,17 @@ export default function NotificationsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Navigation Sidebar */}
         <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 p-2.5 shadow-sm space-y-1">
-          {[
-            { id: "all", label: "All Notifications", count: notifications.length },
+          {([
+            { id: "all", label: "All Notifications", count: notifications.length, highlight: false },
             { id: "unread", label: "Unread", count: unreadCount, highlight: true },
-            { id: "orders", label: "Orders", count: notifications.filter((n) => n.type === "orders").length },
-            { id: "inventory", label: "Inventory", count: notifications.filter((n) => n.type === "inventory").length },
-            { id: "customers", label: "Customers", count: notifications.filter((n) => n.type === "customers").length },
-            { id: "system", label: "System Alerts", count: notifications.filter((n) => n.type === "system").length }
-          ].map((tab) => (
+            { id: "orders", label: "Orders", count: notifications.filter((n) => n.type === "orders").length, highlight: false },
+            { id: "inventory", label: "Inventory", count: notifications.filter((n) => n.type === "inventory").length, highlight: false },
+            { id: "customers", label: "Customers", count: notifications.filter((n) => n.type === "customers").length, highlight: false },
+            { id: "system", label: "System Alerts", count: notifications.filter((n) => n.type === "system").length, highlight: false }
+          ] as const).map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === tab.id
                   ? "bg-indigo-600 text-white shadow-md shadow-indigo-100 scale-[1.02]"

@@ -466,7 +466,7 @@ function FormModal({
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Charge Type</label>
               <Select
                 value={watch("chargeType") ?? "FIXED_DELIVERY"}
-                onChange={(val) => setValue("chargeType", val as any, { shouldValidate: true })}
+                onChange={(val) => setValue("chargeType", val, { shouldValidate: true })}
                 options={CHARGE_TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))}
                 placeholder="Select Charge Type"
                 size="md"

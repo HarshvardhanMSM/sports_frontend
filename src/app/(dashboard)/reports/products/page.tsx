@@ -15,6 +15,8 @@ import {
 } from "react-icons/fi";
 import { useReportProducts, useReportInventory } from "@/hooks/useReports";
 import { resolveImageUrl } from "@/lib/image";
+import { safeArray } from "@/lib/utils";
+import type { ProductReportItem } from "@/types/report.types";
 import Select from "@/components/ui/select/Select";
 
 const PRESETS = [
@@ -62,7 +64,7 @@ export default function ProductPerformancePage() {
     refetchInv();
   }, [refetchProd, refetchInv]);
 
-  const allProducts = products ?? [];
+  const allProducts = safeArray<ProductReportItem>(products);
   const filtered = allProducts.filter((p) =>
     p.productName.toLowerCase().includes(search.toLowerCase())
   );

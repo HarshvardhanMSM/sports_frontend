@@ -27,7 +27,10 @@ export default function CustomerWishlistDrawer({
   const [activeTab, setActiveTab] = useState<"wishlist" | "cart">(initialTab);
 
   useEffect(() => {
-    setActiveTab(initialTab);
+    const timer = setTimeout(() => {
+      setActiveTab(initialTab);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [initialTab]);
 
   const { data: wishlistData, isLoading: wishlistLoading } = useCustomerWishlist(customerId);

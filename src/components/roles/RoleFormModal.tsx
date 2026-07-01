@@ -62,17 +62,20 @@ export default function RoleFormModal({
     return new Set<string>();
   });
 
+  // Clone from dropdown
+  const [cloneFromId, setCloneFromId] = useState<string>("");
+
   useEffect(() => {
     reset({
       name: role?.name ?? "",
       description: role?.description ?? "",
     });
-    setSelectedSlugs(new Set(role ? permissionsToSlugs(role.permissions) : []));
-    setCloneFromId("");
+    const timer = setTimeout(() => {
+      setSelectedSlugs(new Set(role ? permissionsToSlugs(role.permissions) : []));
+      setCloneFromId("");
+    }, 0);
+    return () => clearTimeout(timer);
   }, [role, reset]);
-
-  // Clone from dropdown
-  const [cloneFromId, setCloneFromId] = useState<string>("");
 
   // Group permissions once
   const groupedModules = groupPermissionsByModule(permissionSlugs);

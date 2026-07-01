@@ -8,7 +8,8 @@ import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useAssignRoles, 
 import { useRoles } from "@/hooks/useRoles";
 import { useToast } from "@/components/common/Toast/useToast";
 import type { User, CreateUserRequest, UpdateUserRequest } from "@/types/user.types";
-import { SUPER_ADMIN_ROLE } from "@/types/role.types";
+import { safeArray } from "@/lib/utils";
+import { SUPER_ADMIN_ROLE, type Role } from "@/types/role.types";
 import UserStatsCards from "@/features/users/components/UserStatsCards";
 import UserFilters from "@/features/users/components/UserFilters";
 import UserTable from "@/features/users/components/UserTable";
@@ -33,19 +34,11 @@ export default function AdminUsersPage() {
   const { mutateAsync: assignRoles, isPending: isAssigning } = useAssignRoles();
   const { mutateAsync: removeRoles, isPending: isRemoving } = useRemoveRoles();
 
-  const allUsers: User[] = data?.data?.users ?? [];
-  const totalUsers = data?.data?.totalUsers ?? 0;
-  const activeCount = data?.data?.activeUsers ?? 0;
-  const inactiveCount = data?.data?.inactiveUsers ?? 0;
-  const rolesRaw: any[] = Array.isArray(rolesData)
-    ? rolesData
-    : (rolesData as any)?.roles && Array.isArray((rolesData as any).roles)
-    ? (rolesData as any).roles
-    : (rolesData as any)?.data && Array.isArray((rolesData as any).data)
-    ? (rolesData as any).data
-    : (rolesData as any)?.items && Array.isArray((rolesData as any).items)
-    ? (rolesData as any).items
-    : [];
+  const allUsers = safeArray<User>(data);
+  const totalUsers = data?.data?.totalUsers ?? allUsers.length;
+  const activeCount = data?.data?.activeUsers ?? allUsers.filter(u => u.isActive).length;
+  const inactiveCount = data?.data?.inactiveUsers ?? allUsers.filter(u => !u.isActive).length;
+  const rolesRaw = safeArray<Role>(rolesData);
   const allRoles = rolesRaw.filter((r) => r.name !== SUPER_ADMIN_ROLE);
 
   const filtered = useMemo(() => {
