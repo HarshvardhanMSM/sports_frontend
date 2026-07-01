@@ -374,6 +374,12 @@ export interface AlertStats {
   outOfStockAlerts: number;
 }
 
+export interface AlertStatsResponse {
+  statusCode: number;
+  message: string;
+  data: AlertStats;
+}
+
 export interface InventoryReportData {
   totalStockValue: number;
   lowStockItems: number;

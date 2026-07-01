@@ -31,6 +31,7 @@ import type {
   SlowMovingItemsResponse,
   StockValueData,
   AlertStats,
+  AlertStatsResponse,
   InventoryReportData,
   VariantSearchResponse,
 } from "@/types/inventory.types";
@@ -280,7 +281,7 @@ export const InventoryAnalyticsService = {
   },
 
   getAlerts() {
-    return api.get<AlertStats>("/admin/inventory-analytics/alerts");
+    return api.get<AlertStatsResponse>("/admin/inventory-analytics/alerts");
   },
 };
 
