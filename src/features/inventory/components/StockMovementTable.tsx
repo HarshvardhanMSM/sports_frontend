@@ -34,7 +34,7 @@ export default function StockMovementTable({ items }: StockMovementTableProps) {
             <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Change</th>
             <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Before</th>
             <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">After</th>
-            <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Reference</th>
+            {/* <th className="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Reference</th> */}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -61,9 +61,9 @@ export default function StockMovementTable({ items }: StockMovementTableProps) {
                   </td>
                   <td className="px-4 py-4 text-sm text-slate-700">{mv.beforeQuantity}</td>
                   <td className="px-4 py-4 text-sm text-slate-700">{mv.afterQuantity}</td>
-                  <td className="px-4 py-4 text-sm text-slate-500 font-mono">
+                  {/* <td className="px-4 py-4 text-sm text-slate-500 font-mono">
                     {mv.referenceId ? `${mv.referenceType ?? ""}-${String(mv.referenceId).slice(0, 8)}` : "-"}
-                  </td>
+                  </td> */}
                 </tr>
               );
             })
