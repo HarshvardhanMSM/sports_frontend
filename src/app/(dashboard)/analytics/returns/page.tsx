@@ -80,7 +80,7 @@ export default function ReturnsAnalyticsPage() {
           <ReturnedProductsTable data={productsData?.data} isLoading={productsLoading} />
 
           {/* Refund Analytics */}
-          <RefundAnalyticsChart data={refundsData?.data} isLoading={refundsLoading} />
+          <RefundAnalyticsChart data={refundsData?.data} summary={summaryData?.data} isLoading={refundsLoading} />
         </>
       )}
     </div>

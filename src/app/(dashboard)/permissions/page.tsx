@@ -54,8 +54,8 @@ export default function PermissionsPage() {
       .filter((mod) => mod.permissions.length > 0);
   }, [moduleGroups, search]);
 
-  const totalModules = moduleGroups.length;
-  const totalPermissions = (permissions as { totalPermissions?: number })?.totalPermissions ?? permissionsList.length;
+  const totalModules = permissions?.totalModules ?? moduleGroups.length;
+  const totalPermissions = permissions?.totalPermissions ?? permissionsList.length;
 
   const handleCreateSubmit = async (data: { name: string; slug: string; module: string }) => {
     await createPermission(data as CreatePermissionPayload);

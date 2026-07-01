@@ -52,6 +52,21 @@ export interface ProductReportItem {
   orderCount: number;
 }
 
+export interface TopEarnerItem {
+  productId: string;
+  productName: string;
+  totalRevenue: number;
+  totalSold: number;
+  imageUrl: string;
+}
+
+export interface ProductReportResponse {
+  products: ProductReportItem[];
+  totalProduct: number;
+  productSold: number;
+  topEarner: TopEarnerItem | null;
+}
+
 // ── /admin/reports/categories ────────────────────────────────
 export interface CategoryReportItem {
   category: string;

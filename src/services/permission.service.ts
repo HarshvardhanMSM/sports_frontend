@@ -11,6 +11,7 @@ export const permissionKeys = {
 export interface PermissionsListPayload {
   permissions: PermissionSlug[];
   totalPermissions?: number;
+  totalModules?: number;
 }
 
 interface PermissionsResponse {

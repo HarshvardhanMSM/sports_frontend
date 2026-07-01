@@ -72,7 +72,7 @@ export default function RoleDetailsDrawer({
 
           {/* Metadata */}
           <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-            <div className="flex items-center gap-3 text-sm">
+            {/* <div className="flex items-center gap-3 text-sm">
               <FiCalendar className="size-4 text-slate-400 shrink-0" />
               <span className="text-slate-500">Created</span>
               <span className="ml-auto font-medium text-slate-700">
@@ -82,7 +82,7 @@ export default function RoleDetailsDrawer({
                   year: "numeric",
                 })}
               </span>
-            </div>
+            </div> */}
             <div className="flex items-center gap-3 text-sm">
               <FiClock className="size-4 text-slate-400 shrink-0" />
               <span className="text-slate-500">Permissions</span>
